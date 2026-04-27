@@ -180,7 +180,7 @@ export function Step3Segments() {
                       </label>
 
                       <details className="sg-why">
-                        <summary>なぜチェックを入れると通算対象外になるの？</summary>
+                        <summary>なぜチェックを入れると通算対象外になるの？／傷病手当との関係</summary>
                         <div className="sg-why__body">
                           <p>
                             雇用保険の被保険者期間は「失業給付（基本手当）」を受給するときに
@@ -195,6 +195,16 @@ export function Step3Segments() {
                             ※ 実際に給付金を 1 円でも受け取ったかどうかは関係なく、
                             ハローワークで <strong>受給資格者証が交付された時点</strong> で消費されます。
                             何もせず再就職した場合は、このチェックは不要です。
+                          </p>
+                          <p>
+                            <strong>傷病手当（雇用保険）</strong>を離職後に受給した場合も、
+                            前提として基本手当の受給資格決定が必要なので、このチェックを入れてください。
+                          </p>
+                          <p>
+                            一方で <strong>傷病手当金（健康保険）</strong>
+                            （つわりや病気で在職中に受給）は、雇用保険の被保険者期間とは
+                            <strong>無関係</strong>です。Step 2 で「病気・けがの休職」として
+                            期間を登録するだけで OK（このチェックは不要）。
                           </p>
                         </div>
                       </details>

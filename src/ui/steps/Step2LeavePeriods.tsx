@@ -6,9 +6,13 @@ import './steps.css'
 import './Step2LeavePeriods.css'
 
 const LEAVE_OPTIONS: { value: LeaveType; emoji: string; label: string }[] = [
-  { value: '産休', emoji: '🤰', label: '産前産後休業' },
+  { value: '産休', emoji: '🤰', label: '産前産後休業（労基法 65 条）' },
   { value: '育休', emoji: '🍼', label: '育児休業' },
-  { value: '病気休職', emoji: '🤒', label: '病気・けがの休職' },
+  {
+    value: '病気休職',
+    emoji: '🤒',
+    label: '病気・けがの休職（つわり休業含む）',
+  },
   { value: '介護休業', emoji: '🧓', label: '介護休業' },
   { value: '事業所休業', emoji: '🏚', label: '事業所の休業' },
   { value: '組合専従', emoji: '✊', label: '組合専従' },
@@ -63,6 +67,9 @@ export function Step2LeavePeriods() {
         <span className="lp-note">
           ※ <strong>出産手当金</strong>（健保から）／<strong>育児休業給付金</strong>（雇用保険から）／
           <strong>傷病手当金</strong>（健保から）は「賃金」ではないため、これらだけが支給されている期間は「いいえ」を選んでください。
+          <br />
+          ※ <strong>つわり</strong>で休業し傷病手当金を受給した期間は{' '}
+          <strong>「病気・けがの休職」</strong>で登録します（産休とは別制度）。
         </span>
       </p>
 
