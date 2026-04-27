@@ -701,6 +701,79 @@
   color: var(--plum);
 }
 
+.ac-day-detail__sub {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.55rem 0.85rem;
+}
+.ac-day-detail__sub summary {
+  cursor: pointer;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+.ac-day-detail__sub-body {
+  margin-top: 0.6rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.ac-day-detail__sub-body p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-mute);
+  line-height: 1.6;
+}
+.ac-day-detail__sub-body strong {
+  color: var(--plum);
+  font-family: var(--font-h);
+}
+.ac-day-detail__sub-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.ac-sub-btn {
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ac-sub-btn:hover:not(:disabled) {
+  border-color: var(--mint);
+}
+.ac-sub-btn.is-selected {
+  background: var(--mint);
+  border-color: var(--mint-deep);
+  color: #fff;
+}
+.ac-sub-btn:disabled {
+  opacity: 0.4;
+}
+
+.ac-volatile-mark {
+  display: inline-block;
+  padding: 0 0.35rem;
+  background: #fff5d4;
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+
+/* leave 状態の暦月セル */
+.ac-month--leave button {
+  border-color: #b89dde;
+  background: linear-gradient(180deg, #f1e9ff 0%, #fff 100%);
+  color: #4a3675;
+}
+
 .ac-day-detail__hours label {
   display: block;
   margin-bottom: 0.4rem;

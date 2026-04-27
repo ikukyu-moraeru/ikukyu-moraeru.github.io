@@ -1,9 +1,13 @@
 import { useMemo, useRef, useState } from 'react'
 import {
   addDays,
+  addMonths,
+  endOfMonth,
   format,
   getDay,
+  isAfter,
   parseISO,
+  startOfMonth,
 } from 'date-fns'
 import { useAppState } from '../../state/AppState'
 import { judgeEligibility } from '../../domain/eligibility'
@@ -40,12 +44,13 @@ interface DayInfo {
   overridden: boolean
 }
 
-const STATUS_CYCLE: AttendanceStatus[] = [
-  'work',
-  'paid_leave',
-  'paid_special',
-  'absent',
-]
+/**
+ * セルクリックでサイクルさせる主要 3 状態。
+ * 有給 / 特別休暇は判定上「出勤と同じ扱い」（賃金支払基礎日数にカウント、
+ * 時間は所定労働時間相当）なので、サイクルからは外し、必要な人だけ
+ * 詳細パネルから明示的に選べるようにする。
+ */
+const STATUS_CYCLE: AttendanceStatus[] = ['work', 'absent']
 
 /* -------------------------------------------------------------------- */
 /* 期間判定ユーティリティ                                               */
@@ -130,17 +135,26 @@ function nextStatus(current: AttendanceStatus | null): AttendanceStatus | null {
 
 const SPREAD_DAYS_FOR_VOLATILITY = 14 // 注釈に出す scanRange ±N 日（実際の値は scanRange から）
 
+interface CalendarMonth {
+  ym: string // "YYYY-MM"
+  start: string
+  end: string
+  basicWageDays: number
+  basicWageHours: number
+  status: 'pass' | 'fail' | 'out' | 'leave'
+  volatile: boolean
+  hasInputs: boolean
+}
+
 export function Step4Attendance() {
   const { state, dispatch } = useAppState()
-  const [selectedIdx, setSelectedIdx] = useState(0) // 直近月を 0 として選択
+  const [selectedYm, setSelectedYm] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
-  const [showSkipped, setShowSkipped] = useState(false)
   const detailRef = useRef<HTMLElement>(null)
 
-  const selectMonth = (idx: number) => {
-    setSelectedIdx(idx)
+  const selectMonth = (ym: string) => {
+    setSelectedYm(ym)
     setSelectedDate(null)
-    // 次フレームでスクロール（state 反映後）
     requestAnimationFrame(() => {
       detailRef.current?.scrollIntoView({
         behavior: 'smooth',
@@ -183,6 +197,96 @@ export function Step4Attendance() {
   const achieved = achievedAt >= 0
   const remainingNeeded = Math.max(0, 12 - result.countedMonths)
 
+  /* 暦月リスト生成（最新月から逆順） */
+  const calendarMonths: CalendarMonth[] = (() => {
+    const list: CalendarMonth[] = []
+    let cursor = startOfMonth(parseISO(result.scanWindow.start))
+    const stop = startOfMonth(parseISO(result.scanWindow.end))
+    while (!isAfter(cursor, stop)) {
+      const ym = format(cursor, 'yyyy-MM')
+      const monthStart = format(cursor, 'yyyy-MM-dd')
+      const monthEnd = format(endOfMonth(cursor), 'yyyy-MM-dd')
+
+      let days = 0
+      let hours = 0
+      let hasInputs = false
+      for (const a of state.input.attendances) {
+        if (a.date >= monthStart && a.date <= monthEnd) {
+          hasInputs = true
+          if (
+            a.status === 'work' ||
+            a.status === 'paid_leave' ||
+            a.status === 'paid_special'
+          ) {
+            days += 1
+            if (typeof a.hours === 'number' && Number.isFinite(a.hours)) {
+              hours += a.hours
+            }
+          }
+        }
+      }
+
+      // status: 月の 1 日 〜 末日 の自動推論を見て判定
+      // 全日が「out」(加入前/退職後/未加入) → 'out'
+      // 全日が「leave」 → 'leave'
+      // それ以外 → days/hours で達成判定
+      let outCount = 0
+      let leaveCount = 0
+      let totalCount = 0
+      let cur = parseISO(monthStart)
+      const last = parseISO(monthEnd)
+      while (cur.getTime() <= last.getTime()) {
+        const date = format(cur, 'yyyy-MM-dd')
+        const info = deriveDay(date, overrideMap.get(date), state.input)
+        if (info.state.kind === 'out') outCount += 1
+        else if (info.state.kind === 'leave') leaveCount += 1
+        totalCount += 1
+        cur = addDays(cur, 1)
+      }
+      let status: CalendarMonth['status']
+      if (outCount === totalCount) status = 'out'
+      else if (leaveCount + outCount === totalCount) status = 'leave'
+      else if (days >= 11) status = 'pass'
+      else if (hours >= 80) status = 'pass'
+      else status = 'fail'
+
+      const volatile =
+        status !== 'out' && status !== 'leave' && days >= 8 && days <= 13
+
+      list.push({
+        ym,
+        start: monthStart,
+        end: monthEnd,
+        basicWageDays: days,
+        basicWageHours: hours,
+        status,
+        volatile,
+        hasInputs,
+      })
+      cursor = addMonths(cursor, 1)
+    }
+    return list.reverse() // 直近順
+  })()
+
+  // 達成ラインを暦月ベースで計算（直近順に pass を数えて 12 に達した暦月）
+  let calAchievedAt = -1
+  let calCumulative = 0
+  for (let i = 0; i < calendarMonths.length; i++) {
+    if (calendarMonths[i].status === 'pass') calCumulative += 1
+    if (calCumulative >= 12 && calAchievedAt === -1) {
+      calAchievedAt = i
+      break
+    }
+  }
+
+  const currentSelectedYm =
+    selectedYm && calendarMonths.some((m) => m.ym === selectedYm)
+      ? selectedYm
+      : calendarMonths[0]?.ym ?? null
+  const selectedCalMonth = calendarMonths.find(
+    (m) => m.ym === currentSelectedYm,
+  )
+
   /* 走査範囲（ぶれの大きさ） */
   const scanSpreadDays = (() => {
     if (!state.input.scanRange.start || !state.input.scanRange.end) {
@@ -199,12 +303,11 @@ export function Step4Attendance() {
       ? `（うち緩和加算 +${result.relaxationDays} 日）`
       : ''
 
-  /* 詳細パネル: 選択された対象月 */
-  const selectedMonth = result.monthBreakdown[selectedIdx] ?? result.monthBreakdown[0]
+  /* 詳細パネル: 選択された暦月の日リスト */
   const days: DayInfo[] = []
-  if (selectedMonth) {
-    let d = parseISO(selectedMonth.range.start)
-    const end = parseISO(selectedMonth.range.end)
+  if (selectedCalMonth) {
+    let d = parseISO(selectedCalMonth.start)
+    const end = parseISO(selectedCalMonth.end)
     while (d.getTime() <= end.getTime()) {
       const date = format(d, 'yyyy-MM-dd')
       days.push(deriveDay(date, overrideMap.get(date), state.input))
@@ -251,12 +354,11 @@ export function Step4Attendance() {
   }
 
   const fillSelectedMonthWeekdaysWithWork = () => {
-    const next = state.input.attendances.filter((a) => {
-      // この対象月範囲外は維持
-      return (
-        a.date < selectedMonth.range.start || a.date > selectedMonth.range.end
-      )
-    })
+    if (!selectedCalMonth) return
+    const next = state.input.attendances.filter(
+      (a) =>
+        a.date < selectedCalMonth.start || a.date > selectedCalMonth.end,
+    )
     for (const d of days) {
       if (d.overridden) {
         const o = overrideMap.get(d.date)
@@ -272,8 +374,10 @@ export function Step4Attendance() {
   }
 
   const clearSelectedMonth = () => {
+    if (!selectedCalMonth) return
     const next = state.input.attendances.filter(
-      (a) => a.date < selectedMonth.range.start || a.date > selectedMonth.range.end,
+      (a) =>
+        a.date < selectedCalMonth.start || a.date > selectedCalMonth.end,
     )
     dispatch({ type: 'PATCH_INPUT', patch: { attendances: next } })
   }
@@ -282,12 +386,8 @@ export function Step4Attendance() {
     ? days.find((d) => d.date === selectedDate) ?? null
     : null
 
-  /* 表示する対象月（達成済みで折りたたんでいる場合は必須分のみ） */
-  const visibleMonths = result.monthBreakdown.map((m, idx) => ({
-    month: m,
-    idx,
-    isOptional: achieved && idx > achievedAt,
-  }))
+  const monthLabel = (ym: string) =>
+    `${ym.slice(0, 4)} 年 ${Number(ym.slice(5))} 月`
 
   return (
     <div className="st-section">
@@ -329,39 +429,36 @@ export function Step4Attendance() {
 
       {/* 概念ガイダンス */}
       <details className="ac-guide">
-        <summary>「対象月」とは？／用語と曖昧さについて</summary>
+        <summary>判定の仕組みと曖昧さについて</summary>
         <div className="ac-guide__body">
           <p>
-            判定は<strong>育休開始日（出産予定日 + 産後 56 日 + 1 日）</strong>から
-            <strong>1 か月単位</strong>でさかのぼった区間ごとに集計します。
-            たとえば育休開始 2026-04-15 なら、直近の対象月は <code>2026-03-15 〜 2026-04-14</code>。
-          </p>
-          <p>
-            このように<strong>月の中旬で区切られる</strong>ため、暦月（4 月、5 月…）とは一致しません。
-            正確な日付の境界は各セルに表示されます。
+            この画面は <strong>暦月（4 月、5 月…）</strong> ごとに入力できますが、
+            実際の判定は <strong>育休開始日（出産予定日 + 産後 56 日 + 1 日）からひと月ずつ遡った区間</strong>
+            （例: <code>2026-03-15 〜 2026-04-14</code>）で行われます。
+            暦月の境界とずれるため、暦月で「11 日達成」していても判定上の月で未達になることがあります。
           </p>
           <p className="ac-guide__caveat">
             <strong>※ 曖昧さの注意：</strong>
-            実際の出産日が予定日 ± {scanSpreadDays} 日ぶれると、
-            対象月の区切りも同じだけ前後します。
-            このページは<strong>予定日（{expected}）を中央</strong>として代表計算した結果です。
-            判定結果がぎりぎりの月（例: 10〜12 日付近、70〜90 時間付近）は、
-            実際の出産日次第で結果が変わる可能性があります。
+            実際の出産日が予定日 ± {scanSpreadDays} 日ずれると、判定上の月の区切りも前後します。
+            このページの<strong>「達成見込み」</strong>は予定日（{expected}）を中央とした代表値で、
+            ぎりぎりの月（出勤 8〜13 日付近）は実際の出産日次第で結果が変わる可能性があるため
+            <span className="ac-volatile-mark">⚠</span> マークを付けています。
+            最終判定は Step 5（結果ヒートマップ）で全候補日について計算します。
           </p>
         </div>
       </details>
 
-      {/* 対象月の年ビュー */}
+      {/* 暦月の年ビュー */}
       <section className="ac-year">
         <header className="ac-year__head">
           <div>
-            <h3>対象月（直近順）</h3>
+            <h3>暦月ごとの入力（直近順）</h3>
             <p className="ac-year__hint">
-              タップで詳細を表示。直近 M01 から順に達成数を稼ぐと効率的です。
+              暦月をタップしてその月の出勤情報を入力。日数は「達成見込み」を表します。
             </p>
           </div>
           <div className="ac-year__legend">
-            <span className="ac-pill ac-pill--pass">達成</span>
+            <span className="ac-pill ac-pill--pass">達成見込み</span>
             <span className="ac-pill ac-pill--fail">未達</span>
             <span className="ac-pill ac-pill--out">対象外</span>
             <span
@@ -374,39 +471,28 @@ export function Step4Attendance() {
         </header>
 
         <ol className="ac-year__grid">
-          {visibleMonths.map(({ month, idx, isOptional }) => {
-            if (isOptional && !showSkipped) return null
-            const status =
-              month.reason === '雇用保険未加入'
-                ? 'out'
-                : month.counted === 1
-                  ? 'pass'
-                  : 'fail'
-            const days = month.attendance?.basicWageDays ?? 0
-            const hours = month.attendance?.basicWageHours ?? 0
-            const volatile =
-              status !== 'out' &&
-              ((days >= 8 && days <= 12) || (hours >= 70 && hours <= 90))
-            const monthIndexDisplay = `M${String(idx + 1).padStart(2, '0')}`
-            const isSelected = idx === selectedIdx
+          {calendarMonths.map((m, i) => {
+            const isSelected = m.ym === currentSelectedYm
+            const isOptional =
+              calAchievedAt >= 0 && i > calAchievedAt
             return (
               <li
-                key={month.range.index}
-                className={`ac-month ac-month--${status} ${
+                key={m.ym}
+                className={`ac-month ac-month--${m.status} ${
                   isSelected ? 'is-selected' : ''
                 } ${isOptional ? 'is-optional' : ''}`}
               >
-                <button onClick={() => selectMonth(idx)}>
-                  <span className="ac-month__no">{monthIndexDisplay}</span>
+                <button onClick={() => selectMonth(m.ym)}>
+                  <span className="ac-month__no">
+                    {m.ym.slice(0, 4)}
+                  </span>
                   <span className="ac-month__range">
-                    {month.range.start.slice(5).replace('-', '/')}
-                    <span className="ac-month__sep">–</span>
-                    {month.range.end.slice(5).replace('-', '/')}
+                    {Number(m.ym.slice(5))} 月
                   </span>
                   <span className="ac-month__counter">
-                    {month.attendance ? (
+                    {m.hasInputs ? (
                       <>
-                        <span className="ac-month__num">{days.toFixed(0)}</span>
+                        <span className="ac-month__num">{m.basicWageDays}</span>
                         <span className="ac-month__unit">日</span>
                       </>
                     ) : (
@@ -414,12 +500,19 @@ export function Step4Attendance() {
                     )}
                   </span>
                   <span className="ac-month__statusrow">
-                    {status === 'pass' && <span className="ac-month__check">✓</span>}
-                    {status === 'fail' && <span className="ac-month__x">○</span>}
-                    {status === 'out' && (
-                      <span className="ac-month__out-mark">—</span>
+                    {m.status === 'pass' && (
+                      <span className="ac-month__check">✓ 達成見込</span>
                     )}
-                    {volatile && (
+                    {m.status === 'fail' && (
+                      <span className="ac-month__x">未達</span>
+                    )}
+                    {m.status === 'out' && (
+                      <span className="ac-month__out-mark">対象外</span>
+                    )}
+                    {m.status === 'leave' && (
+                      <span className="ac-month__out-mark">休業中</span>
+                    )}
+                    {m.volatile && (
                       <span
                         className="ac-month__warn"
                         title="出産日次第で結果が変わる可能性"
@@ -437,20 +530,6 @@ export function Step4Attendance() {
           })}
         </ol>
 
-        {/* 達成ライン or 入力下限ライン */}
-        {achieved && (
-          <div className="ac-line ac-line--achieved">
-            <span>━━━ ここで 12 か月達成 ━━━</span>
-            <button
-              className="ac-skip-toggle"
-              onClick={() => setShowSkipped((s) => !s)}
-            >
-              {showSkipped
-                ? '入力不要の期間を隠す'
-                : `入力不要の ${result.monthBreakdown.length - achievedAt - 1} か月を表示`}
-            </button>
-          </div>
-        )}
         <div className="ac-line ac-line--limit">
           <span>
             ↓ ここまで判定対象（{result.scanWindow.start} まで）
@@ -463,36 +542,38 @@ export function Step4Attendance() {
         </div>
       </section>
 
-      {/* 詳細パネル：選択した対象月 */}
-      {selectedMonth && (
+      {/* 詳細パネル：選択した暦月 */}
+      {selectedCalMonth && (
         <section
           className="ac-detail"
           ref={detailRef}
-          key={`detail-${selectedIdx}`}
+          key={`detail-${currentSelectedYm}`}
           aria-live="polite"
         >
           <header className="ac-detail__head">
             <div>
               <span className="ac-detail__small">
-                ↓ 選択中 ・ 対象月 M{String(selectedIdx + 1).padStart(2, '0')}
+                ↓ 選択中 ・ {monthLabel(selectedCalMonth.ym)}
               </span>
               <h3>
-                {selectedMonth.range.start} 〜 {selectedMonth.range.end}
+                {selectedCalMonth.start.slice(5)} 〜 {selectedCalMonth.end.slice(5)}
               </h3>
               <span className="ac-detail__sub">
-                {selectedMonth.attendance
-                  ? `${selectedMonth.attendance.basicWageDays.toFixed(0)} 日入力 / ${selectedMonth.attendance.basicWageHours} 時間`
+                {selectedCalMonth.hasInputs
+                  ? `${selectedCalMonth.basicWageDays} 日入力 / ${selectedCalMonth.basicWageHours} 時間`
                   : '未入力'}{' '}
                 ／{' '}
-                {selectedMonth.reason === '雇用保険未加入'
+                {selectedCalMonth.status === 'out'
                   ? '対象外'
-                  : selectedMonth.counted === 1
-                    ? `達成（${selectedMonth.reason}）`
-                    : `未達（${selectedMonth.reason}）`}
+                  : selectedCalMonth.status === 'leave'
+                    ? '休業中'
+                    : selectedCalMonth.status === 'pass'
+                      ? '達成見込み'
+                      : '未達'}
               </span>
             </div>
 
-            {selectedMonth.reason !== '雇用保険未加入' && (
+            {selectedCalMonth.status !== 'out' && (
               <div className="ac-detail__quick">
                 <button
                   className="at-quick"
@@ -510,9 +591,9 @@ export function Step4Attendance() {
             )}
           </header>
 
-          {selectedMonth.reason === '雇用保険未加入' ? (
+          {selectedCalMonth.status === 'out' ? (
             <p className="ac-detail__notice">
-              この対象月は雇用保険被保険者期間に含まれていないため、出勤情報は使われません。
+              この月は雇用保険被保険者期間に含まれていないため、出勤情報は使われません。
               Step 3 の加入期間／未加入期間の設定をご確認ください。
             </p>
           ) : (
@@ -617,9 +698,10 @@ export function Step4Attendance() {
       )}
 
       {/* 選択日の詳細編集パネル */}
-      {selectedDay && selectedMonth.reason !== '雇用保険未加入' && (
+      {selectedDay && selectedCalMonth && selectedCalMonth.status !== 'out' && (
         <DayDetailPanel
           day={selectedDay}
+          onSetStatus={(s) => setStatus(selectedDay.date, s)}
           onClear={() => {
             setStatus(selectedDay.date, null)
           }}
@@ -636,12 +718,14 @@ export function Step4Attendance() {
 
 interface DayDetailPanelProps {
   day: DayInfo
+  onSetStatus: (status: AttendanceStatus) => void
   onClear: () => void
   onHoursChange: (hours: number | null) => void
 }
 
 function DayDetailPanel({
   day,
+  onSetStatus,
   onClear,
   onHoursChange,
 }: DayDetailPanelProps) {
@@ -669,7 +753,7 @@ function DayDetailPanel({
       case 'paid_leave':
         return '🅿️ 有給'
       case 'paid_special':
-        return '✨ 特休'
+        return '✨ 特別休暇'
       case 'absent':
         return '✕ 欠勤'
       default:
@@ -702,14 +786,52 @@ function DayDetailPanel({
       </header>
 
       <p className="ac-day-detail__hint">
-        セルをタップ（クリック）すると <strong>出勤 → 有給 → 特休 → 欠勤 → 未入力</strong> の順に切り替わります。Shift+クリック または 右クリックで未入力に戻せます。
+        セルをタップで <strong>出勤 → 欠勤 → 未入力</strong> の順に切替。Shift+クリック / 右クリックで未入力に戻せます。
       </p>
+
+      <details className="ac-day-detail__sub">
+        <summary>
+          有給休暇 / 賃金が出る特別休暇として記録する
+        </summary>
+        <div className="ac-day-detail__sub-body">
+          <p>
+            判定上は<strong>出勤と同じ扱い</strong>です（賃金支払基礎日数にカウント、時間は所定労働時間相当）。
+            記録としてだけ区別したい場合に選択してください。
+          </p>
+          <div className="ac-day-detail__sub-row">
+            <button
+              className={`ac-sub-btn ${currentStatus === 'paid_leave' ? 'is-selected' : ''}`}
+              onClick={() => onSetStatus('paid_leave')}
+              disabled={currentStatus === null || currentStatus === 'absent'}
+            >
+              🅿️ 有給
+            </button>
+            <button
+              className={`ac-sub-btn ${currentStatus === 'paid_special' ? 'is-selected' : ''}`}
+              onClick={() => onSetStatus('paid_special')}
+              disabled={currentStatus === null || currentStatus === 'absent'}
+            >
+              ✨ 特別休暇
+            </button>
+            <button
+              className={`ac-sub-btn ${currentStatus === 'work' ? 'is-selected' : ''}`}
+              onClick={() => onSetStatus('work')}
+              disabled={currentStatus === null || currentStatus === 'absent'}
+            >
+              🟢 出勤に戻す
+            </button>
+          </div>
+        </div>
+      </details>
 
       <div className="ac-day-detail__hours">
         <label htmlFor="day-hours">
           <span className="ac-day-detail__hours-label">この日の労働時間（任意）</span>
           <span className="ac-day-detail__hours-hint">
-            80 時間ルール（11 日未満の月でも 80 時間以上で達成）狙いの方だけ入力すれば OK です。空欄でも 11 日以上を満たせば達成できます。
+            80 時間ルール（11 日未満の月でも 80 時間以上で達成）を狙う方だけ入力すれば OK。
+            <br />
+            シフト制の方は <strong>その日のシフト時間</strong>、有給・特休の方は <strong>所定労働時間</strong> を入れてください。
+            空欄でも 11 日以上を満たせば達成できます。
           </span>
         </label>
         <div className="ac-day-detail__hours-row">
@@ -720,7 +842,7 @@ function DayDetailPanel({
             max={24}
             step={0.5}
             value={currentHours ?? ''}
-            placeholder={allowsHours ? '—' : '出勤系の状態のみ'}
+            placeholder={allowsHours ? 'その日の所定時間（任意）' : '出勤系の状態のみ'}
             disabled={!allowsHours}
             onChange={(e) => {
               const v = e.target.value
