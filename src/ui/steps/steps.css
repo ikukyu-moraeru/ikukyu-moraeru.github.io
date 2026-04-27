@@ -209,6 +209,40 @@
   color: var(--ink-soft);
   line-height: 1.5;
 }
+.st-timeline__seed {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: var(--r-sm);
+  padding: 0.55rem 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.6rem;
+}
+.st-timeline__seed strong {
+  font-family: var(--font-h);
+  color: var(--mint-deep);
+}
+.st-timeline__seed-restore {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--mint-deep);
+  background: var(--bg-3);
+  border: 1px solid var(--mint);
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s var(--ease-pop);
+}
+.st-timeline__seed-restore:hover {
+  background: var(--mint);
+  color: #fff;
+  transform: translateY(-1px);
+}
 .st-timeline__list {
   list-style: none;
   margin: 0;

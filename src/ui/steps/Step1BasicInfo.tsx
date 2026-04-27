@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { addDays, format, parseISO, subDays } from 'date-fns'
 import { useAppState } from '../../state/AppState'
 import { computeMaternityTimeline } from '../../domain/maternityTimeline'
+import type { LeavePeriod } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
 import './steps.css'
+
+export const AUTO_MATERNITY_ID = 'auto:maternity'
 
 function jpDate(iso: string) {
   if (!iso) return ''
@@ -75,6 +78,42 @@ export function Step1BasicInfo() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expected, spread])
+
+  // 産前産後休業を Step2 (leavePeriods) に自動シード／追従
+  // ユーザーが Step2 で削除した場合 (suppressAutoMaternity=true) は再追加しない。
+  useEffect(() => {
+    if (!expected) return
+    if (state.meta.suppressAutoMaternity) return
+    const t = computeMaternityTimeline(expected, state.input.isMultipleBirth)
+    if (!t) return
+    const desired: LeavePeriod = {
+      id: AUTO_MATERNITY_ID,
+      type: '産休',
+      start: t.prenatalLeaveStart,
+      end: t.postnatalLeaveEnd,
+      hasWageDuringLeave: false,
+    }
+    const existing = state.input.leavePeriods.find(
+      (p) => p.id === AUTO_MATERNITY_ID,
+    )
+    if (
+      existing &&
+      existing.start === desired.start &&
+      existing.end === desired.end &&
+      existing.type === desired.type &&
+      existing.hasWageDuringLeave === desired.hasWageDuringLeave
+    ) {
+      return
+    }
+    const others = state.input.leavePeriods.filter(
+      (p) => p.id !== AUTO_MATERNITY_ID,
+    )
+    dispatch({
+      type: 'PATCH_INPUT',
+      patch: { leavePeriods: [desired, ...others] },
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expected, state.input.isMultipleBirth, state.meta.suppressAutoMaternity])
 
   return (
     <div className="st-section">
@@ -175,6 +214,13 @@ export function Step1BasicInfo() {
           <Timeline
             expectedBirthDate={expected}
             isMultipleBirth={state.input.isMultipleBirth}
+            suppressed={state.meta.suppressAutoMaternity}
+            onRestore={() =>
+              dispatch({
+                type: 'PATCH_META',
+                patch: { suppressAutoMaternity: false },
+              })
+            }
           />
           <div className="st-summary">
             <span>
@@ -195,9 +241,16 @@ export function Step1BasicInfo() {
 interface TimelineProps {
   expectedBirthDate: string
   isMultipleBirth: boolean
+  suppressed: boolean
+  onRestore: () => void
 }
 
-function Timeline({ expectedBirthDate, isMultipleBirth }: TimelineProps) {
+function Timeline({
+  expectedBirthDate,
+  isMultipleBirth,
+  suppressed,
+  onRestore,
+}: TimelineProps) {
   const t = computeMaternityTimeline(expectedBirthDate, isMultipleBirth)
   if (!t) return null
   const stops = [
@@ -239,6 +292,29 @@ function Timeline({ expectedBirthDate, isMultipleBirth }: TimelineProps) {
           産前 {t.prenatalDays} 日 ＋ 産後 56 日 → その翌日が「育休開始日」
         </span>
       </div>
+      <p className="st-timeline__seed">
+        {suppressed ? (
+          <>
+            <span>
+              「産前産後休業」の自動入力は止めています。Step 2
+              で個別に登録した内容が優先されます。
+            </span>
+            <button
+              type="button"
+              className="st-timeline__seed-restore"
+              onClick={onRestore}
+            >
+              自動入力を再開
+            </button>
+          </>
+        ) : (
+          <>
+            🍀 上の期間を <strong>Step 2「休職・休業」</strong>{' '}
+            に「産休（賃金なし）」として自動登録しました。Step 2
+            で削除すれば自動追加は止まります。
+          </>
+        )}
+      </p>
       <ol className="st-timeline__list">
         {stops.map((s) => (
           <li
