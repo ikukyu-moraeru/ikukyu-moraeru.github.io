@@ -1,14 +1,159 @@
+import { useAppState } from '../../state/AppState'
+import type { LeavePeriod, LeaveType } from '../../domain/types'
 import './steps.css'
+import './Step2LeavePeriods.css'
+
+const LEAVE_OPTIONS: { value: LeaveType; emoji: string; label: string }[] = [
+  { value: '産休', emoji: '🤰', label: '産前産後休業' },
+  { value: '育休', emoji: '🍼', label: '育児休業' },
+  { value: '病気休職', emoji: '🤒', label: '病気・けがの休職' },
+  { value: '介護休業', emoji: '🧓', label: '介護休業' },
+  { value: '事業所休業', emoji: '🏚', label: '事業所の休業' },
+  { value: '組合専従', emoji: '✊', label: '組合専従' },
+  { value: '配偶者海外同行', emoji: '✈️', label: '配偶者海外同行' },
+  { value: 'その他', emoji: '📌', label: 'その他' },
+]
+
+function newPeriod(): LeavePeriod {
+  const id =
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `lp-${Math.random().toString(36).slice(2)}-${Date.now()}`
+  return {
+    id,
+    type: '産休',
+    start: '',
+    end: '',
+    hasWageDuringLeave: false,
+  }
+}
 
 export function Step2LeavePeriods() {
+  const { state, dispatch } = useAppState()
+  const periods = state.input.leavePeriods
+
+  const update = (next: LeavePeriod[]) =>
+    dispatch({ type: 'PATCH_INPUT', patch: { leavePeriods: next } })
+
+  const add = () => update([...periods, newPeriod()])
+  const patch = (id: string, patch: Partial<LeavePeriod>) =>
+    update(periods.map((p) => (p.id === id ? { ...p, ...patch } : p)))
+  const remove = (id: string) => update(periods.filter((p) => p.id !== id))
+
   return (
-    <div className="st-empty">
-      <span className="st-empty__emoji" aria-hidden>
-        🛏
-      </span>
-      第二章は、これまで取得した産休・育休・病気休職などを記録する章です。
-      <br />
-      （次のコミットで実装予定）
+    <div className="st-section">
+      <p className="st-field__hint" style={{ marginBottom: '0.4rem' }}>
+        いままで取得した産休・育休・病気休職などを、思い出せる範囲で。
+        <br />
+        <strong>賃金が支払われた休業</strong>
+        は、緩和（休業前 2 年の延長）の対象外になります。
+      </p>
+
+      {periods.length === 0 ? (
+        <div className="st-empty lp-empty">
+          <span className="st-empty__emoji" aria-hidden>
+            🛏
+          </span>
+          まだ登録された休業期間はありません。
+          <br />
+          下のボタンで追加できます。
+        </div>
+      ) : (
+        <ul className="lp-list">
+          {periods.map((p, i) => {
+            const opt =
+              LEAVE_OPTIONS.find((o) => o.value === p.type) ?? LEAVE_OPTIONS[0]
+            return (
+              <li key={p.id} className="lp-card">
+                <header className="lp-card__head">
+                  <span className="lp-card__index">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="lp-card__emoji" aria-hidden>
+                    {opt.emoji}
+                  </span>
+                  <select
+                    className="st-input lp-card__type"
+                    value={p.type}
+                    onChange={(e) =>
+                      patch(p.id, { type: e.target.value as LeaveType })
+                    }
+                  >
+                    {LEAVE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.emoji} {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    className="lp-card__del"
+                    onClick={() => remove(p.id)}
+                    aria-label={`${i + 1} 番目を削除`}
+                  >
+                    ✕
+                  </button>
+                </header>
+
+                <div className="st-row st-row--two">
+                  <div className="st-field">
+                    <label className="st-field__label" htmlFor={`s-${p.id}`}>
+                      開始日
+                    </label>
+                    <input
+                      id={`s-${p.id}`}
+                      type="date"
+                      className="st-input"
+                      value={p.start}
+                      max={p.end || undefined}
+                      onChange={(e) => patch(p.id, { start: e.target.value })}
+                    />
+                  </div>
+                  <div className="st-field">
+                    <label className="st-field__label" htmlFor={`e-${p.id}`}>
+                      終了日
+                    </label>
+                    <input
+                      id={`e-${p.id}`}
+                      type="date"
+                      className="st-input"
+                      value={p.end}
+                      min={p.start || undefined}
+                      onChange={(e) => patch(p.id, { end: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <label className="lp-toggle">
+                  <input
+                    type="checkbox"
+                    checked={p.hasWageDuringLeave}
+                    onChange={(e) =>
+                      patch(p.id, { hasWageDuringLeave: e.target.checked })
+                    }
+                  />
+                  <span className="lp-toggle__pill" aria-hidden>
+                    <span />
+                  </span>
+                  <span className="lp-toggle__txt">
+                    この休業期間中、<strong>賃金が支払われた</strong>
+                    <span className="lp-toggle__sub">
+                      （会社規定の有給休業など。多くのケースでは「いいえ」）
+                    </span>
+                  </span>
+                </label>
+
+                {p.start && p.end && p.start > p.end && (
+                  <div className="lp-warn">
+                    開始日が終了日より後になっています。
+                  </div>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+
+      <button className="st-add" onClick={add}>
+        <span aria-hidden>＋</span> 休業期間を追加
+      </button>
     </div>
   )
 }
