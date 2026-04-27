@@ -1,7 +1,7 @@
-import { PreviewShell } from './preview/PreviewShell'
+import { HealthTheme } from './preview/themes/HealthTheme'
 
 function App() {
-  return <PreviewShell />
+  return <HealthTheme />
 }
 
 export default App
