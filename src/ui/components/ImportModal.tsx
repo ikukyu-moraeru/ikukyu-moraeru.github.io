@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import type { UserInput } from '../../domain/types'
 import './ShareModal.css'
 import './ImportModal.css'
@@ -31,7 +32,7 @@ export function ImportModal({
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div
       className="share-mask"
       onClick={(e) => {
@@ -91,7 +92,8 @@ export function ImportModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

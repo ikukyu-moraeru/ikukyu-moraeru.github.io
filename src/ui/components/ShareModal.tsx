@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { buildShareUrl } from '../../state/share'
 import { useAppState } from '../../state/AppState'
 import './ShareModal.css'
@@ -45,7 +46,7 @@ export function ShareModal({ open, onClose }: Props) {
     }
   }
 
-  return (
+  return createPortal(
     <div
       className="share-mask"
       onClick={(e) => {
@@ -118,6 +119,7 @@ export function ShareModal({ open, onClose }: Props) {
           受信した相手も自分のブラウザだけで結果を再現できます。
         </p>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
