@@ -127,7 +127,7 @@ export function Step5Result() {
       <IssueBanner scope="all" />
       <div className={`r5-verdict r5-verdict--${verdict}`}>
         <div className="r5-verdict__emoji" aria-hidden>
-          {verdict === 'pass-all' ? '🎉' : verdict === 'fail-all' ? '🌱' : '🤞'}
+          {verdict === 'pass-all' ? '🎉' : verdict === 'fail-all' ? '🌱' : '📅'}
         </div>
         <div>
           <span className="r5-verdict__small">判定結果</span>
