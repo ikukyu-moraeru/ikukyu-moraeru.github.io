@@ -22,6 +22,40 @@
   color: var(--pink-deep);
 }
 
+.wz-nav__right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  justify-content: flex-end;
+}
+
+.wz-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--plum);
+  background: #fff;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--plum);
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.wz-share:hover {
+  background: var(--plum);
+  color: #fff;
+  transform: translateY(-1px);
+}
+@media (max-width: 540px) {
+  .wz-share span:not([aria-hidden]) {
+    display: none;
+  }
+}
+
 .wz-progress {
   display: inline-flex;
   align-items: baseline;
@@ -30,6 +64,7 @@
   letter-spacing: 0.16em;
   color: var(--ink-mute);
   font-size: 0.85rem;
+  white-space: nowrap;
 }
 .wz-progress__num {
   color: var(--pink-deep);

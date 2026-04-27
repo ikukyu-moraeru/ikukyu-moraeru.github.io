@@ -13,8 +13,6 @@ import { scanBirthDates } from '../../domain/birthDateScan'
 import { summarizeScan } from '../../domain/summary'
 import type { EligibilityResult, UserInput } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
-import { ShareModal } from '../components/ShareModal'
-import { SocialShare } from '../components/SocialShare'
 import { isInputableDay } from '../shared/dayClassification'
 import './steps.css'
 import './Step5Result.css'
@@ -78,7 +76,6 @@ export function Step5Result() {
       ) || null
     )
   })
-  const [shareOpen, setShareOpen] = useState(false)
 
   if (!state.input.scanRange.start || !state.input.scanRange.end) {
     return (
@@ -132,13 +129,6 @@ export function Step5Result() {
 
   // mixed の Step5 ヒント文言：不足候補のうち最小 shortage で「あと少し」かどうか判定。
   const mixedNear = summary.shortfallMin <= NEAR_THRESHOLD_MONTHS
-
-  const socialShareText =
-    verdict === 'pass-all'
-      ? '出産日がいつになっても育休給付金を受け取れる判定でした。同じように悩んでいる方の参考になれば。 #マタニティ手帖'
-      : verdict === 'fail-all'
-        ? '育休給付金、現状の入力では条件にもう少し届かないようです。出産日と勤務状況を入れるだけで判定できます。 #マタニティ手帖'
-        : '育休給付金、出産日によって結果が変わる判定でした。予定日 ± 14 日を 1 日ずつ確かめられます。 #マタニティ手帖'
 
   return (
     <div className="st-section">
@@ -342,26 +332,9 @@ export function Step5Result() {
         </section>
       )}
 
-      <section className="r5-share">
-        <SocialShare label="この結果をシェア" text={socialShareText} />
-        <div className="r5-share__divider" aria-hidden />
-        <button
-          type="button"
-          className="r5-share__btn"
-          onClick={() => setShareOpen(true)}
-        >
-          🔗 入力情報ごと URL で共有する
-          <span className="r5-share__hint">
-            ※ 個人の入力データを含むため、信頼できる相手だけに送ってください
-          </span>
-        </button>
-      </section>
-
       <p className="r5-disclaimer">
         ※ 本ツールは参考用です。最終判定は管轄のハローワーク（公共職業安定所）で行われます。
       </p>
-
-      <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} />
     </div>
   )
 }

@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { useAppState } from '../state/AppState'
 import { Step1BasicInfo } from './steps/Step1BasicInfo'
 import { Step2LeavePeriods } from './steps/Step2LeavePeriods'
 import { Step3Segments } from './steps/Step3Segments'
 import { Step4Attendance } from './steps/Step4Attendance'
 import { Step5Result } from './steps/Step5Result'
+import { ShareModal } from './components/ShareModal'
 import './Wizard.css'
 
 interface StepDef {
@@ -24,8 +26,10 @@ const STEPS: StepDef[] = [
 export function Wizard() {
   const { state, dispatch } = useAppState()
   const cur = STEPS.find((s) => s.num === state.currentStep) ?? STEPS[0]
+  const [shareOpen, setShareOpen] = useState(false)
 
   const canProceed = isStepValid(state.currentStep, state.input)
+  const isResult = state.currentStep === 5
 
   return (
     <div className="ht-page">
@@ -39,14 +43,29 @@ export function Wizard() {
         >
           ← 表紙へ
         </button>
-        <div className="wz-progress">
-          <span className="wz-progress__num">
-            {String(state.currentStep).padStart(2, '0')}
-          </span>
-          <span className="wz-progress__sep">／</span>
-          <span className="wz-progress__total">05</span>
+        <div className="wz-nav__right">
+          {isResult && (
+            <button
+              type="button"
+              className="wz-share"
+              onClick={() => setShareOpen(true)}
+              aria-label="結果をシェア"
+            >
+              <span aria-hidden>📤</span>
+              <span>シェア</span>
+            </button>
+          )}
+          <div className="wz-progress">
+            <span className="wz-progress__num">
+              {String(state.currentStep).padStart(2, '0')}
+            </span>
+            <span className="wz-progress__sep">／</span>
+            <span className="wz-progress__total">05</span>
+          </div>
         </div>
       </header>
+
+      <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} />
 
       <ol className="wz-stepper" aria-label="ステップ">
         {STEPS.map((s) => {
