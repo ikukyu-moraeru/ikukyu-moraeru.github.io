@@ -24,6 +24,8 @@ export interface ScanSummary {
   lastPassDate: DateISO | null;
   /** isEligible が連続する区間のリスト（results は scanRange 順を仮定）。 */
   passStreaks: Array<{ start: DateISO; end: DateISO; days: number }>;
+  /** !isEligible が連続する区間のリスト（results は scanRange 順を仮定）。 */
+  failStreaks: Array<{ start: DateISO; end: DateISO; days: number }>;
 }
 
 const BORDER_LOWER = 11.5;
@@ -40,11 +42,12 @@ const emptySummary: ScanSummary = {
   firstPassDate: null,
   lastPassDate: null,
   passStreaks: [],
+  failStreaks: [],
 };
 
 export function summarizeScan(results: EligibilityResult[]): ScanSummary {
   if (results.length === 0) {
-    return { ...emptySummary, passStreaks: [] };
+    return { ...emptySummary, passStreaks: [], failStreaks: [] };
   }
 
   let passDays = 0;
@@ -57,33 +60,39 @@ export function summarizeScan(results: EligibilityResult[]): ScanSummary {
   let lastPass: DateISO | null = null;
 
   const passStreaks: ScanSummary["passStreaks"] = [];
-  let streakStart: DateISO | null = null;
-  let streakEnd: DateISO | null = null;
-  let streakDays = 0;
+  const failStreaks: ScanSummary["failStreaks"] = [];
+
+  type Streak = { start: DateISO; end: DateISO; days: number };
+  let passSt: Streak | null = null;
+  let failSt: Streak | null = null;
 
   for (const r of results) {
     if (r.isEligible) {
       passDays++;
       if (firstPass === null) firstPass = r.birthDate;
       lastPass = r.birthDate;
-      if (streakStart === null) {
-        streakStart = r.birthDate;
-        streakDays = 0;
+      if (passSt === null) {
+        passSt = { start: r.birthDate, end: r.birthDate, days: 1 };
+      } else {
+        passSt.end = r.birthDate;
+        passSt.days++;
       }
-      streakEnd = r.birthDate;
-      streakDays++;
+      if (failSt !== null) {
+        failStreaks.push(failSt);
+        failSt = null;
+      }
     } else {
       failDays++;
       if (r.shortage < shortfallMin) shortfallMin = r.shortage;
-      if (streakStart !== null && streakEnd !== null) {
-        passStreaks.push({
-          start: streakStart,
-          end: streakEnd,
-          days: streakDays,
-        });
-        streakStart = null;
-        streakEnd = null;
-        streakDays = 0;
+      if (failSt === null) {
+        failSt = { start: r.birthDate, end: r.birthDate, days: 1 };
+      } else {
+        failSt.end = r.birthDate;
+        failSt.days++;
+      }
+      if (passSt !== null) {
+        passStreaks.push(passSt);
+        passSt = null;
       }
     }
 
@@ -98,13 +107,8 @@ export function summarizeScan(results: EligibilityResult[]): ScanSummary {
     if (r.countedMonths < worst.countedMonths) worst = r;
   }
 
-  if (streakStart !== null && streakEnd !== null) {
-    passStreaks.push({
-      start: streakStart,
-      end: streakEnd,
-      days: streakDays,
-    });
-  }
+  if (passSt !== null) passStreaks.push(passSt);
+  if (failSt !== null) failStreaks.push(failSt);
 
   return {
     totalDays: results.length,
@@ -117,5 +121,6 @@ export function summarizeScan(results: EligibilityResult[]): ScanSummary {
     firstPassDate: firstPass,
     lastPassDate: lastPass,
     passStreaks,
+    failStreaks,
   };
 }

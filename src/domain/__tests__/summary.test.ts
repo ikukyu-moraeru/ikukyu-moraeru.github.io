@@ -34,10 +34,11 @@ describe("summarizeScan", () => {
       firstPassDate: null,
       lastPassDate: null,
       passStreaks: [],
+      failStreaks: [],
     });
   });
 
-  it("全充足: passDays = totalDays, passStreaks 1 つ", () => {
+  it("全充足: passDays = totalDays, passStreaks 1 つ・failStreaks なし", () => {
     const results = [
       fakeResult("2026-09-01", 24),
       fakeResult("2026-09-02", 24),
@@ -53,9 +54,10 @@ describe("summarizeScan", () => {
     expect(s.passStreaks).toEqual([
       { start: "2026-09-01", end: "2026-09-03", days: 3 },
     ]);
+    expect(s.failStreaks).toEqual([]);
   });
 
-  it("全不足: passDays = 0, passStreaks: []", () => {
+  it("全不足: failStreaks 1 つ・passStreaks なし", () => {
     const results = [
       fakeResult("2026-09-01", 8),
       fakeResult("2026-09-02", 9),
@@ -68,9 +70,12 @@ describe("summarizeScan", () => {
     expect(s.firstPassDate).toBeNull();
     expect(s.lastPassDate).toBeNull();
     expect(s.passStreaks).toEqual([]);
+    expect(s.failStreaks).toEqual([
+      { start: "2026-09-01", end: "2026-09-03", days: 3 },
+    ]);
   });
 
-  it("pass→fail→pass の縞模様: passStreaks 2 つ", () => {
+  it("pass→fail→pass の縞模様: passStreaks 2 つ・failStreaks 1 つ", () => {
     const results = [
       fakeResult("2026-09-01", 12),
       fakeResult("2026-09-02", 12),
@@ -85,9 +90,28 @@ describe("summarizeScan", () => {
       { start: "2026-09-01", end: "2026-09-02", days: 2 },
       { start: "2026-09-05", end: "2026-09-05", days: 1 },
     ]);
+    expect(s.failStreaks).toEqual([
+      { start: "2026-09-03", end: "2026-09-04", days: 2 },
+    ]);
     expect(s.shortfallMin).toBe(1);
     expect(s.firstPassDate).toBe("2026-09-01");
     expect(s.lastPassDate).toBe("2026-09-05");
+  });
+
+  it("fail→pass→fail の縞模様: failStreaks 2 つ", () => {
+    const results = [
+      fakeResult("2026-09-01", 8),
+      fakeResult("2026-09-02", 14),
+      fakeResult("2026-09-03", 9),
+    ];
+    const s = summarizeScan(results);
+    expect(s.failStreaks).toEqual([
+      { start: "2026-09-01", end: "2026-09-01", days: 1 },
+      { start: "2026-09-03", end: "2026-09-03", days: 1 },
+    ]);
+    expect(s.passStreaks).toEqual([
+      { start: "2026-09-02", end: "2026-09-02", days: 1 },
+    ]);
   });
 
   it("border 判定: 11.5 ≤ counted < 12.5", () => {
