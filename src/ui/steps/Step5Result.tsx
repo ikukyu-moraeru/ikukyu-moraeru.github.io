@@ -340,7 +340,7 @@ export function Step5Result() {
         </section>
       )}
 
-      <AdSlot slot="3921845670" className="r5-ad" />
+      <AdSlot slot="1200496675" className="r5-ad" />
 
       <p className="r5-disclaimer">
         ※ 本ツールは参考用です。最終判定は管轄のハローワーク（公共職業安定所）で行われます。

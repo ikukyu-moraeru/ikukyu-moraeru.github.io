@@ -146,7 +146,7 @@ export function Landing() {
         </aside>
       </main>
 
-      <AdSlot slot="3921845670" className="ht-ad" />
+      <AdSlot slot="6704104793" className="ht-ad" />
 
       <section className="ht-share">
         <h2 className="ht-share__title">妊娠中のお友だちにも、おしえる</h2>
