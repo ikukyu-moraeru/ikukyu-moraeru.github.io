@@ -7,7 +7,7 @@ export function Privacy() {
   return (
     <div className="pv-page">
       <header className="pv-header">
-        <a className="pv-back" href="#/" aria-label="トップに戻る">
+        <a className="pv-back" href="/MaternityLeaveCalculator/" aria-label="トップに戻る">
           ← トップに戻る
         </a>
         <h1 className="pv-title">プライバシーポリシー</h1>
