@@ -12,12 +12,18 @@ const POSTNATAL_DAYS = 56
 const PRENATAL_DAYS_SINGLE = 42
 const PRENATAL_DAYS_MULTIPLE = 98
 
-type Status = 'pass' | 'border' | 'fail'
+type Status = 'pass' | 'fail'
 
 function classify(r: EligibilityResult): Status {
-  if (r.countedMonths >= 12.5) return 'pass'
-  if (r.countedMonths >= 11.5) return 'border'
-  return 'fail'
+  return r.isEligible ? 'pass' : 'fail'
+}
+
+/**
+ * 「11.5 ≤ countedMonths < 12.5」の範囲。法令上は 12 ちょうどから達成だが、
+ * 出産日が前後すると完全月の境界が動くため、結果が裏返りうるレンジを警告する。
+ */
+function isVolatile(r: EligibilityResult): boolean {
+  return r.countedMonths >= 11.5 && r.countedMonths < 12.5
 }
 
 function jpDate(iso: string | null) {
@@ -83,13 +89,13 @@ export function Step5Result() {
           </h2>
           <p className="r5-verdict__sub">
             走査した {summary.totalDays} 候補のうち、
-            <strong>{summary.passDays}</strong> 日で受給要件を充足
+            <strong>{summary.passDays}</strong> 日で受給要件を充足、
+            <strong>{summary.failDays}</strong> 日が不足。
             {summary.borderDays > 0 && (
               <>
-                、<strong>{summary.borderDays}</strong> 日が境界
+                {' '}うち <strong>{summary.borderDays}</strong> 日は境界域（11.5〜12.5）で出産日次第で結果が変わる可能性。
               </>
             )}
-            、<strong>{summary.failDays}</strong> 日が不足。
           </p>
         </div>
       </div>
@@ -97,15 +103,19 @@ export function Step5Result() {
       <div className="r5-stats">
         <div className="r5-stats__cell r5-stats__cell--pass">
           <span className="r5-stats__num">{summary.passDays}</span>
-          <span className="r5-stats__lab">充足する日</span>
-        </div>
-        <div className="r5-stats__cell r5-stats__cell--border">
-          <span className="r5-stats__num">{summary.borderDays}</span>
-          <span className="r5-stats__lab">境界の日</span>
+          <span className="r5-stats__lab">充足する日（12 か月以上）</span>
         </div>
         <div className="r5-stats__cell r5-stats__cell--fail">
           <span className="r5-stats__num">{summary.failDays}</span>
-          <span className="r5-stats__lab">不足の日</span>
+          <span className="r5-stats__lab">不足する日（12 か月未満）</span>
+        </div>
+        <div className="r5-stats__cell r5-stats__cell--border">
+          <span className="r5-stats__num">{summary.borderDays}</span>
+          <span className="r5-stats__lab">
+            ⚠ 境界域（11.5〜12.5）
+            <br />
+            <small>出産日次第でぶれる範囲</small>
+          </span>
         </div>
         <div className="r5-stats__cell r5-stats__cell--best">
           <span className="r5-stats__num r5-stats__num--small">
@@ -150,16 +160,17 @@ export function Step5Result() {
         <div className="r5-heat__grid">
           {results.map((r) => {
             const status = classify(r)
+            const volatile = isVolatile(r)
             const isSelected = r.birthDate === selected
             const [, mm, dd] = r.birthDate.split('-')
             return (
               <button
                 key={r.birthDate}
-                className={`r5-cell r5-cell--${status} ${isSelected ? 'is-selected' : ''}`}
+                className={`r5-cell r5-cell--${status} ${volatile ? 'is-volatile' : ''} ${isSelected ? 'is-selected' : ''}`}
                 onClick={() =>
                   setSelected(r.birthDate === selected ? null : r.birthDate)
                 }
-                title={`${r.birthDate}: ${r.countedMonths.toFixed(1)} か月`}
+                title={`${r.birthDate}: ${r.countedMonths.toFixed(1)} か月${volatile ? '（出産日次第で結果が変わる可能性）' : ''}`}
               >
                 <span className="r5-cell__date">
                   {Number(mm)}/{Number(dd)}
@@ -167,15 +178,20 @@ export function Step5Result() {
                 <span className="r5-cell__num">
                   {r.countedMonths.toFixed(1)}
                 </span>
+                {volatile && (
+                  <span className="r5-cell__warn" aria-hidden>
+                    ⚠
+                  </span>
+                )}
               </button>
             )
           })}
         </div>
 
         <footer>
-          <span className="r5-leg r5-leg--pass">充足（12.5 以上）</span>
-          <span className="r5-leg r5-leg--border">境界（11.5–12.5）</span>
-          <span className="r5-leg r5-leg--fail">不足（11.5 未満）</span>
+          <span className="r5-leg r5-leg--pass">充足（12 か月以上）</span>
+          <span className="r5-leg r5-leg--fail">不足（12 か月未満）</span>
+          <span className="r5-leg r5-leg--volatile">⚠ 境界域（11.5〜12.5）</span>
         </footer>
       </section>
 
