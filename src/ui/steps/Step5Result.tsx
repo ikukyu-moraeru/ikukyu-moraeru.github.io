@@ -26,10 +26,24 @@ const POSTNATAL_DAYS = 56
 const PRENATAL_DAYS_SINGLE = 42
 const PRENATAL_DAYS_MULTIPLE = 98
 
+/**
+ * 不足ケースの「強さ」。`shortage <= 1.0` のときだけ「あと少し」と表現してよい。
+ * それより不足が大きい場合は中立的な「受け取れません」系に統一する。
+ */
+const NEAR_THRESHOLD_MONTHS = 1.0
+
 type Status = 'pass' | 'fail'
 
 function classify(r: EligibilityResult): Status {
   return r.isEligible ? 'pass' : 'fail'
+}
+
+function isNearMiss(r: EligibilityResult): boolean {
+  return !r.isEligible && r.shortage <= NEAR_THRESHOLD_MONTHS
+}
+
+function failVerdictLabel(r: EligibilityResult): string {
+  return isNearMiss(r) ? 'あと少し届きません' : '受け取れません'
 }
 
 function jpDate(iso: string | null) {
@@ -77,6 +91,21 @@ export function Step5Result() {
         ? 'fail-all'
         : 'mixed'
 
+  // fail-all のとき：全候補の中で最も惜しい (shortage 最小) ケースを基準に文言を決める。
+  // 1.0 か月以内なら「あと少し」、それ超なら中立な「受け取れません」。
+  const failAllNear = summary.shortfallMin <= NEAR_THRESHOLD_MONTHS
+  const verdictTitle =
+    verdict === 'pass-all'
+      ? 'いつ生まれても、育休給付金を受け取れそうです'
+      : verdict === 'fail-all'
+        ? failAllNear
+          ? 'いまの入力だと、条件にもう少し届かないようです'
+          : 'いまの入力では、条件を満たしていないようです'
+        : '出産日によって、結果が変わります'
+
+  // mixed の Step5 ヒント文言：不足候補のうち最小 shortage で「あと少し」かどうか判定。
+  const mixedNear = summary.shortfallMin <= NEAR_THRESHOLD_MONTHS
+
   return (
     <div className="st-section">
       <IssueBanner scope="all" />
@@ -86,13 +115,7 @@ export function Step5Result() {
         </div>
         <div>
           <span className="r5-verdict__small">判定結果</span>
-          <h2 className="r5-verdict__title">
-            {verdict === 'pass-all'
-              ? 'いつ生まれても、育休給付金を受け取れそうです'
-              : verdict === 'fail-all'
-                ? 'いまの入力だと、条件にもう少し届かないようです'
-                : '出産日によって、結果が変わります'}
-          </h2>
+          <h2 className="r5-verdict__title">{verdictTitle}</h2>
         </div>
       </div>
 
@@ -109,7 +132,9 @@ export function Step5Result() {
 
       {summary.failStreaks.length > 0 && (
         <p className="r5-hint">
-          🌱 下のヒートマップで紫の日が「あと少し届かない日」です。Step 4 で「11 日以上 働いた月」「80 時間以上 働いた月」をもう一度見直してみると、結果が変わるかもしれません。
+          🌱 下の一覧で紫の日が「
+          {mixedNear ? 'あと少し届かない日' : '受け取れない日'}
+          」です。Step 4 で「11 日以上 働いた月」「80 時間以上 働いた月」をもう一度見直してみると、結果が変わるかもしれません。
         </p>
       )}
 
@@ -117,7 +142,7 @@ export function Step5Result() {
 
       <section className="r5-heat">
         <header>
-          <h3>出産日 × 受給判定</h3>
+          <h3>出産日ごとの結果</h3>
           <p>各セルをタップすると、その日の判定根拠が下に表示されます。</p>
         </header>
 
@@ -133,7 +158,13 @@ export function Step5Result() {
                 onClick={() =>
                   setSelected(r.birthDate === selected ? null : r.birthDate)
                 }
-                title={`${r.birthDate}: ${r.countedMonths.toFixed(1)} か月（${r.isEligible ? '受け取れる' : 'あと少し届かない'}）`}
+                title={`${r.birthDate}: ${r.countedMonths.toFixed(1)} か月（${
+                  r.isEligible
+                    ? '受け取れる'
+                    : isNearMiss(r)
+                      ? 'あと少し届かない'
+                      : '受け取れない'
+                }）`}
               >
                 <span className="r5-cell__date">
                   {Number(mm)}/{Number(dd)}
@@ -148,7 +179,7 @@ export function Step5Result() {
 
         <footer>
           <span className="r5-leg r5-leg--pass">受け取れる</span>
-          <span className="r5-leg r5-leg--fail">あと少し届かない</span>
+          <span className="r5-leg r5-leg--fail">受け取れない</span>
         </footer>
       </section>
 
@@ -162,7 +193,7 @@ export function Step5Result() {
             >
               {selectedResult.isEligible
                 ? '✓ 受け取れます'
-                : '✕ あと少し届かないようです'}
+                : `✕ ${failVerdictLabel(selectedResult)}`}
             </span>
           </header>
 
