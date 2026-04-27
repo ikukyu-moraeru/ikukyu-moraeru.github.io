@@ -2,63 +2,138 @@
    Step4 Attendance — 進捗カウンタ + 対象月年ビュー + 詳細編集
    ========================================================================= */
 
-/* ---- 進捗カウンタ -------------------------------------------------- */
+/* ---- 進捗カウンタ（予測値）---------------------------------------- */
 .ac-progress {
   border-radius: 22px;
   padding: 1.2rem 1.4rem;
   display: grid;
   gap: 0.7rem;
+  position: relative;
+  /* 予測値であることを示す微細ストライプ背景 */
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0,
+    transparent 14px,
+    rgba(255, 255, 255, 0.35) 14px,
+    rgba(255, 255, 255, 0.35) 16px
+  );
 }
 .ac-progress--work {
-  background: linear-gradient(135deg, var(--bg-2) 0%, #fff 100%);
-  border: 1.5px solid var(--pink);
+  background-color: var(--bg-2);
+  border: 1.5px dashed var(--pink);
 }
 .ac-progress--pass {
-  background: linear-gradient(135deg, var(--bg-3) 0%, #fff 100%);
-  border: 1.5px solid var(--mint);
+  background-color: var(--bg-3);
+  border: 1.5px dashed var(--mint);
 }
 .ac-progress__small {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-bottom: 0.4rem;
+}
+.ac-progress__chip {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.16em;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  background: var(--gold);
+  color: var(--gold-deep);
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
   text-transform: uppercase;
-  color: var(--ink-mute);
-  margin-bottom: 0.3rem;
+  white-space: nowrap;
 }
 .ac-progress__title {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
   font-family: var(--font-h);
   font-weight: 900;
-  font-size: 1.4rem;
-  color: var(--plum);
   letter-spacing: 0.01em;
+  color: var(--plum);
 }
-.ac-progress--pass .ac-progress__title {
+.ac-progress__approx {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--ink-mute);
+  margin-right: 0.15rem;
+}
+.ac-progress__num {
+  font-size: 2rem;
+  line-height: 1;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+.ac-progress--pass .ac-progress__num {
   color: var(--mint-deep);
+}
+.ac-progress__den {
+  font-size: 0.95rem;
+  color: var(--ink-mute);
+  font-weight: 700;
 }
 .ac-progress__sub {
   display: block;
-  margin-top: 0.4rem;
+  margin-top: 0.45rem;
   font-size: 0.88rem;
   color: var(--ink-soft);
   line-height: 1.7;
 }
+.ac-progress__sub strong {
+  font-family: var(--font-h);
+  color: var(--plum);
+}
 .ac-progress__bar {
+  position: relative;
   width: 100%;
-  height: 12px;
-  background: rgba(255, 255, 255, 0.55);
+  height: 14px;
+  background: rgba(255, 255, 255, 0.6);
   border-radius: 999px;
-  overflow: hidden;
-  border: 1px solid var(--line);
+  overflow: visible;
+  border: 1px dashed var(--line);
 }
 .ac-progress__fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--mint) 0%, var(--mint-deep) 100%);
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.35) 0,
+      rgba(255, 255, 255, 0.35) 6px,
+      transparent 6px,
+      transparent 12px
+    ),
+    linear-gradient(90deg, var(--mint) 0%, var(--mint-deep) 100%);
+  border-radius: 999px;
   transition: width 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 .ac-progress--work .ac-progress__fill {
-  background: linear-gradient(90deg, var(--pink) 0%, var(--pink-deep) 100%);
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.4) 0,
+      rgba(255, 255, 255, 0.4) 6px,
+      transparent 6px,
+      transparent 12px
+    ),
+    linear-gradient(90deg, var(--pink) 0%, var(--pink-deep) 100%);
+}
+.ac-progress__bar-marker {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  transform: translate(50%, 4px);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--ink-mute);
+  background: var(--bg);
+  padding: 0.05rem 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
 }
 
 /* ---- 用語ガイド ---------------------------------------------------- */

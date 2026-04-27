@@ -393,37 +393,48 @@ export function Step4Attendance() {
     <div className="st-section">
       <IssueBanner />
 
-      {/* 進捗カウンタ */}
+      {/* 進捗カウンタ（予測値） */}
       <div
         className={`ac-progress ac-progress--${achieved ? 'pass' : 'work'}`}
       >
         <div className="ac-progress__head">
           <div>
-            <span className="ac-progress__small">対象期間の達成状況</span>
+            <span className="ac-progress__small">
+              <span className="ac-progress__chip">予測</span>
+              入力からの達成見込み
+            </span>
             <strong className="ac-progress__title">
-              {achieved
-                ? '✓ 12 か月の要件 達成'
-                : `達成 ${result.countedMonths.toFixed(1)} / 12 か月`}
+              <span className="ac-progress__approx">およそ</span>
+              <span className="ac-progress__num">
+                {result.countedMonths.toFixed(1)}
+              </span>
+              <span className="ac-progress__den"> / 12 か月</span>
             </strong>
-            {!achieved && (
-              <span className="ac-progress__sub">
-                あと {remainingNeeded.toFixed(1)} か月の達成で要件を満たします。
-                直近の月から入力すると効率的です。
-              </span>
-            )}
-            {achieved && (
-              <span className="ac-progress__sub">
-                直近 {achievedAt + 1} か月分で要件を満たしています。
-                これより前の月の入力は不要です。
-              </span>
-            )}
+            <span className="ac-progress__sub">
+              {achieved ? (
+                <>
+                  入力からは <strong>12 か月達成の見込み</strong>。
+                  ただし実際の出産日が予定日（{expected}）から ± {scanSpreadDays} 日ずれると数値が変動するため、
+                  最終判定は <strong>Step 5（結果ヒートマップ）</strong> で全候補日を確認してください。
+                </>
+              ) : (
+                <>
+                  あと <strong>およそ {remainingNeeded.toFixed(1)} か月分</strong> の入力で要件に届きそうです。
+                  この値は予定日（{expected}）を中央にした代表値で、出産日が ± {scanSpreadDays} 日ずれると前後します。
+                </>
+              )}
+            </span>
           </div>
         </div>
-        <div className="ac-progress__bar">
+        <div
+          className="ac-progress__bar"
+          aria-label={`達成見込み ${result.countedMonths.toFixed(1)} / 12 か月`}
+        >
           <div
             className="ac-progress__fill"
             style={{ width: `${Math.min(100, (result.countedMonths / 12) * 100)}%` }}
           />
+          <span className="ac-progress__bar-marker">12</span>
         </div>
       </div>
 
