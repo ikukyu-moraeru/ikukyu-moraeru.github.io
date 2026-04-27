@@ -65,27 +65,27 @@ export function Landing() {
             <ul className="ht-target__list">
               <li>
                 <span aria-hidden>🌀</span>
-                出産前に <strong>転職</strong> を経験した（前職と通算できる？）
+                <span>出産前に <strong>転職</strong> を経験した（前職と通算できる？）</span>
               </li>
               <li>
                 <span aria-hidden>⏱</span>
-                <strong>パート・シフト制</strong> で月の出勤日数が 11 日に届かない月がある
+                <span><strong>パート・シフト制</strong> で月の出勤日数が 11 日に届かない月がある</span>
               </li>
               <li>
                 <span aria-hidden>🤒</span>
-                <strong>つわり・病気休職</strong> で休んだ期間がある
+                <span><strong>つわり・病気休職</strong> で休んだ期間がある</span>
               </li>
               <li>
                 <span aria-hidden>🍃</span>
-                出産前に <strong>退職・無職期間</strong> がある
+                <span>出産前に <strong>退職・無職期間</strong> がある</span>
               </li>
               <li>
                 <span aria-hidden>📅</span>
-                <strong>出産予定日がぎりぎり</strong> で「あと数日生まれが遅かったら…」が不安
+                <span><strong>出産予定日がぎりぎり</strong> で「あと数日生まれが遅かったら…」が不安</span>
               </li>
               <li>
                 <span aria-hidden>💼</span>
-                ハローワーク・社労士に相談する前に <strong>自己診断したい</strong>
+                <span>ハローワーク・社労士に相談する前に <strong>自己診断したい</strong></span>
               </li>
             </ul>
           </div>
@@ -168,9 +168,9 @@ export function Landing() {
         <p className="ht-foot__sub">
           © 2026 {SERVICE_NAME} · ローカル動作 · 個人情報は送信しません
           {' · '}
-          <a className="ht-foot__link" href="#/privacy">プライバシーポリシー</a>
+          <a className="ht-foot__link" href="/MaternityLeaveCalculator/privacy">プライバシーポリシー</a>
           {' · '}
-          <a className="ht-foot__link" href="#/content-policy">コンテンツポリシー</a>
+          <a className="ht-foot__link" href="/MaternityLeaveCalculator/content-policy">コンテンツポリシー</a>
         </p>
       </footer>
     </div>
