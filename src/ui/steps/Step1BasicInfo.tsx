@@ -191,24 +191,6 @@ export function Step1BasicInfo() {
         />
       </div>
 
-      <div className="st-field">
-        <label className="st-field__label" htmlFor="spread">
-          <span>🔍</span> 走査する範囲（予定日 ± 何日）
-        </label>
-        <p className="st-field__hint">
-          実際の出産日が予定からずれた場合に備え、この範囲内すべての日について判定します。デフォルトは ± 14 日。
-        </p>
-        <input
-          id="spread"
-          className="st-input"
-          type="number"
-          min={1}
-          max={120}
-          value={spread}
-          onChange={(e) => setSpread(Number(e.target.value) || DEFAULT_SPREAD)}
-        />
-      </div>
-
       {expected && (
         <ChildCareStartField
           expectedBirthDate={expected}
@@ -222,6 +204,25 @@ export function Step1BasicInfo() {
           }
         />
       )}
+
+      <div className="st-field">
+        <label className="st-field__label" htmlFor="spread">
+          <span>🔍</span> 予定日からのずれ幅（前後 何日まで試算する？）
+        </label>
+        <p className="st-field__hint">
+          実際の出産日は予定日通りとは限らないので、前後何日分まで一緒に試算するかを指定します。
+          デフォルトは ± 14 日（前 2 週間〜後 2 週間）。
+        </p>
+        <input
+          id="spread"
+          className="st-input"
+          type="number"
+          min={1}
+          max={120}
+          value={spread}
+          onChange={(e) => setSpread(Number(e.target.value) || DEFAULT_SPREAD)}
+        />
+      </div>
 
       {expected && (
         <>
