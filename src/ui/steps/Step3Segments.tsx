@@ -85,93 +85,100 @@ export function Step3Segments() {
           </div>
         ) : (
           <ul className="lp-list">
-            {segments.map((s, i) => (
-              <li key={s.id} className="lp-card">
-                <header className="lp-card__head">
-                  <span className="lp-card__index">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="lp-card__emoji" aria-hidden>
-                    🏢
-                  </span>
-                  <input
-                    className="st-input lp-card__type sg-card__name"
-                    type="text"
-                    placeholder="会社名（任意）"
-                    value={s.employerName ?? ''}
-                    onChange={(e) =>
-                      patchSegment(s.id, { employerName: e.target.value })
-                    }
-                  />
-                  <button
-                    className="lp-card__del"
-                    onClick={() => removeSegment(s.id)}
-                    aria-label={`${i + 1} 番目を削除`}
-                  >
-                    ✕
-                  </button>
-                </header>
-
-                <div className="st-row st-row--two">
-                  <div className="st-field">
-                    <label className="st-field__label" htmlFor={`ss-${s.id}`}>
-                      入社日
-                    </label>
-                    <input
-                      id={`ss-${s.id}`}
-                      type="date"
-                      className="st-input"
-                      value={s.start}
-                      max={s.end ?? undefined}
-                      onChange={(e) =>
-                        patchSegment(s.id, { start: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="st-field">
-                    <label className="st-field__label" htmlFor={`se-${s.id}`}>
-                      退職日
-                    </label>
-                    <input
-                      id={`se-${s.id}`}
-                      type="date"
-                      className="st-input"
-                      value={s.end ?? ''}
-                      min={s.start || undefined}
-                      disabled={s.end === null}
-                      onChange={(e) =>
-                        patchSegment(s.id, { end: e.target.value || null })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <label className="lp-toggle">
-                  <input
-                    type="checkbox"
-                    checked={s.end === null}
-                    onChange={(e) =>
-                      patchSegment(s.id, {
-                        end: e.target.checked ? null : '',
-                      })
-                    }
-                  />
-                  <span className="lp-toggle__pill" aria-hidden>
-                    <span />
-                  </span>
-                  <span className="lp-toggle__txt">
-                    現在も<strong>在職中</strong>
-                    <span className="lp-toggle__sub">
-                      （育休開始予定日まで継続して被保険者）
+            {segments.map((s, i) => {
+              const isCurrent = i === 0
+              return (
+                <li key={s.id} className="lp-card">
+                  <header className="lp-card__head">
+                    <span className="lp-card__index">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="lp-card__emoji" aria-hidden>
+                      🏢
                     </span>
-                  </span>
-                </label>
+                    <input
+                      className="st-input lp-card__type sg-card__name"
+                      type="text"
+                      placeholder="会社名（任意）"
+                      value={s.employerName ?? ''}
+                      onChange={(e) =>
+                        patchSegment(s.id, { employerName: e.target.value })
+                      }
+                    />
+                    <button
+                      className="lp-card__del"
+                      onClick={() => removeSegment(s.id)}
+                      aria-label={`${i + 1} 番目を削除`}
+                    >
+                      ✕
+                    </button>
+                  </header>
 
-                {s.start && s.end && s.end !== null && s.start > s.end && (
-                  <div className="lp-warn">
-                    入社日が退職日より後になっています。
+                  <div className="st-row st-row--two">
+                    <div className="st-field">
+                      <label className="st-field__label" htmlFor={`ss-${s.id}`}>
+                        入社日
+                      </label>
+                      <input
+                        id={`ss-${s.id}`}
+                        type="date"
+                        className="st-input"
+                        value={s.start}
+                        max={s.end ?? undefined}
+                        onChange={(e) =>
+                          patchSegment(s.id, { start: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="st-field">
+                      <label className="st-field__label" htmlFor={`se-${s.id}`}>
+                        退職日
+                      </label>
+                      <input
+                        id={`se-${s.id}`}
+                        type="date"
+                        className="st-input"
+                        value={s.end ?? ''}
+                        min={s.start || undefined}
+                        disabled={isCurrent && s.end === null}
+                        onChange={(e) =>
+                          patchSegment(s.id, {
+                            end: e.target.value || (isCurrent ? null : ''),
+                          })
+                        }
+                      />
+                    </div>
                   </div>
-                )}
-              </li>
-            ))}
+
+                  {isCurrent && (
+                    <label className="lp-toggle">
+                      <input
+                        type="checkbox"
+                        checked={s.end === null}
+                        onChange={(e) =>
+                          patchSegment(s.id, {
+                            end: e.target.checked ? null : '',
+                          })
+                        }
+                      />
+                      <span className="lp-toggle__pill" aria-hidden>
+                        <span />
+                      </span>
+                      <span className="lp-toggle__txt">
+                        現在も<strong>在職中</strong>
+                        <span className="lp-toggle__sub">
+                          （育休開始予定日まで継続して被保険者）
+                        </span>
+                      </span>
+                    </label>
+                  )}
+
+                  {s.start && s.end && s.end !== null && s.start > s.end && (
+                    <div className="lp-warn">
+                      入社日が退職日より後になっています。
+                    </div>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         )}
 
