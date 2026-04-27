@@ -188,6 +188,10 @@
 .ht-btn--ghost:hover {
   border-color: var(--pink-deep);
   color: var(--pink-deep);
+  transform: translateY(-2px);
+}
+.ht-btn--ghost:active {
+  transform: translateY(1px);
 }
 
 .ht-points {

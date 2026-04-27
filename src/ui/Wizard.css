@@ -81,9 +81,18 @@
   font-weight: 900;
   font-size: 1.1rem;
   color: var(--ink-mute);
-  transition: all 0.25s ease;
+  transition: transform 0.25s var(--ease-pop), background 0.2s ease,
+    border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   position: relative;
   z-index: 1;
+}
+.wz-step button:hover:not(:disabled) .wz-step__bubble {
+  transform: translateY(-2px);
+  border-color: var(--pink);
+  box-shadow: var(--sh-md);
+}
+.wz-step button:active:not(:disabled) .wz-step__bubble {
+  transform: translateY(0) scale(0.96);
 }
 
 .wz-step__label {

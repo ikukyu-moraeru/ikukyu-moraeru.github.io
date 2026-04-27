@@ -97,6 +97,10 @@
   background: var(--bg-2);
   border-color: var(--pink-deep);
   color: var(--pink-deep);
+  transform: rotate(8deg) scale(1.05);
+}
+.lp-card__del:active {
+  transform: rotate(0) scale(0.92);
 }
 
 /* toggle */
