@@ -45,7 +45,7 @@ export function Wizard() {
           className="wz-back"
           onClick={() => dispatch({ type: 'GOTO_LANDING' })}
         >
-          ← 表紙へ
+          ← トップへ
         </button>
         <div className="wz-progress">
           <span className="wz-progress__num">
