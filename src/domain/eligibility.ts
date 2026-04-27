@@ -48,7 +48,9 @@ export function judgeEligibility(
     ? PRENATAL_DAYS_MULTIPLE
     : PRENATAL_DAYS_SINGLE;
   const leaveStartDate = fmt(subDays(birthDateD, prenatalDays));
-  const childCareStartD = addDays(birthDateD, POSTNATAL_DAYS + 1);
+  const childCareStartD = input.customChildCareStart
+    ? parseISO(input.customChildCareStart)
+    : addDays(birthDateD, POSTNATAL_DAYS + 1);
   const childCareStartDate = fmt(childCareStartD);
 
   const baseWindowStart = fmt(subYears(childCareStartD, 2));

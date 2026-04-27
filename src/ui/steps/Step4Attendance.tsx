@@ -538,7 +538,11 @@ export function Step4Attendance() {
                     {Number(m.ym.slice(5))} 月
                   </span>
                   <span className="ac-month__counter">
-                    {m.hasInputs ? (
+                    {m.status === 'leave' ? (
+                      <span className="ac-month__missing">休業中</span>
+                    ) : m.status === 'out' ? (
+                      <span className="ac-month__missing">対象外</span>
+                    ) : m.hasInputs ? (
                       <>
                         <span className="ac-month__num">{m.basicWageDays}</span>
                         <span className="ac-month__unit">日</span>

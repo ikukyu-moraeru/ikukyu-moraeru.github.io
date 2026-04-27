@@ -210,6 +210,20 @@ export function Step1BasicInfo() {
       </div>
 
       {expected && (
+        <ChildCareStartField
+          expectedBirthDate={expected}
+          isMultipleBirth={state.input.isMultipleBirth}
+          customStart={state.input.customChildCareStart}
+          onChange={(value) =>
+            dispatch({
+              type: 'PATCH_INPUT',
+              patch: { customChildCareStart: value },
+            })
+          }
+        />
+      )}
+
+      {expected && (
         <>
           <Timeline
             expectedBirthDate={expected}
@@ -332,6 +346,91 @@ function Timeline({
           </li>
         ))}
       </ol>
+    </div>
+  )
+}
+
+interface ChildCareStartFieldProps {
+  expectedBirthDate: string
+  isMultipleBirth: boolean
+  customStart: string | undefined
+  onChange: (value: string | undefined) => void
+}
+
+function ChildCareStartField({
+  expectedBirthDate,
+  isMultipleBirth,
+  customStart,
+  onChange,
+}: ChildCareStartFieldProps) {
+  const t = computeMaternityTimeline(expectedBirthDate, isMultipleBirth)
+  const defaultDate = t?.childCareStart ?? ''
+  const useCustom = customStart !== undefined
+  const earliestPostnatalEnd = t?.postnatalLeaveEnd
+    ? format(addDays(parseISO(t.postnatalLeaveEnd), 1), 'yyyy-MM-dd')
+    : undefined
+
+  return (
+    <div className="st-field">
+      <label className="st-field__label">
+        <span>🍼</span> 育休開始日
+      </label>
+      <p className="st-field__hint">
+        産後休業の翌日にすぐ取得するなら、自動でかまいません。
+        <strong>会社と合意した別の日</strong>から取る場合のみ、日付を指定してください。
+      </p>
+      <div className="st-radio-group">
+        <label className="st-radio-card" data-selected={!useCustom}>
+          <input
+            type="radio"
+            name="ccs"
+            checked={!useCustom}
+            onChange={() => onChange(undefined)}
+          />
+          <span className="st-radio-card__ic" aria-hidden>
+            🌿
+          </span>
+          <span>
+            産後休業の翌日に取る（自動）
+            <span className="st-radio-card__sub">
+              {defaultDate ? jpDate(defaultDate) : '出産日 + 産後 56 日 + 1 日'}
+            </span>
+          </span>
+        </label>
+        <label className="st-radio-card" data-selected={useCustom}>
+          <input
+            type="radio"
+            name="ccs"
+            checked={useCustom}
+            onChange={() => onChange(customStart || defaultDate)}
+          />
+          <span className="st-radio-card__ic" aria-hidden>
+            📌
+          </span>
+          <span>
+            別の日から取る
+            <span className="st-radio-card__sub">
+              産後復職→数か月後に育休、などのケース
+            </span>
+          </span>
+        </label>
+      </div>
+      {useCustom && (
+        <div style={{ marginTop: '0.7rem', display: 'grid', gap: '0.4rem' }}>
+          <input
+            className="st-input"
+            type="date"
+            value={customStart ?? ''}
+            min={earliestPostnatalEnd}
+            onChange={(e) => onChange(e.target.value || defaultDate)}
+          />
+          {customStart && earliestPostnatalEnd && customStart < earliestPostnatalEnd && (
+            <div className="lp-warn">
+              ⚠ 産後休業（出産日 + 56 日）の翌日より前です。出産日次第では育休開始日が産後休業中になり、整合しません。
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

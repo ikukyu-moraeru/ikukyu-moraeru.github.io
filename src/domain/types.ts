@@ -76,6 +76,11 @@ export interface DailyAttendance {
 export interface UserInput {
   isMultipleBirth: boolean; // 多胎妊娠
   scanRange: { start: DateISO; end: DateISO }; // 出産日候補のスキャン範囲
+  /**
+   * 育休開始日のカスタム指定。未設定ならデフォルト（出産日 + 産後 56 日 + 1 日）を使う。
+   * 「産後復職→数か月後に育休」のように会社と確定日が決まっているケース用。
+   */
+  customChildCareStart?: DateISO;
   insuredSegments: InsuredEmploymentSegment[];
   leavePeriods: LeavePeriod[];
   attendances: DailyAttendance[];
