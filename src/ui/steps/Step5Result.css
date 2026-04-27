@@ -208,12 +208,6 @@
   font-weight: 900;
   font-size: 0.95rem;
 }
-.r5-cell__mark {
-  font-family: var(--font-h);
-  font-weight: 900;
-  font-size: 1.25rem;
-  line-height: 1;
-}
 .r5-cell--pass {
   background: linear-gradient(160deg, var(--bg-3) 0%, var(--mint) 100%);
   color: #1f3a2c;

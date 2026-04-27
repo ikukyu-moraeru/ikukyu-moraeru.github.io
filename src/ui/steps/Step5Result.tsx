@@ -133,17 +133,13 @@ export function Step5Result() {
                 onClick={() =>
                   setSelected(r.birthDate === selected ? null : r.birthDate)
                 }
-                title={
-                  r.isEligible
-                    ? `${r.birthDate}: 受け取れる`
-                    : `${r.birthDate}: あと少し届かない`
-                }
+                title={`${r.birthDate}: ${r.countedMonths.toFixed(1)} か月（${r.isEligible ? '受け取れる' : 'あと少し届かない'}）`}
               >
                 <span className="r5-cell__date">
                   {Number(mm)}/{Number(dd)}
                 </span>
-                <span className="r5-cell__mark" aria-hidden>
-                  {r.isEligible ? '○' : '△'}
+                <span className="r5-cell__num">
+                  {r.countedMonths.toFixed(1)}
                 </span>
               </button>
             )
