@@ -6,10 +6,24 @@ const STORAGE_KEY = 'maternity-ledger:v1'
 
 export type Screen = 'landing' | 'wizard'
 
+export interface AppMeta {
+  /**
+   * Step1 から「産前産後休業」を leavePeriods に自動シードする機能を、
+   * ユーザーが Step2 で削除したことで明示的に止めた状態。
+   * true の間は Step1 が再追加しない。
+   */
+  suppressAutoMaternity: boolean
+}
+
 export interface AppState {
   screen: Screen
   currentStep: number // 1..5
   input: UserInput
+  meta: AppMeta
+}
+
+const emptyMeta: AppMeta = {
+  suppressAutoMaternity: false,
 }
 
 export const emptyInput: UserInput = {
@@ -69,15 +83,20 @@ const initial: AppState = {
   screen: 'landing',
   currentStep: 1,
   input: emptyInput,
+  meta: emptyMeta,
 }
 
 function loadInitial(): AppState {
   if (typeof window === 'undefined') return initial
   let inputFromStorage: UserInput = emptyInput
+  let metaFromStorage: AppMeta = emptyMeta
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (raw) {
-      const parsed = JSON.parse(raw) as { input?: Partial<UserInput> }
+      const parsed = JSON.parse(raw) as {
+        input?: Partial<UserInput>
+        meta?: Partial<AppMeta>
+      }
       const candidate = { ...emptyInput, ...(parsed.input ?? {}) }
       // 旧形式 (MonthlyAttendance with monthKey) は破棄
       if (Array.isArray(candidate.attendances)) {
@@ -90,12 +109,13 @@ function loadInitial(): AppState {
         )
       }
       inputFromStorage = candidate
+      metaFromStorage = { ...emptyMeta, ...(parsed.meta ?? {}) }
     }
   } catch {
     /* ignore */
   }
   const fromHash = readCurrentHashState()
-  return { ...fromHash, input: inputFromStorage }
+  return { ...fromHash, input: inputFromStorage, meta: metaFromStorage }
 }
 
 export type Action =
@@ -106,6 +126,7 @@ export type Action =
   | { type: 'PREV_STEP' }
   | { type: 'SYNC_FROM_HASH'; screen: Screen; currentStep: number }
   | { type: 'PATCH_INPUT'; patch: Partial<UserInput> }
+  | { type: 'PATCH_META'; patch: Partial<AppMeta> }
   | { type: 'RESET' }
 
 export function reducer(state: AppState, action: Action): AppState {
@@ -128,8 +149,15 @@ export function reducer(state: AppState, action: Action): AppState {
       }
     case 'PATCH_INPUT':
       return { ...state, input: { ...state.input, ...action.patch } }
+    case 'PATCH_META':
+      return { ...state, meta: { ...state.meta, ...action.patch } }
     case 'RESET':
-      return { screen: 'landing', currentStep: 1, input: emptyInput }
+      return {
+        screen: 'landing',
+        currentStep: 1,
+        input: emptyInput,
+        meta: emptyMeta,
+      }
     default:
       return state
   }
@@ -174,17 +202,17 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // 入力値だけ localStorage に永続化（画面位置は URL を真実とする）
+  // 入力値・メタを localStorage に永続化（画面位置は URL を真実とする）
   useEffect(() => {
     try {
       window.localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ input: state.input }),
+        JSON.stringify({ input: state.input, meta: state.meta }),
       )
     } catch {
       /* ignore */
     }
-  }, [state.input])
+  }, [state.input, state.meta])
 
   const value = useMemo(() => ({ state, dispatch }), [state])
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
