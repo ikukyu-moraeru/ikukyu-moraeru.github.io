@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useAppState } from '../../state/AppState'
 import { scanBirthDates } from '../../domain/birthDateScan'
+import { summarizeScan } from '../../domain/summary'
 import type { EligibilityResult } from '../../domain/types'
 import './steps.css'
 import './Step5Result.css'
@@ -13,7 +14,7 @@ function classify(r: EligibilityResult): Status {
   return 'fail'
 }
 
-function jpDate(iso: string) {
+function jpDate(iso: string | null) {
   if (!iso) return ''
   const [y, m, d] = iso.split('-')
   return `${y} 年 ${Number(m)} 月 ${Number(d)} 日`
@@ -22,6 +23,7 @@ function jpDate(iso: string) {
 export function Step5Result() {
   const { state } = useAppState()
   const results = useMemo(() => scanBirthDates(state.input), [state.input])
+  const summary = useMemo(() => summarizeScan(results), [results])
   const [selected, setSelected] = useState<string | null>(null)
 
   if (!state.input.scanRange.start || !state.input.scanRange.end) {
@@ -46,20 +48,14 @@ export function Step5Result() {
     )
   }
 
-  const passDays = results.filter((r) => classify(r) === 'pass').length
-  const borderDays = results.filter((r) => classify(r) === 'border').length
-  const failDays = results.filter((r) => classify(r) === 'fail').length
-  const best = [...results].sort((a, b) => b.countedMonths - a.countedMonths)[0]
-  const worst = [...results].sort((a, b) => a.countedMonths - b.countedMonths)[0]
-
   const selectedResult = selected
     ? results.find((r) => r.birthDate === selected)
     : null
 
   const verdict =
-    passDays === results.length
+    summary.passDays === summary.totalDays
       ? 'pass-all'
-      : failDays === results.length
+      : summary.failDays === summary.totalDays
         ? 'fail-all'
         : 'mixed'
 
@@ -79,40 +75,64 @@ export function Step5Result() {
                 : '出産日次第で結果が変わります'}
           </h2>
           <p className="r5-verdict__sub">
-            走査した {results.length} 候補のうち、
-            <strong>{passDays}</strong> 日で受給要件を充足
-            {borderDays > 0 && (
+            走査した {summary.totalDays} 候補のうち、
+            <strong>{summary.passDays}</strong> 日で受給要件を充足
+            {summary.borderDays > 0 && (
               <>
-                、<strong>{borderDays}</strong> 日が境界
+                、<strong>{summary.borderDays}</strong> 日が境界
               </>
             )}
-            、<strong>{failDays}</strong> 日が不足。
+            、<strong>{summary.failDays}</strong> 日が不足。
           </p>
         </div>
       </div>
 
       <div className="r5-stats">
         <div className="r5-stats__cell r5-stats__cell--pass">
-          <span className="r5-stats__num">{passDays}</span>
+          <span className="r5-stats__num">{summary.passDays}</span>
           <span className="r5-stats__lab">充足する日</span>
         </div>
         <div className="r5-stats__cell r5-stats__cell--border">
-          <span className="r5-stats__num">{borderDays}</span>
+          <span className="r5-stats__num">{summary.borderDays}</span>
           <span className="r5-stats__lab">境界の日</span>
         </div>
         <div className="r5-stats__cell r5-stats__cell--fail">
-          <span className="r5-stats__num">{failDays}</span>
+          <span className="r5-stats__num">{summary.failDays}</span>
           <span className="r5-stats__lab">不足の日</span>
         </div>
         <div className="r5-stats__cell r5-stats__cell--best">
           <span className="r5-stats__num r5-stats__num--small">
-            {best.countedMonths.toFixed(1)}
+            {bestCounted(results, summary)}
           </span>
           <span className="r5-stats__lab">
-            最良：{jpDate(best.birthDate)}
+            最良：{jpDate(summary.bestBirthDate)}
           </span>
         </div>
       </div>
+
+      {summary.passStreaks.length > 0 && (
+        <div className="r5-streaks">
+          <span className="r5-streaks__label">連続して充足する区間</span>
+          <ul>
+            {summary.passStreaks.map((s) => (
+              <li key={`${s.start}_${s.end}`}>
+                <span className="r5-streaks__range">
+                  {jpDate(s.start)} 〜 {jpDate(s.end)}
+                </span>
+                <span className="r5-streaks__days">{s.days} 日連続</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {summary.passDays < summary.totalDays && summary.shortfallMin > 0 && (
+        <div className="r5-shortfall">
+          🪧 不足候補のうち最小不足月数は
+          <strong> {summary.shortfallMin.toFixed(1)} か月</strong>
+          。あと少しで届きます。
+        </div>
+      )}
 
       <section className="r5-heat">
         <header>
@@ -251,9 +271,16 @@ export function Step5Result() {
 
       <p className="r5-disclaimer">
         ※ 本ツールは参考用です。最終判定は管轄のハローワーク（公共職業安定所）で行われます。
-        最良候補日：{jpDate(best.birthDate)} ({best.countedMonths.toFixed(1)} か月)、
-        最悪候補日：{jpDate(worst.birthDate)} ({worst.countedMonths.toFixed(1)} か月)。
       </p>
     </div>
   )
+}
+
+function bestCounted(
+  results: EligibilityResult[],
+  summary: ReturnType<typeof summarizeScan>,
+): string {
+  if (!summary.bestBirthDate) return '—'
+  const r = results.find((x) => x.birthDate === summary.bestBirthDate)
+  return r ? r.countedMonths.toFixed(1) : '—'
 }
