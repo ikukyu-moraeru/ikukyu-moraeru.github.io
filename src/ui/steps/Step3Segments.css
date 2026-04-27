@@ -1,0 +1,78 @@
+.sg-section {
+  display: grid;
+  gap: 1rem;
+}
+
+.sg-section__head {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+
+.sg-section__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  background: var(--bg-3);
+  flex-shrink: 0;
+}
+.sg-section__icon--alt {
+  background: var(--bg-2);
+}
+
+.sg-section__title {
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 1.15rem;
+  color: var(--plum);
+  margin: 0;
+}
+
+.sg-section__sub {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-mute);
+  line-height: 1.6;
+}
+.sg-section__sub strong {
+  font-family: var(--font-h);
+  color: var(--pink-deep);
+}
+
+.sg-divider {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--line) 20%,
+    var(--line) 80%,
+    transparent 100%
+  );
+  margin: 0.4rem 0;
+}
+
+.sg-card__name {
+  font-weight: 500;
+  background: var(--bg);
+}
+
+.sg-add--alt {
+  background: var(--pink);
+  box-shadow: 0 6px 14px rgba(236, 138, 163, 0.35);
+}
+
+.sg-alert {
+  background: linear-gradient(135deg, var(--bg-2) 0%, #fff 100%);
+  border: 1.5px solid var(--pink);
+  color: var(--pink-deep);
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 12px;
+}
