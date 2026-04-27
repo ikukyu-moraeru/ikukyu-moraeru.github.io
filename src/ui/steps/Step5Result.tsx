@@ -11,13 +11,9 @@ import {
 import { useAppState } from '../../state/AppState'
 import { scanBirthDates } from '../../domain/birthDateScan'
 import { summarizeScan } from '../../domain/summary'
-import type {
-  EligibilityResult,
-  InsuredEmploymentSegment,
-  LeavePeriod,
-  UserInput,
-} from '../../domain/types'
+import type { EligibilityResult, UserInput } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
+import { isInputableDay } from '../shared/dayClassification'
 import './steps.css'
 import './Step5Result.css'
 
@@ -463,7 +459,7 @@ function detectMissingMonths(
 
 /**
  * 月内に「ユーザーが入力すべき日」が 1 日でも残っているか。
- * 入力すべき日 = 加入中 かつ 休業期間外 かつ 判定窓内（育休開始日より前）
+ * Step4 のカレンダーで unset（平日・未入力）になる日と同じ判定。
  */
 function monthHasInputableDay(
   cursor: Date,
@@ -474,36 +470,8 @@ function monthHasInputableDay(
   let cur = cursor
   while (cur.getTime() <= monthEnd.getTime()) {
     const date = format(cur, 'yyyy-MM-dd')
-    if (date > scanWindowEnd) {
-      cur = addDays(cur, 1)
-      continue
-    }
-    if (!isInsuredDay(date, input.insuredSegments)) {
-      cur = addDays(cur, 1)
-      continue
-    }
-    if (isInLeave(date, input.leavePeriods)) {
-      cur = addDays(cur, 1)
-      continue
-    }
-    return true
+    if (isInputableDay(date, input, scanWindowEnd)) return true
+    cur = addDays(cur, 1)
   }
   return false
-}
-
-function isInsuredDay(
-  date: string,
-  segments: InsuredEmploymentSegment[],
-): boolean {
-  if (segments.length === 0) return true
-  return segments.some((s) => {
-    const segEnd = s.end ?? '9999-12-31'
-    return s.start <= date && date <= segEnd
-  })
-}
-
-function isInLeave(date: string, leaves: LeavePeriod[]): boolean {
-  return leaves.some(
-    (l) => l.start && l.end && l.start <= date && date <= l.end,
-  )
 }

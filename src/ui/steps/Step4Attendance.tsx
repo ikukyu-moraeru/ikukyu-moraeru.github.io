@@ -19,6 +19,7 @@ import type {
   UserInput,
 } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
+import { classifyDay } from '../shared/dayClassification'
 import './steps.css'
 import './Step4Attendance.css'
 
@@ -65,59 +66,38 @@ function expectedFromScan(scan: UserInput['scanRange']): string | null {
   return format(new Date((s + e) / 2), 'yyyy-MM-dd')
 }
 
-function inSegment(date: string, segments: UserInput['insuredSegments']): boolean {
-  return segments.some((s) => {
-    const segEnd = s.end ?? '9999-12-31'
-    return s.start <= date && date <= segEnd
-  })
-}
-
-function inLeave(date: string, leaves: UserInput['leavePeriods']): boolean {
-  return leaves.some((l) => l.start <= date && date <= l.end)
-}
-
+/**
+ * Step4 の表示用 DayInfo を、共通の classifyDay 結果から組み立てる。
+ * Step5 の未入力検知も同じ classifyDay を使うので両者の判定が一致する。
+ */
 function deriveDay(
   date: string,
   override: DailyAttendance | undefined,
   input: UserInput,
   scanWindowEnd?: string,
 ): DayInfo {
-  if (override) {
-    const isBasic =
-      override.status === 'work' ||
-      override.status === 'paid_leave' ||
-      override.status === 'paid_special'
-    return {
-      date,
-      state:
-        override.status === 'absent'
-          ? { kind: 'absent' }
-          : { kind: override.status, hours: override.hours },
-      isBasic,
-      overridden: true,
-    }
+  const c = classifyDay(date, override, input, scanWindowEnd)
+  let state: DayState
+  switch (c.kind) {
+    case 'work':
+    case 'paid_leave':
+    case 'paid_special':
+      state = { kind: c.kind, hours: c.hours }
+      break
+    case 'absent':
+    case 'out':
+    case 'leave':
+    case 'public_holiday':
+    case 'unset':
+      state = { kind: c.kind }
+      break
   }
-  // 育休開始日（scanWindow.end）より後は判定対象外として扱う。
-  if (scanWindowEnd && date > scanWindowEnd) {
-    return { date, state: { kind: 'out' }, isBasic: false, overridden: false }
+  return {
+    date,
+    state,
+    isBasic: c.isBasic,
+    overridden: c.overridden,
   }
-  const insured = inSegment(date, input.insuredSegments)
-  if (!insured) {
-    return { date, state: { kind: 'out' }, isBasic: false, overridden: false }
-  }
-  if (inLeave(date, input.leavePeriods)) {
-    return { date, state: { kind: 'leave' }, isBasic: false, overridden: false }
-  }
-  const dow = getDay(parseISO(date))
-  if (dow === 0 || dow === 6) {
-    return {
-      date,
-      state: { kind: 'public_holiday' },
-      isBasic: false,
-      overridden: false,
-    }
-  }
-  return { date, state: { kind: 'unset' }, isBasic: false, overridden: false }
 }
 
 function nextStatus(current: AttendanceStatus | null): AttendanceStatus | null {
