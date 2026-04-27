@@ -67,7 +67,15 @@ export function Step5Result() {
   const { state } = useAppState()
   const results = useMemo(() => scanBirthDates(state.input), [state.input])
   const summary = useMemo(() => summarizeScan(results), [results])
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useState<string | null>(() => {
+    // 初期表示で出産予定日のセルを選択状態にする
+    return (
+      deriveExpectedBirthDate(
+        state.input.scanRange.start,
+        state.input.scanRange.end,
+      ) || null
+    )
+  })
 
   if (!state.input.scanRange.start || !state.input.scanRange.end) {
     return (

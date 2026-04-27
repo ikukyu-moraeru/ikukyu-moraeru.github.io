@@ -223,13 +223,6 @@
   color: #4a1924;
   border-color: var(--pink);
 }
-.r5-cell.is-expected {
-  border-width: 2.5px;
-  border-color: var(--plum);
-  box-shadow: 0 0 0 2px rgba(58, 46, 79, 0.18),
-    0 8px 18px -6px rgba(58, 46, 79, 0.45);
-  z-index: 1;
-}
 .r5-cell__pin {
   position: absolute;
   top: -8px;
