@@ -164,7 +164,7 @@ export function ShareModal({ open, onClose }: Props) {
             <h3 className="share-section__title">🔗 入力データごと URL で送る</h3>
           </header>
           <p className="share-section__lede">
-            社労士・家族・ハローワーク担当者など <strong>信頼できる相手だけ</strong> に
+            家族・社労士・ハローワーク担当者など <strong>信頼できる相手だけ</strong> に
             送ってください。受け取った相手も同じ判定結果を再現できます。
           </p>
           <div className="share-modal__warn">
