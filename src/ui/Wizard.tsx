@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAppState } from '../state/AppState'
 import { Step1BasicInfo } from './steps/Step1BasicInfo'
 import { Step2LeavePeriods } from './steps/Step2LeavePeriods'
@@ -30,6 +30,10 @@ export function Wizard() {
 
   const canProceed = isStepValid(state.currentStep, state.input)
   const isResult = state.currentStep === 5
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [state.currentStep])
 
   return (
     <div className="ht-page">

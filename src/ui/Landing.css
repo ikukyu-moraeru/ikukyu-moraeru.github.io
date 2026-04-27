@@ -201,6 +201,8 @@
   font-size: 0.7rem;
   padding: 0.15rem 0.55rem;
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .ht-btn--ghost {
   background: transparent;
