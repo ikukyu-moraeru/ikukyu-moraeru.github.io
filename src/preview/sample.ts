@@ -31,9 +31,9 @@ const buildSample = (): HeatmapCell[] => {
     let status: CellStatus
     let months: number
     if (i < 22) {
-      // pass: 12.5 / 13.0 / 13.5 を緩やかに循環（実態に近い狭めの幅）
+      // pass: 12.0 を最頻値にしつつ、たまに 12.5 / 13.0 / 13.5 を混ぜる
       status = 'pass'
-      months = [13.5, 13.0, 12.5][i % 3]
+      months = [12.0, 12.0, 12.5, 12.0, 13.0, 12.0, 12.0, 12.5, 13.5][i % 9]
     } else if (i < 25) {
       // near: 11.5 と 11.0 を交互に
       status = 'near'
