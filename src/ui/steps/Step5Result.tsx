@@ -108,14 +108,21 @@ export function Step5Result() {
 
       {summary.passStreaks.length > 0 && (
         <div className="r5-streaks">
-          <span className="r5-streaks__label">連続して充足する区間</span>
+          <div className="r5-streaks__head">
+            <span className="r5-streaks__label">
+              いつ生まれても受給できる範囲
+            </span>
+            <span className="r5-streaks__hint">
+              この期間内に出産すれば、受給要件（12 か月以上）を必ず満たします。
+            </span>
+          </div>
           <ul>
             {summary.passStreaks.map((s) => (
               <li key={`${s.start}_${s.end}`}>
                 <span className="r5-streaks__range">
                   {jpDate(s.start)} 〜 {jpDate(s.end)}
                 </span>
-                <span className="r5-streaks__days">{s.days} 日連続</span>
+                <span className="r5-streaks__days">{s.days} 日間</span>
               </li>
             ))}
           </ul>

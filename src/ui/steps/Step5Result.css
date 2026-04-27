@@ -553,10 +553,15 @@
   display: grid;
   gap: 0.5rem;
 }
+.r5-streaks__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
 .r5-streaks__label {
   font-family: var(--font-h);
   font-weight: 900;
-  font-size: 0.92rem;
+  font-size: 1rem;
   color: var(--mint-deep);
   display: flex;
   align-items: center;
@@ -573,6 +578,12 @@
   text-align: center;
   line-height: 22px;
   font-size: 0.75rem;
+}
+.r5-streaks__hint {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  padding-left: 1.85rem;
 }
 .r5-streaks ul {
   list-style: none;
