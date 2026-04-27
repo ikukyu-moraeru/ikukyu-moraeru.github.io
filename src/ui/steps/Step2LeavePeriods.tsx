@@ -1,5 +1,6 @@
 import { useAppState } from '../../state/AppState'
 import type { LeavePeriod, LeaveType } from '../../domain/types'
+import { IssueBanner } from '../components/IssueBanner'
 import './steps.css'
 import './Step2LeavePeriods.css'
 
@@ -40,8 +41,11 @@ export function Step2LeavePeriods() {
     update(periods.map((p) => (p.id === id ? { ...p, ...patch } : p)))
   const remove = (id: string) => update(periods.filter((p) => p.id !== id))
 
+  const ids = periods.map((p) => p.id)
+
   return (
     <div className="st-section">
+      <IssueBanner scopeIds={ids} />
       <p className="st-field__hint" style={{ marginBottom: '0.4rem' }}>
         いままで取得した産休・育休・病気休職などを、思い出せる範囲で。
         <br />

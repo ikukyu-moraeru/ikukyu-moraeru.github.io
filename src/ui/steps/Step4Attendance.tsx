@@ -11,6 +11,7 @@ import {
 } from 'date-fns'
 import { useAppState } from '../../state/AppState'
 import type { MonthlyAttendance, UserInput } from '../../domain/types'
+import { IssueBanner } from '../components/IssueBanner'
 import './steps.css'
 import './Step4Attendance.css'
 
@@ -128,6 +129,7 @@ export function Step4Attendance() {
 
   return (
     <div className="st-section">
+      <IssueBanner />
       <div className="at-info">
         <div>
           <span className="at-info__label">判定対象期間</span>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { addDays, format, parseISO, subDays } from 'date-fns'
 import { useAppState } from '../../state/AppState'
+import { IssueBanner } from '../components/IssueBanner'
 import './steps.css'
 
 const DEFAULT_SPREAD = 14
@@ -70,6 +71,7 @@ export function Step1BasicInfo() {
 
   return (
     <div className="st-section">
+      <IssueBanner />
       <div className="st-field">
         <label className="st-field__label">
           <span>👶</span> 妊娠の人数

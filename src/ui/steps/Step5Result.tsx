@@ -3,6 +3,7 @@ import { useAppState } from '../../state/AppState'
 import { scanBirthDates } from '../../domain/birthDateScan'
 import { summarizeScan } from '../../domain/summary'
 import type { EligibilityResult } from '../../domain/types'
+import { IssueBanner } from '../components/IssueBanner'
 import './steps.css'
 import './Step5Result.css'
 
@@ -61,6 +62,7 @@ export function Step5Result() {
 
   return (
     <div className="st-section">
+      <IssueBanner scope="all" />
       <div className={`r5-verdict r5-verdict--${verdict}`}>
         <div className="r5-verdict__emoji" aria-hidden>
           {verdict === 'pass-all' ? '🎉' : verdict === 'fail-all' ? '⚠️' : '🤞'}

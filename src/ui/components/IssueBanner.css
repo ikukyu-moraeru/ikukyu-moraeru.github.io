@@ -1,0 +1,95 @@
+.ib-banner {
+  border-radius: 16px;
+  border: 1.5px solid;
+  background: var(--bg);
+  overflow: hidden;
+}
+.ib-banner--error {
+  border-color: var(--pink);
+  background: linear-gradient(135deg, var(--bg-2) 0%, #fff 70%);
+}
+.ib-banner--warning {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, #fff5d4 0%, #fff 70%);
+}
+
+.ib-banner__head {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.ib-banner__icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.ib-banner__title {
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+.ib-banner__title strong {
+  font-family: var(--font-h);
+  font-weight: 900;
+  color: var(--pink-deep);
+}
+.ib-banner--warning .ib-banner__title strong {
+  color: var(--gold-deep);
+}
+.ib-banner__warn-count {
+  font-family: var(--font-h);
+  font-weight: 700;
+  color: var(--gold-deep);
+}
+
+.ib-banner__chev {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+  font-size: 0.85rem;
+}
+
+.ib-banner__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 1rem 0.95rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ib-issue {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6rem;
+  align-items: baseline;
+  padding: 0.5rem 0.7rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.ib-issue__sev {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.ib-issue--error .ib-issue__sev {
+  background: var(--pink);
+  color: #fff;
+}
+.ib-issue--warning .ib-issue__sev {
+  background: var(--gold);
+  color: var(--gold-deep);
+}

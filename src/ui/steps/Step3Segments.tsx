@@ -3,6 +3,7 @@ import type {
   InsuredEmploymentSegment,
   NonInsuredGap,
 } from '../../domain/types'
+import { IssueBanner } from '../components/IssueBanner'
 import './steps.css'
 import './Step2LeavePeriods.css'
 import './Step3Segments.css'
@@ -53,8 +54,11 @@ export function Step3Segments() {
   const removeGap = (id: string) =>
     updateGaps(gaps.filter((g) => g.id !== id))
 
+  const ids = [...segments.map((s) => s.id), ...gaps.map((g) => g.id)]
+
   return (
     <div className="st-section">
+      <IssueBanner scopeIds={ids} />
       <p className="st-field__hint">
         雇用保険の<strong>加入していた期間</strong>と
         <strong>加入していなかった期間</strong>を分けて記録します。
