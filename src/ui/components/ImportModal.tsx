@@ -24,10 +24,8 @@ export function ImportModal({
       if (e.key === 'Escape') onCancel()
     }
     window.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
     return () => {
       window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
     }
   }, [open, onCancel])
 

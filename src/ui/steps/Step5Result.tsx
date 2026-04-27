@@ -143,6 +143,15 @@ export function Step5Result() {
           <span className="r5-verdict__small">判定結果</span>
           <h2 className="r5-verdict__title">{verdictTitle}</h2>
         </div>
+        <button
+          type="button"
+          className="r5-verdict__share"
+          onClick={() => setShareOpen(true)}
+          aria-label="結果を URL でシェアする"
+        >
+          <span aria-hidden>📤</span>
+          <span>シェア</span>
+        </button>
       </div>
 
       <div className="r5-stats">
@@ -324,19 +333,6 @@ export function Step5Result() {
           )}
         </section>
       )}
-
-      <div className="r5-share">
-        <button
-          type="button"
-          className="r5-share__btn"
-          onClick={() => setShareOpen(true)}
-        >
-          📤 結果を URL でシェアする
-        </button>
-        <p className="r5-share__hint">
-          家族・社労士・ハローワーク担当者などに、入力内容ごと共有できます。
-        </p>
-      </div>
 
       <p className="r5-disclaimer">
         ※ 本ツールは参考用です。最終判定は管轄のハローワーク（公共職業安定所）で行われます。

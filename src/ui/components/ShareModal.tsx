@@ -27,10 +27,8 @@ export function ShareModal({ open, onClose }: Props) {
       if (e.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
     return () => {
       window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
     }
   }, [open, onClose])
 
