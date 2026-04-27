@@ -62,13 +62,17 @@ function readCurrentPathState(): { screen: Screen; currentStep: number } {
   return stateFromPathname(window.location.pathname)
 }
 
+const UNMANAGED_PATHS = ['/privacy', '/content-policy', '/import']
+
 function navigateTo(
   next: { screen: Screen; currentStep: number },
   mode: 'push' | 'replace' = 'push',
 ) {
   if (typeof window === 'undefined') return
-  const target = pathFromState(next)
   const cur = window.location.pathname
+  const suffix = cur.replace(BASE, '')
+  if (UNMANAGED_PATHS.some((p) => suffix.startsWith(p))) return
+  const target = pathFromState(next)
   if (cur === target) return
   if (mode === 'replace') {
     window.history.replaceState(null, '', target)
