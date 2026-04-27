@@ -239,7 +239,7 @@ export function Step1BasicInfo() {
           />
           <div className="st-summary">
             <span>
-              <strong>走査範囲：</strong>
+              <strong>判定する範囲：</strong>
               {state.input.scanRange.start} 〜 {state.input.scanRange.end}
             </span>
             <span>

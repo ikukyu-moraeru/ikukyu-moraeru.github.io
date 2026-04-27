@@ -33,7 +33,7 @@ export function Landing() {
       <main className="ht-main">
         <div className="ht-hero">
           <span className="ht-pill">
-            転職・時短・休職で、ぎりぎりかもしれない方へ
+            転職・休職・シフト制で、ぎりぎりかもしれない方へ
           </span>
 
           <h1 className="ht-h1">
@@ -68,7 +68,7 @@ export function Landing() {
               </li>
               <li>
                 <span aria-hidden>⏱</span>
-                <strong>時短勤務・パート</strong> で月の出勤日数が少なめ
+                <strong>パート・シフト制</strong> で月の出勤日数が 11 日に届かない月がある
               </li>
               <li>
                 <span aria-hidden>🤒</span>
