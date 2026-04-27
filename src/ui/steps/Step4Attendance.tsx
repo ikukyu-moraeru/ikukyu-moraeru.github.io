@@ -152,15 +152,17 @@ export function Step4Attendance() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const detailRef = useRef<HTMLElement>(null)
 
-  const selectMonth = (ym: string) => {
+  const selectMonth = (ym: string, scroll = true) => {
     setSelectedYm(ym)
     setSelectedDate(null)
-    requestAnimationFrame(() => {
-      detailRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
+    if (scroll) {
+      requestAnimationFrame(() => {
+        detailRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
       })
-    })
+    }
   }
 
   const expected = expectedFromScan(state.input.scanRange)
@@ -601,6 +603,43 @@ export function Step4Attendance() {
               </div>
             )}
           </header>
+
+          {(() => {
+            const curIdx = calendarMonths.findIndex(
+              (m) => m.ym === currentSelectedYm,
+            )
+            // calendarMonths は直近順（idx 0 が最新）。
+            // 「前の月」は古い方 = idx +1、「次の月」は新しい方 = idx -1。
+            const prevYm =
+              curIdx >= 0 && curIdx + 1 < calendarMonths.length
+                ? calendarMonths[curIdx + 1].ym
+                : null
+            const nextYm =
+              curIdx > 0 ? calendarMonths[curIdx - 1].ym : null
+            return (
+              <nav className="ac-detail__cal-nav" aria-label="月の切替">
+                <button
+                  className="ac-cal-nav__btn"
+                  onClick={() => prevYm && selectMonth(prevYm, false)}
+                  disabled={!prevYm}
+                  aria-label="前の月へ"
+                >
+                  ← 前の月
+                </button>
+                <span className="ac-cal-nav__label">
+                  {monthLabel(selectedCalMonth.ym)}
+                </span>
+                <button
+                  className="ac-cal-nav__btn"
+                  onClick={() => nextYm && selectMonth(nextYm, false)}
+                  disabled={!nextYm}
+                  aria-label="次の月へ"
+                >
+                  次の月 →
+                </button>
+              </nav>
+            )
+          })()}
 
           {selectedCalMonth.status === 'out' ? (
             <p className="ac-detail__notice">

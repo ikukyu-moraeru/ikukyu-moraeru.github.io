@@ -573,6 +573,54 @@
   color: var(--pink-deep);
 }
 
+/* 月切替ナビ */
+.ac-detail__cal-nav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.85rem;
+  padding: 0.45rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.ac-cal-nav__btn {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--plum);
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.ac-cal-nav__btn:first-child {
+  justify-self: start;
+}
+.ac-cal-nav__btn:last-child {
+  justify-self: end;
+}
+.ac-cal-nav__btn:hover:not(:disabled) {
+  border-color: var(--plum);
+  background: var(--bg-2);
+  transform: translateY(-1px);
+}
+.ac-cal-nav__btn:disabled {
+  color: var(--ink-mute);
+  background: transparent;
+  border-style: dashed;
+}
+.ac-cal-nav__label {
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--plum);
+  white-space: nowrap;
+}
+
 /* ---- 月カレンダー (詳細) ------------------------------------------- */
 .ac-detail__cal-head {
   display: grid;
