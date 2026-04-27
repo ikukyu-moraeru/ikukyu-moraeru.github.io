@@ -13,6 +13,7 @@ import { scanBirthDates } from '../../domain/birthDateScan'
 import { summarizeScan } from '../../domain/summary'
 import type { EligibilityResult, UserInput } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
+import { AdSlot } from '../components/AdSlot'
 import { isInputableDay } from '../shared/dayClassification'
 import './steps.css'
 import './Step5Result.css'
@@ -339,8 +340,12 @@ export function Step5Result() {
         </section>
       )}
 
+      <AdSlot slot="3921845670" className="r5-ad" />
+
       <p className="r5-disclaimer">
         ※ 本ツールは参考用です。最終判定は管轄のハローワーク（公共職業安定所）で行われます。
+        {' '}
+        <a className="r5-disclaimer__link" href="#/privacy">プライバシーポリシー</a>
       </p>
     </div>
   )

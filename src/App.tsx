@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Landing } from './ui/Landing'
 import { Wizard } from './ui/Wizard'
+import { Privacy } from './ui/Privacy'
 import { ImportModal } from './ui/components/ImportModal'
 import { useAppState } from './state/AppState'
 import {
@@ -10,8 +11,21 @@ import {
 } from './state/share'
 import type { UserInput } from './domain/types'
 
+function useIsPrivacy() {
+  const [isPrivacy, setIsPrivacy] = useState(
+    () => window.location.hash === '#/privacy',
+  )
+  useEffect(() => {
+    const sync = () => setIsPrivacy(window.location.hash === '#/privacy')
+    window.addEventListener('hashchange', sync)
+    return () => window.removeEventListener('hashchange', sync)
+  }, [])
+  return isPrivacy
+}
+
 function App() {
   const { state, dispatch } = useAppState()
+  const isPrivacy = useIsPrivacy()
   const [importPreview, setImportPreview] = useState<UserInput | null>(null)
   const [importParseError, setImportParseError] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
@@ -51,7 +65,13 @@ function App() {
 
   return (
     <>
-      {state.screen === 'landing' ? <Landing /> : <Wizard />}
+      {isPrivacy ? (
+        <Privacy />
+      ) : state.screen === 'landing' ? (
+        <Landing />
+      ) : (
+        <Wizard />
+      )}
       <ImportModal
         open={importOpen}
         preview={importPreview}

@@ -578,6 +578,19 @@
   line-height: 1.7;
   margin: 1rem 0 0;
 }
+.r5-disclaimer__link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  opacity: 0.75;
+}
+.r5-disclaimer__link:hover {
+  opacity: 1;
+}
+
+.r5-ad {
+  margin-top: 2rem;
+}
 
 /* verdict バナー右上のシェアボタン */
 .r5-verdict {

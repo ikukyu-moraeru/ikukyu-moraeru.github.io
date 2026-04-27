@@ -1,0 +1,77 @@
+.pv-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem) 4rem;
+  color: var(--ink);
+}
+
+.pv-header {
+  margin-bottom: 2rem;
+}
+
+.pv-back {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: var(--plum);
+  text-decoration: none;
+  margin-bottom: 1.2rem;
+}
+.pv-back:hover {
+  text-decoration: underline;
+}
+
+.pv-title {
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  color: var(--plum);
+  margin: 0 0 0.4rem;
+}
+
+.pv-meta {
+  font-size: 0.85rem;
+  color: var(--ink-mute);
+  margin: 0;
+}
+
+.pv-main section {
+  margin-bottom: 2rem;
+}
+
+.pv-main h2 {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--plum);
+  margin: 0 0 0.6rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.pv-main p {
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: var(--ink-soft);
+  margin: 0 0 0.6rem;
+}
+
+.pv-main ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1.4em;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.pv-main li {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+.pv-main a {
+  color: var(--plum);
+  text-underline-offset: 2px;
+}
+.pv-main a:hover {
+  color: var(--pink-deep);
+}

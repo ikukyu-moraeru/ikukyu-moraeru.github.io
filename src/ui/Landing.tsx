@@ -1,6 +1,7 @@
 import { useAppState } from '../state/AppState'
 import { SAMPLE_HEATMAP } from '../preview/sample'
 import { SocialShare } from './components/SocialShare'
+import { AdSlot } from './components/AdSlot'
 import './Landing.css'
 
 /**
@@ -145,6 +146,8 @@ export function Landing() {
         </aside>
       </main>
 
+      <AdSlot slot="3921845670" className="ht-ad" />
+
       <section className="ht-share">
         <h2 className="ht-share__title">妊娠中のお友だちにも、おしえる</h2>
         <p className="ht-share__sub">
@@ -164,6 +167,8 @@ export function Landing() {
         </p>
         <p className="ht-foot__sub">
           © 2026 {SERVICE_NAME} · ローカル動作 · 個人情報は送信しません
+          {' · '}
+          <a className="ht-foot__link" href="#/privacy">プライバシーポリシー</a>
         </p>
       </footer>
     </div>
