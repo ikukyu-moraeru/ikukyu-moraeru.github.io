@@ -60,13 +60,37 @@ export function Step2LeavePeriods() {
   return (
     <div className="st-section">
       <IssueBanner scopeIds={ids} />
+
+      <aside className="lp-intro">
+        <span className="lp-intro__icon" aria-hidden>
+          ⏱
+        </span>
+        <div className="lp-intro__body">
+          <strong className="lp-intro__title">
+            休職期間を登録すると、判定対象の期間がそのぶん前に伸びます
+          </strong>
+          <p className="lp-intro__text">
+            育休給付金は <strong>「休業前 2 年で 11 日以上の月が 12 か月」</strong>{' '}
+            必要ですが、
+            <strong>会社から賃金が出なかった休職期間</strong>
+            （産休・育休・病気休職など、連続 30 日以上）の日数分だけ、
+            判定対象期間が前にずれて <strong>最長 4 年</strong> まで延びます。
+          </p>
+          <p className="lp-intro__example">
+            例：産休 98 日 + 育休 1 年 ＝ 約 463 日が加算 → 過去
+            <strong>2 年 + 463 日 ≒ 3 年 3 か月</strong>前まで遡って判定
+          </p>
+        </div>
+      </aside>
+
       <p className="st-field__hint" style={{ marginBottom: '0.4rem' }}>
-        いままで取得した産休・育休・病気休職などを、思い出せる範囲で。
-        休業中に<strong>会社から賃金が支払われた</strong>期間は、緩和（休業前 2 年を最長 4 年へ延長）の対象外です。
+        いままで取得した産休・育休・病気休職などを、思い出せる範囲で登録してください。
         <br />
         <span className="lp-note">
-          ※ <strong>出産手当金</strong>（健保から）／<strong>育児休業給付金</strong>（雇用保険から）／
-          <strong>傷病手当金</strong>（健保から）は「賃金」ではないため、これらだけが支給されている期間は「いいえ」を選んでください。
+          ※ <strong>出産手当金</strong>（健保）／<strong>育児休業給付金</strong>
+          （雇用保険）／<strong>傷病手当金</strong>（健保）は「賃金」ではないため、
+          これらだけが支給されている期間は「賃金が支払われた」を{' '}
+          <strong>「いいえ」</strong>のままで OK です。
           <br />
           ※ <strong>つわり</strong>で休業し傷病手当金を受給した期間は{' '}
           <strong>「病気・けがの休職」</strong>で登録します（産休とは別制度）。

@@ -4,6 +4,69 @@
   border: 2px dashed var(--line);
 }
 
+/* イントロバナー：「登録すると判定期間が伸びる」を強調 */
+.lp-intro {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem 1rem;
+  align-items: start;
+  padding: 0.95rem 1.1rem;
+  background: linear-gradient(135deg, var(--bg-3) 0%, #fff 70%);
+  border: 1.5px solid var(--mint);
+  border-radius: var(--r-lg, 18px);
+  position: relative;
+  overflow: hidden;
+}
+.lp-intro::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: var(--mint);
+}
+.lp-intro__icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  margin-top: 0.1rem;
+}
+.lp-intro__body {
+  display: grid;
+  gap: 0.45rem;
+}
+.lp-intro__title {
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 0.98rem;
+  color: var(--mint-deep);
+  line-height: 1.5;
+}
+.lp-intro__text {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.75;
+  color: var(--ink);
+}
+.lp-intro__text strong {
+  font-family: var(--font-h);
+  color: var(--plum);
+}
+.lp-intro__example {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+  border: 1px dashed var(--mint);
+}
+.lp-intro__example strong {
+  font-family: var(--font-h);
+  color: var(--mint-deep);
+}
+
 .lp-list {
   list-style: none;
   margin: 0;
