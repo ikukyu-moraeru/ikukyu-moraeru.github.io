@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { addDays, format, parseISO } from 'date-fns'
 import { useAppState } from '../../state/AppState'
 import { scanBirthDates } from '../../domain/birthDateScan'
 import { summarizeScan } from '../../domain/summary'
@@ -6,6 +7,10 @@ import type { EligibilityResult } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
 import './steps.css'
 import './Step5Result.css'
+
+const POSTNATAL_DAYS = 56
+const PRENATAL_DAYS_SINGLE = 42
+const PRENATAL_DAYS_MULTIPLE = 98
 
 type Status = 'pass' | 'border' | 'fail'
 
@@ -190,15 +195,12 @@ export function Step5Result() {
             </span>
           </header>
 
+          <DetailTimeline
+            result={selectedResult}
+            isMultipleBirth={state.input.isMultipleBirth}
+          />
+
           <dl className="r5-detail__meta">
-            <div>
-              <dt>産前休業開始</dt>
-              <dd>{jpDate(selectedResult.leaveStartDate)}</dd>
-            </div>
-            <div>
-              <dt>育休開始日（判定基準）</dt>
-              <dd>{jpDate(selectedResult.childCareStartDate)}</dd>
-            </div>
             <div>
               <dt>判定対象期間</dt>
               <dd>
@@ -285,4 +287,58 @@ function bestCounted(
   if (!summary.bestBirthDate) return '—'
   const r = results.find((x) => x.birthDate === summary.bestBirthDate)
   return r ? r.countedMonths.toFixed(1) : '—'
+}
+
+interface DetailTimelineProps {
+  result: EligibilityResult
+  isMultipleBirth: boolean
+}
+
+function DetailTimeline({ result, isMultipleBirth }: DetailTimelineProps) {
+  const prenatalDays = isMultipleBirth
+    ? PRENATAL_DAYS_MULTIPLE
+    : PRENATAL_DAYS_SINGLE
+  const birth = parseISO(result.birthDate)
+  const postnatalEnd = format(addDays(birth, POSTNATAL_DAYS), 'yyyy-MM-dd')
+  const stops = [
+    {
+      key: 'prenatal',
+      ic: '🌸',
+      label: `産前 ${prenatalDays} 日`,
+      date: result.leaveStartDate,
+    },
+    { key: 'birth', ic: '👶', label: '出産', date: result.birthDate },
+    {
+      key: 'postnatal',
+      ic: '🌿',
+      label: '産後 56 日 終了',
+      date: postnatalEnd,
+    },
+    {
+      key: 'childcare',
+      ic: '🍼',
+      label: '育休開始（判定基準日）',
+      date: result.childCareStartDate,
+      pivot: true as const,
+    },
+  ]
+  return (
+    <ol
+      className="r5-timeline"
+      aria-label="この出産日における産休・育休スケジュール"
+    >
+      {stops.map((s) => (
+        <li
+          key={s.key}
+          className={`r5-timeline__stop${s.pivot ? ' is-pivot' : ''}`}
+        >
+          <span className="r5-timeline__ic" aria-hidden>
+            {s.ic}
+          </span>
+          <span className="r5-timeline__label">{s.label}</span>
+          <span className="r5-timeline__date">{jpDate(s.date)}</span>
+        </li>
+      ))}
+    </ol>
+  )
 }
