@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Landing } from './ui/Landing'
 import { Wizard } from './ui/Wizard'
 import { Privacy } from './ui/Privacy'
+import { ContentPolicy } from './ui/ContentPolicy'
 import { ImportModal } from './ui/components/ImportModal'
 import { useAppState } from './state/AppState'
 import {
@@ -11,21 +12,19 @@ import {
 } from './state/share'
 import type { UserInput } from './domain/types'
 
-function useIsPrivacy() {
-  const [isPrivacy, setIsPrivacy] = useState(
-    () => window.location.hash === '#/privacy',
-  )
+function useCurrentPage() {
+  const [hash, setHash] = useState(() => window.location.hash)
   useEffect(() => {
-    const sync = () => setIsPrivacy(window.location.hash === '#/privacy')
+    const sync = () => setHash(window.location.hash)
     window.addEventListener('hashchange', sync)
     return () => window.removeEventListener('hashchange', sync)
   }, [])
-  return isPrivacy
+  return hash
 }
 
 function App() {
   const { state, dispatch } = useAppState()
-  const isPrivacy = useIsPrivacy()
+  const currentPage = useCurrentPage()
   const [importPreview, setImportPreview] = useState<UserInput | null>(null)
   const [importParseError, setImportParseError] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
@@ -65,8 +64,10 @@ function App() {
 
   return (
     <>
-      {isPrivacy ? (
+      {currentPage === '#/privacy' ? (
         <Privacy />
+      ) : currentPage === '#/content-policy' ? (
+        <ContentPolicy />
       ) : state.screen === 'landing' ? (
         <Landing />
       ) : (
