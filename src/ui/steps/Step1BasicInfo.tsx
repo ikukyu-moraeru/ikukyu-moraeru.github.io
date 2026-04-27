@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react'
 import { addDays, format, parseISO, subDays } from 'date-fns'
 import { useAppState } from '../../state/AppState'
+import { computeMaternityTimeline } from '../../domain/maternityTimeline'
 import { IssueBanner } from '../components/IssueBanner'
 import './steps.css'
+
+function jpDate(iso: string) {
+  if (!iso) return ''
+  const [y, m, d] = iso.split('-')
+  return `${y}年${Number(m)}月${Number(d)}日`
+}
 
 const DEFAULT_SPREAD = 14
 
@@ -164,17 +171,91 @@ export function Step1BasicInfo() {
       </div>
 
       {expected && (
-        <div className="st-summary">
-          <span>
-            <strong>走査範囲：</strong>
-            {state.input.scanRange.start} 〜 {state.input.scanRange.end}
-          </span>
-          <span>
-            <strong>候補日数：</strong>
-            {Math.max(0, spread * 2 + 1)} 日
-          </span>
-        </div>
+        <>
+          <Timeline
+            expectedBirthDate={expected}
+            isMultipleBirth={state.input.isMultipleBirth}
+          />
+          <div className="st-summary">
+            <span>
+              <strong>走査範囲：</strong>
+              {state.input.scanRange.start} 〜 {state.input.scanRange.end}
+            </span>
+            <span>
+              <strong>候補日数：</strong>
+              {Math.max(0, spread * 2 + 1)} 日
+            </span>
+          </div>
+        </>
       )}
+    </div>
+  )
+}
+
+interface TimelineProps {
+  expectedBirthDate: string
+  isMultipleBirth: boolean
+}
+
+function Timeline({ expectedBirthDate, isMultipleBirth }: TimelineProps) {
+  const t = computeMaternityTimeline(expectedBirthDate, isMultipleBirth)
+  if (!t) return null
+  const stops = [
+    {
+      key: 'prenatal',
+      ic: '🌸',
+      label: '産前休業 開始',
+      sub: `予定日 ${t.prenatalDays} 日前（最長）`,
+      date: t.prenatalLeaveStart,
+    },
+    {
+      key: 'birth',
+      ic: '👶',
+      label: '出産（予定日）',
+      sub: '実出産日が前後すると以降の日付も自動でずれます',
+      date: t.expectedBirthDate,
+    },
+    {
+      key: 'postnatal',
+      ic: '🌿',
+      label: '産後休業 終了',
+      sub: '出産日 + 56 日（労基法 65 条）',
+      date: t.postnatalLeaveEnd,
+    },
+    {
+      key: 'childcare',
+      ic: '🍼',
+      label: '育休開始 ＝ 判定基準日',
+      sub: 'この日の前 2 年（緩和で最長 4 年）が判定対象',
+      date: t.childCareStart,
+      highlight: true as const,
+    },
+  ]
+  return (
+    <div className="st-timeline" aria-label="産休・育休スケジュール">
+      <div className="st-timeline__head">
+        <span className="st-timeline__title">📐 出産予定日から決まる日付</span>
+        <span className="st-timeline__hint">
+          産前 {t.prenatalDays} 日 ＋ 産後 56 日 → その翌日が「育休開始日」
+        </span>
+      </div>
+      <ol className="st-timeline__list">
+        {stops.map((s) => (
+          <li
+            key={s.key}
+            className={`st-timeline__stop${s.highlight ? ' is-pivot' : ''}`}
+          >
+            <span className="st-timeline__ic" aria-hidden>
+              {s.ic}
+            </span>
+            <div className="st-timeline__body">
+              <span className="st-timeline__label">{s.label}</span>
+              <span className="st-timeline__date">{jpDate(s.date)}</span>
+              <span className="st-timeline__sub">{s.sub}</span>
+            </div>
+          </li>
+        ))}
+      </ol>
     </div>
   )
 }
