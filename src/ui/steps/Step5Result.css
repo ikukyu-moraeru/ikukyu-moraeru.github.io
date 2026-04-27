@@ -213,6 +213,11 @@
   color: #1f3a2c;
   border-color: var(--mint);
 }
+.r5-cell--near {
+  background: linear-gradient(160deg, #fff5d4 0%, var(--gold) 100%);
+  color: var(--gold-deep);
+  border-color: var(--gold);
+}
 .r5-cell--fail {
   background: linear-gradient(160deg, var(--bg-2) 0%, var(--pink) 100%);
   color: #4a1924;
@@ -250,6 +255,10 @@
 .r5-leg--pass {
   background: var(--bg-3);
   color: var(--mint-deep);
+}
+.r5-leg--near {
+  background: #fff5d4;
+  color: var(--gold-deep);
 }
 .r5-leg--fail {
   background: var(--bg-2);
@@ -306,6 +315,7 @@
   background: var(--bg-3);
   color: var(--mint-deep);
 }
+.r5-detail__badge--near,
 .r5-detail__badge--border {
   background: #fff3cf;
   color: var(--gold-deep);

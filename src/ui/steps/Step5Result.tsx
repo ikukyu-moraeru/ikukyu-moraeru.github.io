@@ -31,10 +31,12 @@ const PRENATAL_DAYS_MULTIPLE = 98
  */
 const NEAR_THRESHOLD_MONTHS = 1.0
 
-type Status = 'pass' | 'fail'
+type Status = 'pass' | 'near' | 'fail'
 
 function classify(r: EligibilityResult): Status {
-  return r.isEligible ? 'pass' : 'fail'
+  if (r.isEligible) return 'pass'
+  if (r.shortage <= NEAR_THRESHOLD_MONTHS) return 'near'
+  return 'fail'
 }
 
 function isNearMiss(r: EligibilityResult): boolean {
@@ -178,6 +180,7 @@ export function Step5Result() {
 
         <footer>
           <span className="r5-leg r5-leg--pass">受け取れる</span>
+          <span className="r5-leg r5-leg--near">あと少し届かない</span>
           <span className="r5-leg r5-leg--fail">受け取れない</span>
         </footer>
       </section>
