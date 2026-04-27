@@ -48,9 +48,12 @@ export function Step2LeavePeriods() {
       <IssueBanner scopeIds={ids} />
       <p className="st-field__hint" style={{ marginBottom: '0.4rem' }}>
         いままで取得した産休・育休・病気休職などを、思い出せる範囲で。
+        休業中に<strong>会社から賃金が支払われた</strong>期間は、緩和（休業前 2 年を最長 4 年へ延長）の対象外です。
         <br />
-        <strong>賃金が支払われた休業</strong>
-        は、緩和（休業前 2 年の延長）の対象外になります。
+        <span className="lp-note">
+          ※ <strong>出産手当金</strong>（健保から）／<strong>育児休業給付金</strong>（雇用保険から）／
+          <strong>傷病手当金</strong>（健保から）は「賃金」ではないため、これらだけが支給されている期間は「いいえ」を選んでください。
+        </span>
       </p>
 
       {periods.length === 0 ? (
@@ -137,9 +140,10 @@ export function Step2LeavePeriods() {
                     <span />
                   </span>
                   <span className="lp-toggle__txt">
-                    この休業期間中、<strong>賃金が支払われた</strong>
+                    この期間中、<strong>会社から賃金（給与）が支払われた</strong>
                     <span className="lp-toggle__sub">
-                      （会社規定の有給休業など。多くのケースでは「いいえ」）
+                      会社規定で休業中も給与が支給される場合のみ「はい」。
+                      出産手当金・育休給付金・傷病手当金だけが支給されている場合は「いいえ」のままで大丈夫です。
                     </span>
                   </span>
                 </label>
