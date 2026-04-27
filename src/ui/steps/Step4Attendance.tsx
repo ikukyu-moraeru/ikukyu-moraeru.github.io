@@ -1,35 +1,34 @@
 import { useMemo, useState } from 'react'
 import {
   addDays,
-  addMonths,
-  endOfMonth,
   format,
   getDay,
-  isAfter,
   parseISO,
-  startOfMonth,
-  subDays,
-  subYears,
 } from 'date-fns'
 import { useAppState } from '../../state/AppState'
+import { judgeEligibility } from '../../domain/eligibility'
 import type {
   AttendanceStatus,
   DailyAttendance,
+  EligibilityResult,
   UserInput,
 } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
 import './steps.css'
 import './Step4Attendance.css'
 
+/* -------------------------------------------------------------------- */
+/* 1 日のセル状態                                                       */
+/* -------------------------------------------------------------------- */
+
 type DayState =
-  | { kind: 'pre_hire' | 'post_quit' }
-  | { kind: 'gap' }
-  | { kind: 'leave' }
-  | { kind: 'public_holiday' }
+  | { kind: 'out' } // 加入前 / 退職後 / 未加入期間
+  | { kind: 'leave' } // 休業期間中
+  | { kind: 'public_holiday' } // 公休（土日）
   | { kind: 'unset' } // 平日・未入力
   | { kind: 'work'; hours?: number }
-  | { kind: 'paid_leave' }
-  | { kind: 'paid_special' }
+  | { kind: 'paid_leave'; hours?: number }
+  | { kind: 'paid_special'; hours?: number }
   | { kind: 'absent' }
 
 interface DayInfo {
@@ -48,29 +47,19 @@ const STATUS_CYCLE: AttendanceStatus[] = [
   'absent',
 ]
 
-function expectedFromScan(scan: UserInput['scanRange']): Date | null {
+/* -------------------------------------------------------------------- */
+/* 期間判定ユーティリティ                                               */
+/* -------------------------------------------------------------------- */
+
+function expectedFromScan(scan: UserInput['scanRange']): string | null {
   if (!scan.start || !scan.end) return null
   const s = parseISO(scan.start).getTime()
   const e = parseISO(scan.end).getTime()
   if (Number.isNaN(s) || Number.isNaN(e)) return null
-  return new Date((s + e) / 2)
+  return format(new Date((s + e) / 2), 'yyyy-MM-dd')
 }
 
-function buildJudgmentRange(input: UserInput): { start: Date; end: Date } | null {
-  const expected = expectedFromScan(input.scanRange)
-  if (!expected) return null
-  const childCareStart = addDays(expected, 57)
-  const end = subDays(childCareStart, 1)
-  // 緩和を考慮し最長 4 年（簡易: 2 年と +2 年バッファ）。実際の判定対象は出産日ごとに変わるが、
-  // ここではユーザーが入力できる期間として最長 4 年を確保する。
-  const start = subYears(end, 4)
-  return { start, end }
-}
-
-function inSegment(
-  date: string,
-  segments: UserInput['insuredSegments'],
-): boolean {
+function inSegment(date: string, segments: UserInput['insuredSegments']): boolean {
   return segments.some((s) => {
     const segEnd = s.end ?? '9999-12-31'
     return s.start <= date && date <= segEnd
@@ -91,23 +80,26 @@ function deriveDay(
   input: UserInput,
 ): DayInfo {
   if (override) {
+    const isBasic =
+      override.status === 'work' ||
+      override.status === 'paid_leave' ||
+      override.status === 'paid_special'
     return {
       date,
-      state: { kind: override.status, hours: override.hours },
-      isBasic:
-        override.status === 'work' ||
-        override.status === 'paid_leave' ||
-        override.status === 'paid_special',
+      state:
+        override.status === 'absent'
+          ? { kind: 'absent' }
+          : { kind: override.status, hours: override.hours },
+      isBasic,
       overridden: true,
     }
   }
-  // 自動推論: 客観的に決まるものだけ
   const insured = inSegment(date, input.insuredSegments)
   if (!insured) {
-    return { date, state: { kind: 'pre_hire' }, isBasic: false, overridden: false }
+    return { date, state: { kind: 'out' }, isBasic: false, overridden: false }
   }
   if (inGap(date, input.nonInsuredGaps)) {
-    return { date, state: { kind: 'gap' }, isBasic: false, overridden: false }
+    return { date, state: { kind: 'out' }, isBasic: false, overridden: false }
   }
   if (inLeave(date, input.leavePeriods)) {
     return { date, state: { kind: 'leave' }, isBasic: false, overridden: false }
@@ -125,26 +117,33 @@ function deriveDay(
 }
 
 function nextStatus(current: AttendanceStatus | null): AttendanceStatus | null {
-  // 未入力 → work → paid_leave → paid_special → absent → 未入力 のサイクル
   if (current === null) return STATUS_CYCLE[0]
   const idx = STATUS_CYCLE.indexOf(current)
   if (idx < 0 || idx === STATUS_CYCLE.length - 1) return null
   return STATUS_CYCLE[idx + 1]
 }
 
+/* -------------------------------------------------------------------- */
+/* メイン                                                                */
+/* -------------------------------------------------------------------- */
+
+const SPREAD_DAYS_FOR_VOLATILITY = 14 // 注釈に出す scanRange ±N 日（実際の値は scanRange から）
+
 export function Step4Attendance() {
   const { state, dispatch } = useAppState()
+  const [selectedIdx, setSelectedIdx] = useState(0) // 直近月を 0 として選択
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [showSkipped, setShowSkipped] = useState(false)
 
-  const range = useMemo(() => buildJudgmentRange(state.input), [state.input])
-  const [monthOffset, setMonthOffset] = useState(0)
+  const expected = expectedFromScan(state.input.scanRange)
 
-  const overrideMap = useMemo(() => {
-    const m = new Map<string, DailyAttendance>()
-    for (const a of state.input.attendances) m.set(a.date, a)
-    return m
-  }, [state.input.attendances])
+  const result: EligibilityResult | null = useMemo(() => {
+    if (!expected) return null
+    return judgeEligibility(state.input, expected)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.input, expected])
 
-  if (!range) {
+  if (!expected || !result) {
     return (
       <div className="st-empty">
         <span className="st-empty__emoji" aria-hidden>
@@ -155,43 +154,49 @@ export function Step4Attendance() {
     )
   }
 
-  // 入力可能な月リスト（最古 → 最新）
-  const monthsList: string[] = []
-  let cursor = startOfMonth(range.start)
-  const stop = startOfMonth(range.end)
-  while (!isAfter(cursor, stop)) {
-    monthsList.push(format(cursor, 'yyyy-MM'))
-    cursor = addMonths(cursor, 1)
-  }
-  // デフォルト表示は最新月（出産直前）
-  const defaultIdx = monthsList.length - 1
-  const idx = Math.min(
-    Math.max(0, defaultIdx + monthOffset),
-    monthsList.length - 1,
-  )
-  const currentMonthKey = monthsList[idx]
-  const monthStart = parseISO(`${currentMonthKey}-01`)
-  const monthEnd = endOfMonth(monthStart)
+  const overrideMap = new Map<string, DailyAttendance>()
+  for (const a of state.input.attendances) overrideMap.set(a.date, a)
 
-  // この月のすべての日
-  const days: DayInfo[] = []
-  for (
-    let d = monthStart;
-    d.getTime() <= monthEnd.getTime();
-    d = addDays(d, 1)
-  ) {
-    const date = format(d, 'yyyy-MM-dd')
-    days.push(deriveDay(date, overrideMap.get(date), state.input))
-  }
-
-  // この月の集計
-  const basicCount = days.filter((d) => d.isBasic).length
-  const totalHours = days.reduce((sum, d) => {
-    if (d.state.kind === 'work' && typeof d.state.hours === 'number') {
-      return sum + d.state.hours
+  /* 達成ラインの計算（直近順に累積し 12 を超えたインデックス） */
+  let cumulative = 0
+  let achievedAt = -1 // 0-indexed
+  for (let i = 0; i < result.monthBreakdown.length; i++) {
+    cumulative += result.monthBreakdown[i].counted
+    if (cumulative >= 12 && achievedAt === -1) {
+      achievedAt = i
     }
-    return sum
-  }, 0)
+  }
+  const achieved = achievedAt >= 0
+  const remainingNeeded = Math.max(0, 12 - result.countedMonths)
+
+  /* 走査範囲（ぶれの大きさ） */
+  const scanSpreadDays = (() => {
+    if (!state.input.scanRange.start || !state.input.scanRange.end) {
+      return SPREAD_DAYS_FOR_VOLATILITY
+    }
+    const s = parseISO(state.input.scanRange.start).getTime()
+    const e = parseISO(state.input.scanRange.end).getTime()
+    return Math.max(0, Math.round((e - s) / 2 / 86400000))
+  })()
+
+  /* 緩和加算の表記 */
+  const relaxLabel =
+    result.relaxationDays > 0
+      ? `（うち緩和加算 +${result.relaxationDays} 日）`
+      : ''
+
+  /* 詳細パネル: 選択された対象月 */
+  const selectedMonth = result.monthBreakdown[selectedIdx] ?? result.monthBreakdown[0]
+  const days: DayInfo[] = []
+  if (selectedMonth) {
+    let d = parseISO(selectedMonth.range.start)
+    const end = parseISO(selectedMonth.range.end)
+    while (d.getTime() <= end.getTime()) {
+      const date = format(d, 'yyyy-MM-dd')
+      days.push(deriveDay(date, overrideMap.get(date), state.input))
+      d = addDays(d, 1)
+    }
+  }
 
   const setStatus = (date: string, status: AttendanceStatus | null) => {
     const next = state.input.attendances.filter((a) => a.date !== date)
@@ -208,11 +213,9 @@ export function Step4Attendance() {
   }
 
   const setHours = (date: string, hours: number | null) => {
-    const existing = overrideMap.get(date)
-    if (!existing) return
     const next = state.input.attendances.map((a) => {
       if (a.date !== date) return a
-      if (hours === null) {
+      if (hours === null || Number.isNaN(hours)) {
         const { hours: _omit, ...rest } = a
         return rest
       }
@@ -221,18 +224,8 @@ export function Step4Attendance() {
     dispatch({ type: 'PATCH_INPUT', patch: { attendances: next } })
   }
 
-  const cycle = (info: DayInfo) => {
-    if (
-      info.state.kind === 'pre_hire' ||
-      info.state.kind === 'post_quit' ||
-      info.state.kind === 'gap' ||
-      info.state.kind === 'leave' ||
-      info.state.kind === 'public_holiday'
-    ) {
-      // 自動着色日も明示入力可能（休業中だが特例で出勤した、など）
-      setStatus(info.date, 'work')
-      return
-    }
+  const cycleDay = (info: DayInfo) => {
+    if (info.state.kind === 'out') return // 加入前/未加入は変更不可
     const cur =
       info.state.kind === 'work' ||
       info.state.kind === 'paid_leave' ||
@@ -243,305 +236,462 @@ export function Step4Attendance() {
     setStatus(info.date, nextStatus(cur))
   }
 
-  // 月内の平日（自動着色されない日）を一括 work に
-  const fillWeekdaysInMonth = () => {
-    const next = state.input.attendances.filter(
-      (a) => !a.date.startsWith(currentMonthKey),
-    )
+  const fillSelectedMonthWeekdaysWithWork = () => {
+    const next = state.input.attendances.filter((a) => {
+      // この対象月範囲外は維持
+      return (
+        a.date < selectedMonth.range.start || a.date > selectedMonth.range.end
+      )
+    })
     for (const d of days) {
-      if (d.state.kind === 'unset') {
-        next.push({ date: d.date, status: 'work' })
-      } else if (d.overridden) {
+      if (d.overridden) {
         const o = overrideMap.get(d.date)
         if (o) next.push(o)
+        continue
+      }
+      if (d.state.kind === 'unset') {
+        next.push({ date: d.date, status: 'work' })
       }
     }
     next.sort((a, b) => a.date.localeCompare(b.date))
     dispatch({ type: 'PATCH_INPUT', patch: { attendances: next } })
   }
 
-  // 月内のオーバーライドをクリア
-  const clearMonth = () => {
+  const clearSelectedMonth = () => {
     const next = state.input.attendances.filter(
-      (a) => !a.date.startsWith(currentMonthKey),
+      (a) => a.date < selectedMonth.range.start || a.date > selectedMonth.range.end,
     )
     dispatch({ type: 'PATCH_INPUT', patch: { attendances: next } })
   }
 
-  // 全期間の平日を一括 work に
-  const fillWeekdaysAll = () => {
-    const next: DailyAttendance[] = []
-    // 既存オーバーライドは保持
-    for (const a of state.input.attendances) next.push(a)
-    const seen = new Set(next.map((a) => a.date))
-    for (const ymKey of monthsList) {
-      const mStart = parseISO(`${ymKey}-01`)
-      const mEnd = endOfMonth(mStart)
-      for (let d = mStart; d.getTime() <= mEnd.getTime(); d = addDays(d, 1)) {
-        const date = format(d, 'yyyy-MM-dd')
-        if (seen.has(date)) continue
-        const info = deriveDay(date, undefined, state.input)
-        if (info.state.kind === 'unset') {
-          next.push({ date, status: 'work' })
-        }
-      }
-    }
-    next.sort((a, b) => a.date.localeCompare(b.date))
-    dispatch({ type: 'PATCH_INPUT', patch: { attendances: next } })
-  }
+  const selectedDay = selectedDate
+    ? days.find((d) => d.date === selectedDate) ?? null
+    : null
+
+  /* 表示する対象月（達成済みで折りたたんでいる場合は必須分のみ） */
+  const visibleMonths = result.monthBreakdown.map((m, idx) => ({
+    month: m,
+    idx,
+    isOptional: achieved && idx > achievedAt,
+  }))
 
   return (
     <div className="st-section">
       <IssueBanner />
 
-      <p className="st-field__hint">
-        各日の出勤状況を入力してください。<strong>出勤・有給・賃金の出る特休</strong>
-        が「賃金支払基礎日数」にカウントされます。<strong>欠勤・休業中・公休（土日）</strong>
-        はカウントされません。<br />
-        セルをタップすると <span className="at-key at-key--work">出勤</span> →
-        <span className="at-key at-key--paid_leave">有給</span> →
-        <span className="at-key at-key--paid_special">特休</span> →
-        <span className="at-key at-key--absent">欠勤</span> →
-        未入力 の順に切り替わります。
-      </p>
-
-      <div className="at-toolbar">
-        <button
-          className="at-month-nav"
-          onClick={() => setMonthOffset((o) => o - 1)}
-          disabled={idx === 0}
-          aria-label="前の月"
-        >
-          ‹
-        </button>
-        <select
-          className="at-month-select"
-          value={currentMonthKey}
-          onChange={(e) => {
-            const newIdx = monthsList.indexOf(e.target.value)
-            if (newIdx >= 0) setMonthOffset(newIdx - defaultIdx)
-          }}
-        >
-          {monthsList.map((ym) => (
-            <option key={ym} value={ym}>
-              {ym.slice(0, 4)} 年 {Number(ym.slice(5))} 月
-            </option>
-          ))}
-        </select>
-        <button
-          className="at-month-nav"
-          onClick={() => setMonthOffset((o) => o + 1)}
-          disabled={idx === monthsList.length - 1}
-          aria-label="次の月"
-        >
-          ›
-        </button>
-
-        <div className="at-toolbar__spacer" />
-
-        <button className="at-quick" onClick={fillWeekdaysInMonth}>
-          📌 この月の平日を出勤に
-        </button>
-        <button className="at-quick at-quick--ghost" onClick={clearMonth}>
-          月をクリア
-        </button>
-      </div>
-
-      <div className="at-summary">
-        <div className="at-summary__cell">
-          <span className="at-summary__big">{basicCount}</span>
-          <span className="at-summary__lab">
-            賃金支払基礎日数
-            <br />
-            <small>11日以上で達成</small>
-          </span>
+      {/* 進捗カウンタ */}
+      <div
+        className={`ac-progress ac-progress--${achieved ? 'pass' : 'work'}`}
+      >
+        <div className="ac-progress__head">
+          <div>
+            <span className="ac-progress__small">対象期間の達成状況</span>
+            <strong className="ac-progress__title">
+              {achieved
+                ? '✓ 12 か月の要件 達成'
+                : `達成 ${result.countedMonths.toFixed(1)} / 12 か月`}
+            </strong>
+            {!achieved && (
+              <span className="ac-progress__sub">
+                あと {remainingNeeded.toFixed(1)} か月の達成で要件を満たします。
+                直近の月から入力すると効率的です。
+              </span>
+            )}
+            {achieved && (
+              <span className="ac-progress__sub">
+                直近 {achievedAt + 1} か月分で要件を満たしています。
+                これより前の月の入力は不要です。
+              </span>
+            )}
+          </div>
         </div>
-        <div className="at-summary__cell">
-          <span className="at-summary__big">
-            {totalHours > 0 ? totalHours : '—'}
-          </span>
-          <span className="at-summary__lab">
-            出勤時間（任意）
-            <br />
-            <small>80時間以上で達成（11日未満時）</small>
-          </span>
-        </div>
-        <div
-          className={`at-summary__verdict at-summary__verdict--${basicCount >= 11 ? 'pass' : totalHours >= 80 ? 'pass' : 'fail'}`}
-        >
-          {basicCount >= 11
-            ? '✓ 11日以上を達成'
-            : totalHours >= 80
-              ? '✓ 80時間以上を達成'
-              : '✕ 未達'}
+        <div className="ac-progress__bar">
+          <div
+            className="ac-progress__fill"
+            style={{ width: `${Math.min(100, (result.countedMonths / 12) * 100)}%` }}
+          />
         </div>
       </div>
 
-      <div className="at-cal">
-        <div className="at-cal__head">
-          {['日', '月', '火', '水', '木', '金', '土'].map((w) => (
-            <span key={w}>{w}</span>
-          ))}
-        </div>
-        <div className="at-cal__grid">
-          {/* 月初の曜日まで空セル */}
-          {Array.from({ length: getDay(monthStart) }).map((_, i) => (
-            <span key={`pad-${i}`} className="at-cell at-cell--pad" />
-          ))}
-          {days.map((d) => (
-            <DayCell
-              key={d.date}
-              info={d}
-              onCycle={() => cycle(d)}
-              onClear={() => setStatus(d.date, null)}
-              onHoursChange={(h) => setHours(d.date, h)}
-            />
-          ))}
-        </div>
-      </div>
-
-      <details className="at-actions">
-        <summary>その他の操作</summary>
-        <div className="at-actions__body">
-          <button className="at-quick" onClick={fillWeekdaysAll}>
-            🌿 入力対象期間 全部の平日を出勤に
-          </button>
+      {/* 概念ガイダンス */}
+      <details className="ac-guide">
+        <summary>「対象月」とは？／用語と曖昧さについて</summary>
+        <div className="ac-guide__body">
+          <p>
+            判定は<strong>育休開始日（出産予定日 + 産後 56 日 + 1 日）</strong>から
+            <strong>1 か月単位</strong>でさかのぼった区間ごとに集計します。
+            たとえば育休開始 2026-04-15 なら、直近の対象月は <code>2026-03-15 〜 2026-04-14</code>。
+          </p>
+          <p>
+            このように<strong>月の中旬で区切られる</strong>ため、暦月（4 月、5 月…）とは一致しません。
+            正確な日付の境界は各セルに表示されます。
+          </p>
+          <p className="ac-guide__caveat">
+            <strong>※ 曖昧さの注意：</strong>
+            実際の出産日が予定日 ± {scanSpreadDays} 日ぶれると、
+            対象月の区切りも同じだけ前後します。
+            このページは<strong>予定日（{expected}）を中央</strong>として代表計算した結果です。
+            判定結果がぎりぎりの月（例: 10〜12 日付近、70〜90 時間付近）は、
+            実際の出産日次第で結果が変わる可能性があります。
+          </p>
         </div>
       </details>
 
-      <div className="at-legend">
-        <span className="at-key at-key--work">🟢 出勤</span>
-        <span className="at-key at-key--paid_leave">🅿️ 有給</span>
-        <span className="at-key at-key--paid_special">✨ 特休</span>
-        <span className="at-key at-key--absent">✕ 欠勤</span>
-        <span className="at-key at-key--leave">🛏 休業中</span>
-        <span className="at-key at-key--gap">🌀 未加入</span>
-        <span className="at-key at-key--holiday">— 公休</span>
-        <span className="at-key at-key--unset">？ 未入力</span>
-      </div>
+      {/* 対象月の年ビュー */}
+      <section className="ac-year">
+        <header className="ac-year__head">
+          <h3>対象月（直近順）</h3>
+          <span className="ac-year__hint">
+            タップで詳細を表示。<span className="ac-pill ac-pill--pass">達成</span>{' '}
+            <span className="ac-pill ac-pill--fail">未達</span>{' '}
+            <span className="ac-pill ac-pill--out">対象外</span>{' '}
+            <span className="ac-pill ac-pill--volatile">⚠ 出産日次第</span>
+          </span>
+        </header>
+
+        <ol className="ac-year__list">
+          {visibleMonths.map(({ month, idx, isOptional }) => {
+            if (isOptional && !showSkipped) return null
+            const status =
+              month.reason === '雇用保険未加入'
+                ? 'out'
+                : month.counted === 1
+                  ? 'pass'
+                  : 'fail'
+            const days = month.attendance?.basicWageDays ?? 0
+            const hours = month.attendance?.basicWageHours ?? 0
+            const volatile =
+              status !== 'out' && (
+                (days >= 8 && days <= 12) || (hours >= 70 && hours <= 90)
+              )
+            const monthIndexDisplay = `M${String(idx + 1).padStart(2, '0')}`
+            const isSelected = idx === selectedIdx
+            return (
+              <li
+                key={month.range.index}
+                className={`ac-month ac-month--${status} ${
+                  isSelected ? 'is-selected' : ''
+                } ${isOptional ? 'is-optional' : ''}`}
+              >
+                <button
+                  onClick={() => {
+                    setSelectedIdx(idx)
+                    setSelectedDate(null)
+                  }}
+                >
+                  <span className="ac-month__no">{monthIndexDisplay}</span>
+                  <span className="ac-month__range">
+                    {month.range.start.slice(5)} – {month.range.end.slice(5)}
+                  </span>
+                  <span className="ac-month__counter">
+                    {month.attendance ? (
+                      <>
+                        <span className="ac-month__num">{days.toFixed(0)}</span>
+                        <span className="ac-month__unit">日</span>
+                      </>
+                    ) : (
+                      <span className="ac-month__missing">未入力</span>
+                    )}
+                  </span>
+                  <span className="ac-month__badges">
+                    {status === 'pass' && (
+                      <span className="ac-pill ac-pill--pass">達成</span>
+                    )}
+                    {status === 'fail' && (
+                      <span className="ac-pill ac-pill--fail">未達</span>
+                    )}
+                    {status === 'out' && (
+                      <span className="ac-pill ac-pill--out">対象外</span>
+                    )}
+                    {volatile && (
+                      <span
+                        className="ac-pill ac-pill--volatile"
+                        title="出産日が前後すると結果が変わる可能性"
+                      >
+                        ⚠
+                      </span>
+                    )}
+                    {isOptional && (
+                      <span className="ac-pill ac-pill--skip">入力不要</span>
+                    )}
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ol>
+
+        {/* 達成ライン or 入力下限ライン */}
+        {achieved && (
+          <div className="ac-line ac-line--achieved">
+            <span>━━━ ここで 12 か月達成 ━━━</span>
+            <button
+              className="ac-skip-toggle"
+              onClick={() => setShowSkipped((s) => !s)}
+            >
+              {showSkipped
+                ? '入力不要の期間を隠す'
+                : `入力不要の ${result.monthBreakdown.length - achievedAt - 1} か月を表示`}
+            </button>
+          </div>
+        )}
+        <div className="ac-line ac-line--limit">
+          <span>
+            ↓ ここまで判定対象（{result.scanWindow.start} まで）
+            {relaxLabel && <em className="ac-line__relax">{relaxLabel}</em>}
+          </span>
+          <span className="ac-line__sub">
+            これより前は判定対象外です（雇用保険・育児休業給付の規定により最長
+            {result.relaxationDays > 0 ? ' 4 ' : ' 2 '}年）
+          </span>
+        </div>
+      </section>
+
+      {/* 詳細パネル：選択した対象月 */}
+      {selectedMonth && (
+        <section className="ac-detail">
+          <header className="ac-detail__head">
+            <div>
+              <span className="ac-detail__small">
+                対象月 M{String(selectedIdx + 1).padStart(2, '0')}
+              </span>
+              <h3>
+                {selectedMonth.range.start} 〜 {selectedMonth.range.end}
+              </h3>
+              <span className="ac-detail__sub">
+                {selectedMonth.attendance
+                  ? `${selectedMonth.attendance.basicWageDays.toFixed(0)} 日入力 / ${selectedMonth.attendance.basicWageHours} 時間`
+                  : '未入力'}{' '}
+                ／{' '}
+                {selectedMonth.reason === '雇用保険未加入'
+                  ? '対象外'
+                  : selectedMonth.counted === 1
+                    ? `達成（${selectedMonth.reason}）`
+                    : `未達（${selectedMonth.reason}）`}
+              </span>
+            </div>
+
+            {selectedMonth.reason !== '雇用保険未加入' && (
+              <div className="ac-detail__quick">
+                <button
+                  className="at-quick"
+                  onClick={fillSelectedMonthWeekdaysWithWork}
+                >
+                  📌 平日を出勤に
+                </button>
+                <button
+                  className="at-quick at-quick--ghost"
+                  onClick={clearSelectedMonth}
+                >
+                  クリア
+                </button>
+              </div>
+            )}
+          </header>
+
+          {selectedMonth.reason === '雇用保険未加入' ? (
+            <p className="ac-detail__notice">
+              この対象月は雇用保険被保険者期間に含まれていないため、出勤情報は使われません。
+              Step 3 の加入期間／未加入期間の設定をご確認ください。
+            </p>
+          ) : (
+            <div className="ac-detail__cal">
+              <div className="ac-detail__cal-head">
+                <span className="ac-dow ac-dow--sun">日</span>
+                <span>月</span>
+                <span>火</span>
+                <span>水</span>
+                <span>木</span>
+                <span>金</span>
+                <span className="ac-dow ac-dow--sat">土</span>
+              </div>
+              <div className="ac-detail__cal-grid">
+                {Array.from({ length: getDay(parseISO(days[0]?.date ?? expected)) }).map(
+                  (_, i) => (
+                    <span key={`pad-${i}`} className="ac-cell ac-cell--pad" />
+                  ),
+                )}
+                {days.map((d) => {
+                  const dn = Number(d.date.slice(8, 10))
+                  const klass = (() => {
+                    switch (d.state.kind) {
+                      case 'work':
+                        return 'ac-cell ac-cell--work'
+                      case 'paid_leave':
+                        return 'ac-cell ac-cell--paid_leave'
+                      case 'paid_special':
+                        return 'ac-cell ac-cell--paid_special'
+                      case 'absent':
+                        return 'ac-cell ac-cell--absent'
+                      case 'leave':
+                        return 'ac-cell ac-cell--leave'
+                      case 'out':
+                        return 'ac-cell ac-cell--out'
+                      case 'public_holiday':
+                        return 'ac-cell ac-cell--holiday'
+                      case 'unset':
+                        return 'ac-cell ac-cell--unset'
+                    }
+                  })()
+                  const label = (() => {
+                    switch (d.state.kind) {
+                      case 'work':
+                        return '出勤'
+                      case 'paid_leave':
+                        return '有給'
+                      case 'paid_special':
+                        return '特休'
+                      case 'absent':
+                        return '欠勤'
+                      case 'leave':
+                        return '休業'
+                      case 'out':
+                        return '対象外'
+                      case 'public_holiday':
+                        return '公休'
+                      case 'unset':
+                        return ''
+                    }
+                  })()
+                  const isSelectedDay = d.date === selectedDate
+                  return (
+                    <button
+                      key={d.date}
+                      className={`${klass} ${isSelectedDay ? 'is-selected' : ''}`}
+                      onClick={() => {
+                        if (isSelectedDay) cycleDay(d)
+                        else setSelectedDate(d.date)
+                      }}
+                    >
+                      <span className="ac-cell__day">{dn}</span>
+                      {label && <span className="ac-cell__label">{label}</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* 選択日の詳細編集パネル */}
+      {selectedDay && selectedMonth.reason !== '雇用保険未加入' && (
+        <DayDetailPanel
+          day={selectedDay}
+          onSetStatus={(s) => setStatus(selectedDay.date, s)}
+          onClear={() => {
+            setStatus(selectedDay.date, null)
+          }}
+          onHoursChange={(h) => setHours(selectedDay.date, h)}
+        />
+      )}
     </div>
   )
 }
 
-interface DayCellProps {
-  info: DayInfo
-  onCycle: () => void
+/* -------------------------------------------------------------------- */
+/* 選択日の詳細編集（時間入力をここに分離）                              */
+/* -------------------------------------------------------------------- */
+
+interface DayDetailPanelProps {
+  day: DayInfo
+  onSetStatus: (status: AttendanceStatus) => void
   onClear: () => void
   onHoursChange: (hours: number | null) => void
 }
 
-function DayCell({ info, onCycle, onClear, onHoursChange }: DayCellProps) {
-  const dn = Number(info.date.slice(8, 10))
-  const klass = (() => {
-    switch (info.state.kind) {
-      case 'work':
-        return 'at-cell at-cell--work'
-      case 'paid_leave':
-        return 'at-cell at-cell--paid_leave'
-      case 'paid_special':
-        return 'at-cell at-cell--paid_special'
-      case 'absent':
-        return 'at-cell at-cell--absent'
-      case 'leave':
-        return 'at-cell at-cell--leave'
-      case 'gap':
-        return 'at-cell at-cell--gap'
-      case 'pre_hire':
-      case 'post_quit':
-        return 'at-cell at-cell--out'
-      case 'public_holiday':
-        return 'at-cell at-cell--holiday'
-      case 'unset':
-        return 'at-cell at-cell--unset'
-    }
-  })()
+function DayDetailPanel({
+  day,
+  onSetStatus,
+  onClear,
+  onHoursChange,
+}: DayDetailPanelProps) {
+  const currentStatus =
+    day.state.kind === 'work' ||
+    day.state.kind === 'paid_leave' ||
+    day.state.kind === 'paid_special' ||
+    day.state.kind === 'absent'
+      ? day.state.kind
+      : null
 
-  const label = (() => {
-    switch (info.state.kind) {
-      case 'work':
-        return '出勤'
-      case 'paid_leave':
-        return '有給'
-      case 'paid_special':
-        return '特休'
-      case 'absent':
-        return '欠勤'
-      case 'leave':
-        return '休業'
-      case 'gap':
-        return '未加入'
-      case 'pre_hire':
-      case 'post_quit':
-        return '対象外'
-      case 'public_holiday':
-        return '公休'
-      case 'unset':
-        return ''
-    }
-  })()
+  const currentHours =
+    day.state.kind === 'work' ||
+    day.state.kind === 'paid_leave' ||
+    day.state.kind === 'paid_special'
+      ? day.state.hours
+      : undefined
 
-  const [editingHours, setEditingHours] = useState(false)
-  const hours = info.state.kind === 'work' ? info.state.hours : undefined
+  const [, mm, dd] = day.date.split('-')
 
   return (
-    <button
-      className={klass}
-      onClick={(e) => {
-        // hours 入力欄クリック時はサイクルしない
-        const target = e.target as HTMLElement
-        if (target.tagName === 'INPUT') return
-        onCycle()
-      }}
-      onContextMenu={(e) => {
-        e.preventDefault()
-        if (info.overridden) onClear()
-      }}
-      title={`${info.date} · ${label || '未入力'}（クリックで変更、右クリックで未入力に戻す）`}
-    >
-      <span className="at-cell__day">{dn}</span>
-      {label && <span className="at-cell__label">{label}</span>}
-      {info.state.kind === 'work' &&
-        (editingHours ? (
-          <input
-            type="number"
-            className="at-cell__hours-input"
-            min={0}
-            max={24}
-            step={0.5}
-            value={hours ?? ''}
-            placeholder="時間"
-            autoFocus
-            onClick={(e) => e.stopPropagation()}
-            onChange={(e) => {
-              const v = e.target.value
-              if (v === '') {
-                onHoursChange(null)
-              } else {
-                const n = Number(v)
-                if (Number.isFinite(n)) onHoursChange(n)
-              }
-            }}
-            onBlur={() => setEditingHours(false)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                ;(e.target as HTMLInputElement).blur()
-              }
-            }}
-          />
-        ) : (
-          <span
-            className="at-cell__hours"
-            onClick={(e) => {
-              e.stopPropagation()
-              setEditingHours(true)
-            }}
-            role="button"
-            tabIndex={-1}
+    <div className="ac-day-detail">
+      <header className="ac-day-detail__head">
+        <span className="ac-day-detail__small">選択した日</span>
+        <strong>
+          {Number(mm)} 月 {Number(dd)} 日
+        </strong>
+        <button
+          className="ac-day-detail__clear"
+          onClick={onClear}
+          disabled={!day.overridden}
+        >
+          未入力に戻す
+        </button>
+      </header>
+
+      <div className="ac-day-detail__choices">
+        {STATUS_CYCLE.map((s) => (
+          <button
+            key={s}
+            className={`ac-choice ac-choice--${s} ${currentStatus === s ? 'is-selected' : ''}`}
+            onClick={() => onSetStatus(s)}
           >
-            {hours !== undefined ? `${hours}h` : '時間'}
-          </span>
+            <span className="ac-choice__label">
+              {s === 'work'
+                ? '🟢 出勤'
+                : s === 'paid_leave'
+                  ? '🅿️ 有給'
+                  : s === 'paid_special'
+                    ? '✨ 特休'
+                    : '✕ 欠勤'}
+            </span>
+          </button>
         ))}
-    </button>
+      </div>
+
+      {(currentStatus === 'work' ||
+        currentStatus === 'paid_leave' ||
+        currentStatus === 'paid_special') && (
+        <div className="ac-day-detail__hours">
+          <label htmlFor="day-hours">
+            <span className="ac-day-detail__hours-label">この日の労働時間（任意）</span>
+            <span className="ac-day-detail__hours-hint">
+              80 時間ルール（11 日未満の月でも 80 時間以上で達成）に必要な人だけ入力。
+              空欄でも 11 日以上を満たせば達成できます。
+            </span>
+          </label>
+          <div className="ac-day-detail__hours-row">
+            <input
+              id="day-hours"
+              type="number"
+              min={0}
+              max={24}
+              step={0.5}
+              value={currentHours ?? ''}
+              placeholder="—"
+              onChange={(e) => {
+                const v = e.target.value
+                if (v === '') onHoursChange(null)
+                else {
+                  const n = Number(v)
+                  if (Number.isFinite(n)) onHoursChange(n)
+                }
+              }}
+            />
+            <span>時間</span>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
