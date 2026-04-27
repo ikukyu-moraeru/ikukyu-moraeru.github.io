@@ -1,5 +1,6 @@
 import { useAppState } from '../state/AppState'
 import { SAMPLE_HEATMAP } from '../preview/sample'
+import { SocialShare } from './components/SocialShare'
 import './Landing.css'
 
 export function Landing() {
@@ -98,6 +99,21 @@ export function Landing() {
           </div>
         </aside>
       </main>
+
+      <section className="ht-share">
+        <h2 className="ht-share__title">妊娠中の友だちにも、おしえる</h2>
+        <p className="ht-share__sub">
+          受給できるか不安な人ほど、調べる前に時間が過ぎてしまいがち。
+          ブラウザだけで動くので気軽に試せます。
+        </p>
+        <SocialShare
+          variant="inline"
+          label="シェア"
+          text={
+            '出産日がずれても、育休給付金を受け取れるかを 1 日ごとに判定するツールを見つけたよ。ブラウザの中で完結するみたい。 #マタニティ手帖'
+          }
+        />
+      </section>
 
       <footer className="ht-foot">
         <p>※ 本ツールは参考用です。最終判定は管轄のハローワークで行われます。</p>

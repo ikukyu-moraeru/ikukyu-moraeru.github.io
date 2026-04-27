@@ -404,11 +404,43 @@
   color: var(--pink-deep);
 }
 
+.ht-share {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 4rem auto 0;
+  padding: 1.6rem clamp(1.2rem, 4vw, 2rem);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  text-align: center;
+  display: grid;
+  gap: 0.7rem;
+  justify-items: center;
+}
+.ht-share__title {
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+  margin: 0;
+  color: var(--plum);
+  letter-spacing: 0.02em;
+}
+.ht-share__sub {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  max-width: 32em;
+}
+
 .ht-foot {
   position: relative;
   z-index: 1;
   text-align: center;
-  margin-top: 4rem;
+  margin-top: 3rem;
   font-size: 0.85rem;
   color: var(--ink-mute);
 }
