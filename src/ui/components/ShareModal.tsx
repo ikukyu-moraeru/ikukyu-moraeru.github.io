@@ -39,7 +39,7 @@ export function ShareModal({ open, onClose }: Props) {
           : verdict === 'fail-all'
             ? '🌱 育休給付金、いまの入力では条件に届かない判定でした。'
             : `📅 育休給付金、出産日次第で結果が変わる判定でした（受け取れる日 ${summary.passDays} / ${summary.totalDays} 日）。`
-      return `${headline}\n出産日と勤務状況を入れるだけでブラウザだけで判定できます。\n${APP_URL}\n#マタニティ手帖`
+      return `${headline}\n出産日と勤務状況を入れるだけ、ブラウザの中だけで判定できます。\n${APP_URL}\n#育休もらえる`
     } catch {
       return ''
     }

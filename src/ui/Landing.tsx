@@ -10,6 +10,8 @@ function formatMonths(n: number): string {
   return Number.isInteger(n) ? String(n) : n.toFixed(1)
 }
 
+const SERVICE_NAME = '育休もらえる？'
+
 export function Landing() {
   const { dispatch } = useAppState()
   return (
@@ -20,26 +22,31 @@ export function Landing() {
 
       <header className="ht-nav">
         <div className="ht-logo">
-          <span className="ht-logo__mark">◐</span>
-          <span>マタニティ手帖</span>
+          <span className="ht-logo__mark">？</span>
+          <span>{SERVICE_NAME}</span>
         </div>
-        <span className="ht-nav__sub">育休給付の受給判定 — ローカル動作</span>
+        <span className="ht-nav__sub">
+          育休給付金の受給判定 — ブラウザで完結
+        </span>
       </header>
 
       <main className="ht-main">
         <div className="ht-hero">
-          <span className="ht-pill">育休給付の受給判定 · 2026 年版</span>
+          <span className="ht-pill">
+            転職・時短・休職で、ぎりぎりかもしれない方へ
+          </span>
 
           <h1 className="ht-h1">
-            <span className="ht-h1__line">出産日がずれても、</span>
-            <span className="ht-h1__line ht-h1__accent">受け取れるか。</span>
+            <span className="ht-h1__line">育休給付金、</span>
+            <span className="ht-h1__line ht-h1__accent">もらえる？</span>
           </h1>
 
           <p className="ht-lede">
-            育児休業給付金を受け取るには、休業前 2 年で
+            雇用保険の育児休業給付金は、休業前 2 年で
             <strong>「11 日以上 働いた月」が 12 か月以上</strong>{' '}
-            あること。出産日が動くと結果も変わるので、
-            <strong>あり得る日付すべてをまとめて判定</strong>します。
+            必要です。微妙な人ほど、自分の場合に当てはめないと判断できません。
+            このツールは、出産日のぶれや産休・育休・転職を全部考慮して、
+            <strong>あなたの場合に受け取れるか</strong>を判定します。
           </p>
 
           <div className="ht-cta">
@@ -47,37 +54,67 @@ export function Landing() {
               className="ht-btn ht-btn--primary"
               onClick={() => dispatch({ type: 'GOTO_WIZARD' })}
             >
-              <span>判定をはじめる</span>
+              <span>あなたの場合を判定する</span>
               <span className="ht-btn__chip">3 分</span>
             </button>
+          </div>
+
+          <div className="ht-target">
+            <p className="ht-target__label">こんな方の自己診断に</p>
+            <ul className="ht-target__list">
+              <li>
+                <span aria-hidden>🌀</span>
+                出産前に <strong>転職</strong> を経験した（前職と通算できる？）
+              </li>
+              <li>
+                <span aria-hidden>⏱</span>
+                <strong>時短勤務・パート</strong> で月の出勤日数が少なめ
+              </li>
+              <li>
+                <span aria-hidden>🤒</span>
+                <strong>つわり・病気休職</strong> で休んだ期間がある
+              </li>
+              <li>
+                <span aria-hidden>🍃</span>
+                出産前に <strong>退職・無職期間</strong> がある
+              </li>
+              <li>
+                <span aria-hidden>📅</span>
+                <strong>出産予定日がぎりぎり</strong> で「あと数日生まれが遅かったら…」が不安
+              </li>
+              <li>
+                <span aria-hidden>💼</span>
+                ハローワーク・社労士に相談する前に <strong>自己診断したい</strong>
+              </li>
+            </ul>
           </div>
 
           <ul className="ht-points">
             <li>
               <span className="ht-points__ic">📅</span>
-              <strong>出産日のゆらぎを考慮</strong>
-              予定日 ± 14 日を 1 日ずつ判定
+              <strong>出産日のぶれを考慮</strong>
+              予定日 ± 任意日数を 1 日ずつ判定
             </li>
             <li>
               <span className="ht-points__ic">📒</span>
-              <strong>制度を反映</strong>
-              緩和事由（最長 4 年）・前職通算もまるごと自動計算
+              <strong>制度をまるごと反映</strong>
+              緩和（最長 4 年）／前職通算／80 時間ルールも自動計算
             </li>
             <li>
               <span className="ht-points__ic">🔒</span>
               <strong>送信しません</strong>
-              すべてブラウザの中で完結。データは端末に残るだけ
+              すべてブラウザで完結。データは端末から外に出ません
             </li>
           </ul>
         </div>
 
         <aside className="ht-card">
           <div className="ht-card__head">
-            <span className="ht-card__tag">サンプル</span>
-            <h3>出産日ごとの結果</h3>
+            <span className="ht-card__tag">こんな結果が出ます</span>
+            <h3>出産日ごとに「もらえる？」</h3>
             <p>
               予定日の周辺で「実際にいつ生まれたら」を 1 日ずつ判定し、
-              受け取れる日／届かない日を色で見せます。数字は積み上がった月数です。
+              受け取れる日／届かない日を色で見せます。
             </p>
           </div>
 
@@ -109,23 +146,25 @@ export function Landing() {
       </main>
 
       <section className="ht-share">
-        <h2 className="ht-share__title">妊娠中の友だちにも、おしえる</h2>
+        <h2 className="ht-share__title">妊娠中のお友だちにも、おしえる</h2>
         <p className="ht-share__sub">
           受給できるか不安な人ほど、調べる前に時間が過ぎてしまいがち。
-          ブラウザだけで動くので気軽に試せます。
+          ブラウザだけで動くので、気軽に試してもらえます。
         </p>
         <SocialShare
           variant="inline"
           label="シェア"
-          text={
-            '出産日がずれても、育休給付金を受け取れるかを 1 日ごとに判定するツールを見つけたよ。ブラウザの中で完結するみたい。 #マタニティ手帖'
-          }
+          text={`育休給付金、転職や時短があっても自分はもらえる？を 1 日ごとに判定できるツール。ブラウザだけで完結します。 #育休もらえる`}
         />
       </section>
 
       <footer className="ht-foot">
-        <p>※ 本ツールは参考用です。最終判定は管轄のハローワークで行われます。</p>
-        <p className="ht-foot__sub">© 2026 マタニティ手帖 · ローカル動作</p>
+        <p>
+          ※ 本ツールは参考用です。最終判定は管轄のハローワーク（公共職業安定所）で行われます。
+        </p>
+        <p className="ht-foot__sub">
+          © 2026 {SERVICE_NAME} · ローカル動作 · 個人情報は送信しません
+        </p>
       </footer>
     </div>
   )

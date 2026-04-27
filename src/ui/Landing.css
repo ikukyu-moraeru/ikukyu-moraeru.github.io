@@ -216,6 +216,50 @@
   transform: translateY(1px);
 }
 
+/* ターゲット（こんな方の自己診断に） */
+.ht-target {
+  margin: 0 0 1.4rem;
+  padding: 1rem 1.2rem;
+  background: linear-gradient(135deg, var(--bg-2) 0%, #fff 100%);
+  border: 1.5px solid var(--pink);
+  border-radius: var(--r-md);
+}
+.ht-target__label {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 0.95rem;
+  color: var(--pink-deep);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.ht-target__label::before {
+  content: '👤';
+  font-size: 1.1rem;
+}
+.ht-target__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.ht-target__list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem;
+  align-items: baseline;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.ht-target__list strong {
+  font-family: var(--font-h);
+  font-weight: 700;
+  color: var(--plum);
+}
+
 .ht-points {
   list-style: none;
   margin: 0;
