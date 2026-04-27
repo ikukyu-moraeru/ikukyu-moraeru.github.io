@@ -66,7 +66,7 @@
 /* stats */
 .r5-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.6rem;
 }
 .r5-stats__cell {
@@ -121,11 +121,6 @@
   line-height: 1.4;
 }
 
-@media (max-width: 720px) {
-  .r5-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
 /* heatmap */
 .r5-heat {
@@ -212,6 +207,12 @@
   font-family: var(--font-h);
   font-weight: 900;
   font-size: 0.95rem;
+}
+.r5-cell__mark {
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 1.25rem;
+  line-height: 1;
 }
 .r5-cell--pass {
   background: linear-gradient(160deg, var(--bg-3) 0%, var(--mint) 100%);
@@ -645,16 +646,62 @@
   border-radius: 999px;
 }
 
-/* shortfall */
-.r5-shortfall {
-  background: var(--bg-2);
-  border-left: 4px solid var(--pink);
-  border-radius: 12px;
-  padding: 0.7rem 1rem;
-  font-size: 0.9rem;
-  color: var(--ink);
+/* fail streaks（あと少し届かない日の区間表示） */
+.r5-fails {
+  background: linear-gradient(135deg, var(--bg-2) 0%, #fff 100%);
+  border: 1px solid var(--pink);
+  border-radius: var(--r-md);
+  padding: var(--sp-4) 1.1rem;
+  display: grid;
+  gap: 0.55rem;
 }
-.r5-shortfall strong {
+.r5-fails__label {
   font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 0.92rem;
   color: var(--pink-deep);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.r5-fails__label::before {
+  content: "🌱";
+  font-size: 1rem;
+}
+.r5-fails ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+.r5-fails li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.4rem;
+  align-items: baseline;
+  padding: 0.4rem 0.65rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: var(--r-xs);
+  font-size: 0.9rem;
+}
+.r5-fails__range {
+  font-family: var(--font-h);
+  font-weight: 700;
+  color: var(--plum);
+}
+.r5-fails__days {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--pink-deep);
+  background: var(--bg-2);
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--r-full);
+}
+.r5-fails__hint {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
 }

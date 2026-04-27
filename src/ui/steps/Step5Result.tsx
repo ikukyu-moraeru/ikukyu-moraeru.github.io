@@ -68,49 +68,50 @@ export function Step5Result() {
       <IssueBanner scope="all" />
       <div className={`r5-verdict r5-verdict--${verdict}`}>
         <div className="r5-verdict__emoji" aria-hidden>
-          {verdict === 'pass-all' ? '🎉' : verdict === 'fail-all' ? '⚠️' : '🤞'}
+          {verdict === 'pass-all' ? '🎉' : verdict === 'fail-all' ? '🌱' : '🤞'}
         </div>
         <div>
           <span className="r5-verdict__small">判定結果</span>
           <h2 className="r5-verdict__title">
             {verdict === 'pass-all'
-              ? 'いつ生まれても、受給できます'
+              ? 'いつ生まれても、育休給付金を受け取れそうです'
               : verdict === 'fail-all'
-                ? '現状の入力では受給要件に届きません'
-                : '出産日次第で結果が変わります'}
+                ? 'いまの入力だと、条件にもう少し届かないようです'
+                : '出産日によって、結果が変わります'}
           </h2>
-          <p className="r5-verdict__sub">
-            走査した {summary.totalDays} 候補のうち、
-            <strong>{summary.passDays}</strong> 日で受給要件を充足、
-            <strong>{summary.failDays}</strong> 日が不足。
-          </p>
         </div>
       </div>
 
       <div className="r5-stats">
         <div className="r5-stats__cell r5-stats__cell--pass">
           <span className="r5-stats__num">{summary.passDays}</span>
-          <span className="r5-stats__lab">充足する日（12 か月以上）</span>
+          <span className="r5-stats__lab">受け取れる日</span>
         </div>
         <div className="r5-stats__cell r5-stats__cell--fail">
           <span className="r5-stats__num">{summary.failDays}</span>
-          <span className="r5-stats__lab">不足する日（12 か月未満）</span>
-        </div>
-        <div className="r5-stats__cell r5-stats__cell--best">
-          <span className="r5-stats__num r5-stats__num--small">
-            {bestCounted(results, summary)}
-          </span>
-          <span className="r5-stats__lab">
-            最良：{jpDate(summary.bestBirthDate)}
-          </span>
+          <span className="r5-stats__lab">届かない日</span>
         </div>
       </div>
 
-      {summary.passDays < summary.totalDays && summary.shortfallMin > 0 && (
-        <div className="r5-shortfall">
-          🪧 不足候補のうち最小不足月数は
-          <strong> {summary.shortfallMin.toFixed(1)} か月</strong>
-          。あと少しで届きます。
+      {summary.failStreaks.length > 0 && (
+        <div className="r5-fails">
+          <span className="r5-fails__label">
+            条件にあと少し届かない日
+          </span>
+          <ul>
+            {summary.failStreaks.map((s) => (
+              <li key={`${s.start}_${s.end}`}>
+                <span className="r5-fails__range">
+                  {jpDate(s.start)}
+                  {s.start !== s.end && <> 〜 {jpDate(s.end)}</>}
+                </span>
+                <span className="r5-fails__days">{s.days} 日間</span>
+              </li>
+            ))}
+          </ul>
+          <p className="r5-fails__hint">
+            Step 4 で「11 日以上 働いた月」「80 時間以上 働いた月」をもう一度見直してみると、結果が変わるかもしれません。
+          </p>
         </div>
       )}
 
@@ -132,13 +133,17 @@ export function Step5Result() {
                 onClick={() =>
                   setSelected(r.birthDate === selected ? null : r.birthDate)
                 }
-                title={`${r.birthDate}: ${r.countedMonths.toFixed(1)} か月`}
+                title={
+                  r.isEligible
+                    ? `${r.birthDate}: 受け取れる`
+                    : `${r.birthDate}: あと少し届かない`
+                }
               >
                 <span className="r5-cell__date">
                   {Number(mm)}/{Number(dd)}
                 </span>
-                <span className="r5-cell__num">
-                  {r.countedMonths.toFixed(1)}
+                <span className="r5-cell__mark" aria-hidden>
+                  {r.isEligible ? '○' : '△'}
                 </span>
               </button>
             )
@@ -146,8 +151,8 @@ export function Step5Result() {
         </div>
 
         <footer>
-          <span className="r5-leg r5-leg--pass">充足（12 か月以上）</span>
-          <span className="r5-leg r5-leg--fail">不足（12 か月未満）</span>
+          <span className="r5-leg r5-leg--pass">受け取れる</span>
+          <span className="r5-leg r5-leg--fail">あと少し届かない</span>
         </footer>
       </section>
 
@@ -159,11 +164,9 @@ export function Step5Result() {
             <span
               className={`r5-detail__badge r5-detail__badge--${classify(selectedResult)}`}
             >
-              {selectedResult.isEligible ? '✓ 充足' : '✕ 不足'} ／
-              カウント {selectedResult.countedMonths.toFixed(1)} か月
-              {selectedResult.shortage > 0 && (
-                <> · 不足 {selectedResult.shortage.toFixed(1)} か月</>
-              )}
+              {selectedResult.isEligible
+                ? '✓ 受け取れます'
+                : '✕ あと少し届かないようです'}
             </span>
           </header>
 
@@ -260,15 +263,6 @@ export function Step5Result() {
       </p>
     </div>
   )
-}
-
-function bestCounted(
-  results: EligibilityResult[],
-  summary: ReturnType<typeof summarizeScan>,
-): string {
-  if (!summary.bestBirthDate) return '—'
-  const r = results.find((x) => x.birthDate === summary.bestBirthDate)
-  return r ? r.countedMonths.toFixed(1) : '—'
 }
 
 interface DetailTimelineProps {
