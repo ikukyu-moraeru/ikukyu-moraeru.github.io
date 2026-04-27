@@ -18,10 +18,8 @@ const EXPECTED_INDEX = 14 // 9/15 を予定日に固定
 
 /**
  * countedMonths は完全月（整数加算）＋端数月（最大 +0.5）で構成されるため、
- * 実装上 0.5 刻みの値しか取らない。サンプルもそれに揃える。
+ * 実装上 0.5 刻みの値しか取らない。サンプルもそれに揃え、実態に近い狭めの幅で並べる。
  */
-const halfStep = (n: number): number => Math.round(n * 2) / 2
-
 const buildSample = (): HeatmapCell[] => {
   const cells: HeatmapCell[] = []
   const base = new Date(2026, 8, 1) // Sep 1
@@ -33,17 +31,17 @@ const buildSample = (): HeatmapCell[] => {
     let status: CellStatus
     let months: number
     if (i < 22) {
-      // pass: 30 日中 22 日を「受け取れる」に。15.0 → 12.5 を 0.5 刻みで穏やかに
+      // pass: 12.5 / 13.0 / 13.5 を緩やかに循環（実態に近い狭めの幅）
       status = 'pass'
-      months = halfStep(15 - i * 0.12)
+      months = [13.5, 13.0, 12.5][i % 3]
     } else if (i < 25) {
-      // near: 11.5 と 11.0 を交互に（3 日分）
+      // near: 11.5 と 11.0 を交互に
       status = 'near'
       months = i % 2 === 0 ? 11.5 : 11.0
     } else {
-      // fail: 10.5 → 8.0 を 0.5 刻みで
+      // fail: 10.5 / 10.0 を交互に（広げすぎず、届かない側も控えめに）
       status = 'fail'
-      months = halfStep(10.5 - (i - 25) * 0.5)
+      months = i % 2 === 0 ? 10.0 : 10.5
     }
     cells.push({
       index: i,
