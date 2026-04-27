@@ -155,34 +155,56 @@ export function Step3Segments() {
                   )}
 
                   {isPrev && (
-                    <label className="lp-toggle">
-                      <input
-                        type="checkbox"
-                        checked={s.claimedBasicAllowanceAfterEnd === true}
-                        onChange={(e) =>
-                          patchSegment(s.id, {
-                            claimedBasicAllowanceAfterEnd: e.target.checked,
-                          })
-                        }
-                      />
-                      <span className="lp-toggle__pill" aria-hidden>
-                        <span />
-                      </span>
-                      <span className="lp-toggle__txt">
-                        この会社の離職後、
-                        <strong>失業給付の受給資格決定</strong>を受けた
-                        <span className="lp-toggle__sub">
-                          ハローワークで受給資格者証が交付された／受給を始めた
-                          場合のみチェック。これ以前の被保険者期間は通算対象外になります。
+                    <>
+                      <label className="lp-toggle">
+                        <input
+                          type="checkbox"
+                          checked={s.claimedBasicAllowanceAfterEnd === true}
+                          onChange={(e) =>
+                            patchSegment(s.id, {
+                              claimedBasicAllowanceAfterEnd: e.target.checked,
+                            })
+                          }
+                        />
+                        <span className="lp-toggle__pill" aria-hidden>
+                          <span />
                         </span>
-                      </span>
-                    </label>
-                  )}
+                        <span className="lp-toggle__txt">
+                          この会社の離職後、
+                          <strong>失業給付（基本手当）の受給資格決定</strong>を受けた
+                          <span className="lp-toggle__sub">
+                            ハローワークで <strong>受給資格者証</strong>{' '}
+                            が交付された／給付を申請した場合のみチェックしてください。
+                          </span>
+                        </span>
+                      </label>
 
-                  {isPrev && s.claimedBasicAllowanceAfterEnd === true && (
-                    <div className="sg-alert">
-                      ⚠ この会社およびそれ以前の期間は通算対象から外れます。
-                    </div>
+                      <details className="sg-why">
+                        <summary>なぜチェックを入れると通算対象外になるの？</summary>
+                        <div className="sg-why__body">
+                          <p>
+                            雇用保険の被保険者期間は「失業給付（基本手当）」を受給するときに
+                            <strong>消費される</strong>仕組みになっています（雇用保険法 14 条 2 項）。
+                          </p>
+                          <p>
+                            一度<strong>受給資格を決定</strong>すると、それ以前の被保険者期間は
+                            「使った」扱いになり、その後の他の給付（育休給付金など）の判定には
+                            <strong>もう使えません</strong>。
+                          </p>
+                          <p className="sg-why__note">
+                            ※ 実際に給付金を 1 円でも受け取ったかどうかは関係なく、
+                            ハローワークで <strong>受給資格者証が交付された時点</strong> で消費されます。
+                            何もせず再就職した場合は、このチェックは不要です。
+                          </p>
+                        </div>
+                      </details>
+
+                      {s.claimedBasicAllowanceAfterEnd === true && (
+                        <div className="sg-alert">
+                          ⚠ この会社およびそれ以前の期間は通算対象から外れます。
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {s.start && s.end && s.end !== null && s.start > s.end && (

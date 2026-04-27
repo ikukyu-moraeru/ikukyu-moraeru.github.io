@@ -76,3 +76,45 @@
   padding: 0.55rem 0.9rem;
   border-radius: 12px;
 }
+
+.sg-why {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem;
+}
+.sg-why summary {
+  cursor: pointer;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+.sg-why summary:hover {
+  color: var(--plum);
+}
+.sg-why__body {
+  margin-top: 0.6rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.sg-why__body p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.sg-why__body strong {
+  font-family: var(--font-h);
+  color: var(--plum);
+}
+.sg-why__note {
+  background: #fff5d4;
+  border-left: 3px solid var(--gold);
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  color: var(--gold-deep) !important;
+}
+.sg-why__note strong {
+  color: var(--gold-deep) !important;
+}
