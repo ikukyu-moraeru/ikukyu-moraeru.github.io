@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   addDays,
   format,
@@ -134,6 +134,19 @@ export function Step4Attendance() {
   const [selectedIdx, setSelectedIdx] = useState(0) // 直近月を 0 として選択
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [showSkipped, setShowSkipped] = useState(false)
+  const detailRef = useRef<HTMLElement>(null)
+
+  const selectMonth = (idx: number) => {
+    setSelectedIdx(idx)
+    setSelectedDate(null)
+    // 次フレームでスクロール（state 反映後）
+    requestAnimationFrame(() => {
+      detailRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+  }
 
   const expected = expectedFromScan(state.input.scanRange)
 
@@ -340,16 +353,26 @@ export function Step4Attendance() {
       {/* 対象月の年ビュー */}
       <section className="ac-year">
         <header className="ac-year__head">
-          <h3>対象月（直近順）</h3>
-          <span className="ac-year__hint">
-            タップで詳細を表示。<span className="ac-pill ac-pill--pass">達成</span>{' '}
-            <span className="ac-pill ac-pill--fail">未達</span>{' '}
-            <span className="ac-pill ac-pill--out">対象外</span>{' '}
-            <span className="ac-pill ac-pill--volatile">⚠ 出産日次第</span>
-          </span>
+          <div>
+            <h3>対象月（直近順）</h3>
+            <p className="ac-year__hint">
+              タップで詳細を表示。直近 M01 から順に達成数を稼ぐと効率的です。
+            </p>
+          </div>
+          <div className="ac-year__legend">
+            <span className="ac-pill ac-pill--pass">達成</span>
+            <span className="ac-pill ac-pill--fail">未達</span>
+            <span className="ac-pill ac-pill--out">対象外</span>
+            <span
+              className="ac-pill ac-pill--volatile"
+              title="出産日次第で結果が変わる可能性"
+            >
+              ⚠
+            </span>
+          </div>
         </header>
 
-        <ol className="ac-year__list">
+        <ol className="ac-year__grid">
           {visibleMonths.map(({ month, idx, isOptional }) => {
             if (isOptional && !showSkipped) return null
             const status =
@@ -361,9 +384,8 @@ export function Step4Attendance() {
             const days = month.attendance?.basicWageDays ?? 0
             const hours = month.attendance?.basicWageHours ?? 0
             const volatile =
-              status !== 'out' && (
-                (days >= 8 && days <= 12) || (hours >= 70 && hours <= 90)
-              )
+              status !== 'out' &&
+              ((days >= 8 && days <= 12) || (hours >= 70 && hours <= 90))
             const monthIndexDisplay = `M${String(idx + 1).padStart(2, '0')}`
             const isSelected = idx === selectedIdx
             return (
@@ -373,15 +395,12 @@ export function Step4Attendance() {
                   isSelected ? 'is-selected' : ''
                 } ${isOptional ? 'is-optional' : ''}`}
               >
-                <button
-                  onClick={() => {
-                    setSelectedIdx(idx)
-                    setSelectedDate(null)
-                  }}
-                >
+                <button onClick={() => selectMonth(idx)}>
                   <span className="ac-month__no">{monthIndexDisplay}</span>
                   <span className="ac-month__range">
-                    {month.range.start.slice(5)} – {month.range.end.slice(5)}
+                    {month.range.start.slice(5).replace('-', '/')}
+                    <span className="ac-month__sep">–</span>
+                    {month.range.end.slice(5).replace('-', '/')}
                   </span>
                   <span className="ac-month__counter">
                     {month.attendance ? (
@@ -393,26 +412,22 @@ export function Step4Attendance() {
                       <span className="ac-month__missing">未入力</span>
                     )}
                   </span>
-                  <span className="ac-month__badges">
-                    {status === 'pass' && (
-                      <span className="ac-pill ac-pill--pass">達成</span>
-                    )}
-                    {status === 'fail' && (
-                      <span className="ac-pill ac-pill--fail">未達</span>
-                    )}
+                  <span className="ac-month__statusrow">
+                    {status === 'pass' && <span className="ac-month__check">✓</span>}
+                    {status === 'fail' && <span className="ac-month__x">○</span>}
                     {status === 'out' && (
-                      <span className="ac-pill ac-pill--out">対象外</span>
+                      <span className="ac-month__out-mark">—</span>
                     )}
                     {volatile && (
                       <span
-                        className="ac-pill ac-pill--volatile"
-                        title="出産日が前後すると結果が変わる可能性"
+                        className="ac-month__warn"
+                        title="出産日次第で結果が変わる可能性"
                       >
                         ⚠
                       </span>
                     )}
                     {isOptional && (
-                      <span className="ac-pill ac-pill--skip">入力不要</span>
+                      <span className="ac-month__skip">不要</span>
                     )}
                   </span>
                 </button>
@@ -449,11 +464,16 @@ export function Step4Attendance() {
 
       {/* 詳細パネル：選択した対象月 */}
       {selectedMonth && (
-        <section className="ac-detail">
+        <section
+          className="ac-detail"
+          ref={detailRef}
+          key={`detail-${selectedIdx}`}
+          aria-live="polite"
+        >
           <header className="ac-detail__head">
             <div>
               <span className="ac-detail__small">
-                対象月 M{String(selectedIdx + 1).padStart(2, '0')}
+                ↓ 選択中 ・ 対象月 M{String(selectedIdx + 1).padStart(2, '0')}
               </span>
               <h3>
                 {selectedMonth.range.start} 〜 {selectedMonth.range.end}

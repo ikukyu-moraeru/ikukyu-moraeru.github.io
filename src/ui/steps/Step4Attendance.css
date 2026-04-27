@@ -116,9 +116,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.9rem;
 }
 .ac-year__head h3 {
   font-family: var(--font-h);
@@ -128,19 +128,24 @@
   margin: 0;
 }
 .ac-year__hint {
+  margin: 0.2rem 0 0;
   font-size: 0.78rem;
   color: var(--ink-mute);
+  line-height: 1.6;
+}
+.ac-year__legend {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 0.3rem;
   align-items: center;
 }
 
-.ac-year__list {
+.ac-year__grid {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
   gap: 6px;
 }
 .ac-month {
@@ -149,29 +154,46 @@
 .ac-month button {
   width: 100%;
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  gap: 0.7rem;
-  align-items: center;
-  padding: 0.6rem 0.85rem;
+  grid-template-rows: auto auto auto auto;
+  gap: 0.18rem;
+  padding: 0.55rem 0.5rem 0.45rem;
   border-radius: 12px;
   border: 1.5px solid var(--line);
   background: var(--bg);
   font-family: inherit;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.18s cubic-bezier(0.22, 0.61, 0.36, 1);
+  position: relative;
 }
 .ac-month button:hover {
   border-color: var(--plum);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(58, 46, 79, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(58, 46, 79, 0.1);
 }
 .ac-month.is-selected button {
   border-color: var(--plum);
-  background: linear-gradient(135deg, #fff 0%, var(--bg) 100%);
+  background: linear-gradient(180deg, #fff 0%, var(--bg) 100%);
+  transform: translateY(-2px);
   box-shadow:
-    0 0 0 3px rgba(58, 46, 79, 0.15),
-    0 6px 14px rgba(58, 46, 79, 0.12);
+    0 0 0 3px rgba(58, 46, 79, 0.2),
+    0 12px 22px rgba(58, 46, 79, 0.18);
+  z-index: 2;
+}
+/* 選択された月から下の詳細パネルへ「視線の流れ」を作る吹き出し三角 */
+.ac-month.is-selected button::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid var(--plum);
+  filter: drop-shadow(0 2px 4px rgba(58, 46, 79, 0.18));
+  z-index: 3;
 }
 .ac-month.is-optional {
   opacity: 0.55;
@@ -182,11 +204,11 @@
 }
 .ac-month--pass button {
   border-color: var(--mint);
-  background: linear-gradient(90deg, var(--bg-3) 0%, var(--bg) 100%);
+  background: linear-gradient(180deg, var(--bg-3) 0%, var(--bg) 100%);
 }
 .ac-month--fail button {
   border-color: var(--pink);
-  background: linear-gradient(90deg, var(--bg-2) 0%, var(--bg) 100%);
+  background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%);
 }
 .ac-month--out button {
   border-color: var(--line);
@@ -202,27 +224,41 @@
 
 .ac-month__no {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
   color: var(--ink-mute);
   font-weight: 500;
+  line-height: 1;
 }
 .ac-month__range {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--ink);
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  line-height: 1.2;
+}
+.ac-month__sep {
+  margin: 0 0.2em;
+  color: var(--ink-mute);
 }
 .ac-month__counter {
   display: flex;
   align-items: baseline;
-  gap: 0.2rem;
+  justify-content: center;
+  gap: 0.15rem;
   font-family: var(--font-h);
   font-weight: 700;
+  margin-top: 0.1rem;
 }
 .ac-month__num {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   color: var(--plum);
   line-height: 1;
+}
+.ac-month--pass .ac-month__num {
+  color: var(--mint-deep);
+}
+.ac-month--fail .ac-month__num {
+  color: var(--ink);
 }
 .ac-month__unit {
   font-size: 0.7rem;
@@ -231,14 +267,40 @@
 .ac-month__missing {
   font-family: var(--font-h);
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--ink-mute);
 }
-.ac-month__badges {
+.ac-month__statusrow {
   display: inline-flex;
-  gap: 0.3rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 0.78rem;
+}
+.ac-month__check {
+  color: var(--mint-deep);
+  font-size: 1rem;
+}
+.ac-month__x {
+  color: var(--pink-deep);
+  font-size: 0.85rem;
+}
+.ac-month__out-mark {
+  color: var(--ink-mute);
+}
+.ac-month__warn {
+  color: var(--gold-deep);
+  font-size: 0.85rem;
+}
+.ac-month__skip {
+  font-size: 0.65rem;
+  color: var(--ink-mute);
+  background: var(--bg);
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
 }
 
 .ac-pill {
@@ -343,9 +405,26 @@
 .ac-detail {
   background: #fff;
   border-radius: 22px;
-  border: 1.5px solid var(--plum);
+  border: 2px solid var(--plum);
   padding: 1.1rem 1.3rem;
-  box-shadow: 0 12px 24px -8px rgba(58, 46, 79, 0.18);
+  box-shadow: 0 16px 32px -10px rgba(58, 46, 79, 0.22);
+  scroll-margin-top: 1.2rem;
+  animation: acDetailPop 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@keyframes acDetailPop {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+    box-shadow: 0 0 0 0 rgba(58, 46, 79, 0);
+  }
+  60% {
+    box-shadow: 0 0 0 6px rgba(58, 46, 79, 0.18);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    box-shadow: 0 16px 32px -10px rgba(58, 46, 79, 0.22);
+  }
 }
 .ac-detail__head {
   display: grid;
@@ -353,20 +432,26 @@
   gap: 1rem;
   margin-bottom: 1rem;
   align-items: start;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1rem;
 }
 .ac-detail__small {
+  display: inline-block;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
   color: var(--plum);
+  background: var(--bg-2);
+  padding: 0.18rem 0.7rem;
+  border-radius: 999px;
 }
 .ac-detail__head h3 {
   font-family: var(--font-h);
   font-weight: 900;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   color: var(--plum);
-  margin: 0.2rem 0;
+  margin: 0.5rem 0 0.3rem;
+  letter-spacing: 0.01em;
 }
 .ac-detail__sub {
   font-size: 0.85rem;
