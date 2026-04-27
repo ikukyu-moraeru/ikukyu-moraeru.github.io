@@ -30,6 +30,7 @@
 .lp-card--auto {
   background: linear-gradient(160deg, var(--bg-3) 0%, #fff 60%);
   border-color: var(--mint);
+  margin-top: 0.7rem;
 }
 .lp-card--auto::before {
   content: "";
@@ -42,15 +43,21 @@
 }
 
 .lp-card__auto-badge {
+  position: absolute;
+  top: -0.7rem;
+  left: 1rem;
+  z-index: 2;
   font-family: var(--font-h);
   font-weight: 700;
   font-size: 0.7rem;
   letter-spacing: 0.06em;
   color: var(--mint-deep);
-  background: var(--bg-3);
-  padding: 0.2rem 0.55rem;
+  background: #fff;
+  padding: 0.2rem 0.6rem;
   border-radius: 999px;
   border: 1px solid var(--mint);
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(63, 142, 108, 0.2);
 }
 
 .lp-card__head {
