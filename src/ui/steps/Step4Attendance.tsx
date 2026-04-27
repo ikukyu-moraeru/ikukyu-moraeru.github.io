@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import {
   addDays,
   addMonths,
+  differenceInCalendarDays,
   endOfMonth,
   format,
   getDay,
@@ -305,6 +306,47 @@ export function Step4Attendance() {
       ? `（うち緩和加算 +${result.relaxationDays} 日）`
       : ''
 
+  /* 緩和加算の根拠（賃金未払いの休業期間 × baseWindow との重複） */
+  interface RelaxBreakdown {
+    id: string
+    type: string
+    start: string
+    end: string
+    overlapStart: string
+    overlapEnd: string
+    days: number
+    eligible: boolean // 連続 30 日以上ある「重なり」かどうか
+  }
+  const relaxBreakdown: RelaxBreakdown[] = state.input.leavePeriods
+    .filter(
+      (lp) => lp.start && lp.end && lp.start <= lp.end,
+    )
+    .map((lp) => {
+      const overlapStart =
+        lp.start > result.baseWindowStart ? lp.start : result.baseWindowStart
+      const overlapEnd =
+        lp.end < result.scanWindow.end ? lp.end : result.scanWindow.end
+      let days = 0
+      if (overlapStart <= overlapEnd) {
+        days =
+          differenceInCalendarDays(
+            parseISO(overlapEnd),
+            parseISO(overlapStart),
+          ) + 1
+      }
+      return {
+        id: lp.id,
+        type: lp.type,
+        start: lp.start,
+        end: lp.end,
+        overlapStart,
+        overlapEnd,
+        days: Math.max(0, days),
+        eligible: !lp.hasWageDuringLeave && days >= 30,
+      }
+    })
+    .filter((b) => b.days > 0)
+
   /* 詳細パネル: 選択された暦月の日リスト */
   const days: DayInfo[] = []
   if (selectedCalMonth) {
@@ -552,6 +594,62 @@ export function Step4Attendance() {
             これより前は判定対象外です（雇用保険・育児休業給付の規定により最長
             {result.relaxationDays > 0 ? ' 4 ' : ' 2 '}年）
           </span>
+
+          {result.relaxationDays > 0 && (
+            <details className="ac-relax-detail">
+              <summary>
+                緩和加算 +{result.relaxationDays} 日の根拠を見る
+              </summary>
+              <div className="ac-relax-detail__body">
+                <p>
+                  Step 2 で登録した
+                  <strong>賃金支払のない休業（連続 30 日以上）</strong>が判定対象期間
+                  ({result.baseWindowStart} 〜 {result.scanWindow.end})
+                  と重なる日数を、最長 +730 日（2 年）まで加算しています。
+                </p>
+                {relaxBreakdown.length === 0 ? (
+                  <p className="ac-relax-detail__empty">
+                    対象期間と重なる休業期間が見つかりません。
+                  </p>
+                ) : (
+                  <ul className="ac-relax-detail__list">
+                    {relaxBreakdown.map((b) => {
+                      const lp = state.input.leavePeriods.find(
+                        (x) => x.id === b.id,
+                      )
+                      const hasWage = lp?.hasWageDuringLeave ?? false
+                      return (
+                        <li
+                          key={b.id}
+                          className={`ac-relax-item ac-relax-item--${b.eligible ? 'eligible' : 'excluded'}`}
+                        >
+                          <span className="ac-relax-item__type">{b.type}</span>
+                          <span className="ac-relax-item__range">
+                            {b.start} 〜 {b.end}
+                          </span>
+                          <span className="ac-relax-item__overlap">
+                            判定期間と重なる: {b.days} 日
+                          </span>
+                          <span className="ac-relax-item__verdict">
+                            {hasWage
+                              ? '✕ 賃金支払あり → 加算対象外'
+                              : b.days >= 30
+                                ? `✓ +${b.days} 日 加算`
+                                : '✕ 連続 30 日未満 → 加算対象外'}
+                          </span>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+                <p className="ac-relax-detail__caveat">
+                  ※ 加算合計は 730 日（2 年）を上限としてクランプされます。
+                  実際の判定（Step 5）では出産日候補ごとに対象期間の境界が動くため、
+                  加算日数も若干変動することがあります。
+                </p>
+              </div>
+            </details>
+          )}
         </div>
       </section>
 

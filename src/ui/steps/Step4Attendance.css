@@ -455,6 +455,115 @@
   font-size: 0.75rem !important;
   color: var(--ink-mute) !important;
 }
+
+/* 緩和加算の根拠 details */
+.ac-relax-detail {
+  width: 100%;
+  margin-top: 0.7rem;
+  background: var(--bg);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 0.55rem 0.85rem;
+}
+.ac-relax-detail summary {
+  cursor: pointer;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--gold-deep);
+}
+.ac-relax-detail__body {
+  margin-top: 0.6rem;
+  display: grid;
+  gap: 0.6rem;
+}
+.ac-relax-detail__body p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  font-weight: 400 !important;
+  font-family: var(--font-body) !important;
+}
+.ac-relax-detail__body strong {
+  font-family: var(--font-h);
+  color: var(--plum);
+}
+.ac-relax-detail__empty {
+  color: var(--ink-mute) !important;
+  font-style: italic;
+}
+.ac-relax-detail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.ac-relax-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+}
+.ac-relax-item--eligible {
+  background: linear-gradient(90deg, var(--bg-3) 0%, var(--bg) 60%);
+  border: 1px solid var(--mint);
+}
+.ac-relax-item--excluded {
+  background: var(--bg);
+  border: 1px dashed var(--line);
+  opacity: 0.85;
+}
+.ac-relax-item__type {
+  font-family: var(--font-h);
+  font-weight: 700;
+  color: var(--plum);
+  white-space: nowrap;
+}
+.ac-relax-item__range {
+  font-family: var(--font-mono);
+  color: var(--ink);
+  font-size: 0.78rem;
+}
+.ac-relax-item__overlap {
+  font-family: var(--font-mono);
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.ac-relax-item__verdict {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.ac-relax-item--eligible .ac-relax-item__verdict {
+  color: var(--mint-deep);
+}
+.ac-relax-item--excluded .ac-relax-item__verdict {
+  color: var(--ink-mute);
+}
+.ac-relax-detail__caveat {
+  font-style: italic;
+  color: var(--ink-mute) !important;
+}
+
+@media (max-width: 640px) {
+  .ac-relax-item {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3rem 0.6rem;
+  }
+  .ac-relax-item__type {
+    grid-column: 1 / -1;
+  }
+  .ac-relax-item__verdict {
+    grid-column: 1 / -1;
+  }
+}
 .ac-line--achieved {
   border-top: 2px dashed var(--mint);
   padding-top: 0.85rem;
