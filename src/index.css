@@ -1,0 +1,17 @@
+:root {
+  font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  background: var(--bg, #fafafa);
+  color: var(--fg, #222);
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #1a1a1a;
+    color: #f0f0f0;
+  }
+}
