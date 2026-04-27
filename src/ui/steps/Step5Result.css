@@ -569,6 +569,40 @@
   margin: 1rem 0 0;
 }
 
+.r5-share {
+  margin-top: 1rem;
+  padding: 1rem 1.2rem;
+  background: linear-gradient(135deg, var(--bg) 0%, #fff 100%);
+  border: 1.5px dashed var(--plum);
+  border-radius: var(--r-md);
+  text-align: center;
+}
+.r5-share__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--plum);
+  background: #fff;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--plum);
+  transition: all 0.18s ease;
+}
+.r5-share__btn:hover {
+  background: var(--plum);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.r5-share__hint {
+  margin: 0.55rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-mute);
+  line-height: 1.6;
+}
+
 .r5-detail__inline-note {
   display: inline-block;
   margin-left: 0.5rem;

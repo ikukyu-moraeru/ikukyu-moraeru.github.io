@@ -111,17 +111,26 @@
 .ht-h1 {
   font-family: var(--font-h);
   font-weight: 900;
-  font-size: clamp(2.4rem, 6vw, 4.4rem);
-  line-height: 1.18;
+  font-size: clamp(2.2rem, 5.4vw, 4rem);
+  line-height: 1.22;
   letter-spacing: 0.02em;
   margin: 1.4rem 0 1.6rem;
   color: var(--plum);
+}
+.ht-h1__line {
+  display: block;
+  white-space: nowrap;
 }
 .ht-h1__accent {
   background: linear-gradient(140deg, var(--pink) 0%, var(--pink-deep) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+@media (max-width: 380px) {
+  .ht-h1__line {
+    white-space: normal;
+  }
 }
 
 .ht-lede {
@@ -143,17 +152,28 @@
   flex-wrap: wrap;
   gap: 0.9rem;
   margin-bottom: 2.4rem;
+  justify-content: center;
+}
+@media (min-width: 920px) {
+  .ht-cta {
+    justify-content: flex-start;
+  }
 }
 .ht-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  justify-content: center;
+  gap: 0.7rem;
   font-family: var(--font-h);
   font-weight: 700;
-  font-size: 1rem;
-  padding: 0.95rem 1.6rem;
-  border-radius: 18px;
+  font-size: 1.1rem;
+  padding: 1.15rem 2rem;
+  min-height: 56px;
+  border-radius: var(--r-md);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.ht-btn--primary {
+  width: min(360px, 100%);
 }
 .ht-btn--primary {
   background: var(--plum);

@@ -13,6 +13,7 @@ import { scanBirthDates } from '../../domain/birthDateScan'
 import { summarizeScan } from '../../domain/summary'
 import type { EligibilityResult, UserInput } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
+import { ShareModal } from '../components/ShareModal'
 import { isInputableDay } from '../shared/dayClassification'
 import './steps.css'
 import './Step5Result.css'
@@ -76,6 +77,7 @@ export function Step5Result() {
       ) || null
     )
   })
+  const [shareOpen, setShareOpen] = useState(false)
 
   if (!state.input.scanRange.start || !state.input.scanRange.end) {
     return (
@@ -323,9 +325,24 @@ export function Step5Result() {
         </section>
       )}
 
+      <div className="r5-share">
+        <button
+          type="button"
+          className="r5-share__btn"
+          onClick={() => setShareOpen(true)}
+        >
+          📤 結果を URL でシェアする
+        </button>
+        <p className="r5-share__hint">
+          家族・社労士・ハローワーク担当者などに、入力内容ごと共有できます。
+        </p>
+      </div>
+
       <p className="r5-disclaimer">
         ※ 本ツールは参考用です。最終判定は管轄のハローワーク（公共職業安定所）で行われます。
       </p>
+
+      <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} />
     </div>
   )
 }

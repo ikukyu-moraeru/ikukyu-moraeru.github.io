@@ -126,6 +126,7 @@ export type Action =
   | { type: 'SYNC_FROM_HASH'; screen: Screen; currentStep: number }
   | { type: 'PATCH_INPUT'; patch: Partial<UserInput> }
   | { type: 'PATCH_META'; patch: Partial<AppMeta> }
+  | { type: 'LOAD_INPUT'; input: UserInput }
   | { type: 'RESET' }
 
 export function reducer(state: AppState, action: Action): AppState {
@@ -150,6 +151,8 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, input: { ...state.input, ...action.patch } }
     case 'PATCH_META':
       return { ...state, meta: { ...state.meta, ...action.patch } }
+    case 'LOAD_INPUT':
+      return { ...state, input: { ...emptyInput, ...action.input } }
     case 'RESET':
       return {
         screen: 'landing',

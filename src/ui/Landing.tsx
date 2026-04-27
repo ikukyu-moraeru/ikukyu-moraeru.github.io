@@ -23,9 +23,8 @@ export function Landing() {
           <span className="ht-pill">育休給付の受給判定 · 2026 年版</span>
 
           <h1 className="ht-h1">
-            出産日がずれても、
-            <br />
-            <span className="ht-h1__accent">受け取れるか。</span>
+            <span className="ht-h1__line">出産日がずれても、</span>
+            <span className="ht-h1__line ht-h1__accent">受け取れるか。</span>
           </h1>
 
           <p className="ht-lede">
@@ -69,8 +68,7 @@ export function Landing() {
             <span className="ht-card__tag">サンプル</span>
             <h3>出産日ごとの結果</h3>
             <p>
-              出産日の候補ごとに「みなし被保険者期間」の月数を計算し、
-              色で結果を表示します。<strong>「予」</strong>は出産予定日です。
+              出産日の候補ごとに「みなし被保険者期間」の月数を計算し、色で結果を表示します。
             </p>
           </div>
 
