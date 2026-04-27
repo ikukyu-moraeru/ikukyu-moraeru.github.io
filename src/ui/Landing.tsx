@@ -15,11 +15,7 @@ export function Landing() {
           <span className="ht-logo__mark">◐</span>
           <span>マタニティ手帖</span>
         </div>
-        <nav>
-          <a href="#">使い方</a>
-          <a href="#">よくある質問</a>
-          <a href="#">出典</a>
-        </nav>
+        <span className="ht-nav__sub">育休給付の受給判定 — ローカル動作</span>
       </header>
 
       <main className="ht-main">
@@ -27,17 +23,16 @@ export function Landing() {
           <span className="ht-pill">育休給付の受給判定 · 2026 年版</span>
 
           <h1 className="ht-h1">
-            出産日が
+            出産日がずれても、
             <br />
-            すこしずれても、
-            <br />
-            <span className="ht-h1__accent">大丈夫かどうか。</span>
+            <span className="ht-h1__accent">受け取れるか。</span>
           </h1>
 
           <p className="ht-lede">
-            雇用保険の育児休業給付金は、休業前 2 年で
-            <strong>「11 日以上働いた月」が 12 か月以上</strong>
-            必要です。出産日が動くと結果も変わるから、ありうる日付ぜんぶをまとめてしらべます。
+            育児休業給付金を受け取るには、休業前 2 年で
+            <strong>「11 日以上 働いた月」が 12 か月以上</strong>{' '}
+            あること。出産日が動くと結果も変わるので、
+            <strong>あり得る日付すべてをまとめて判定</strong>します。
           </p>
 
           <div className="ht-cta">
@@ -52,30 +47,44 @@ export function Landing() {
 
           <ul className="ht-points">
             <li>
-              <span className="ht-points__ic">🍼</span>
-              <strong>かんたん入力</strong>休職や転職の期間を選ぶだけ
+              <span className="ht-points__ic">📅</span>
+              <strong>出産日のゆらぎを考慮</strong>
+              予定日 ± 14 日を 1 日ずつ判定
             </li>
             <li>
               <span className="ht-points__ic">📒</span>
-              <strong>自動で計算</strong>緩和事由・前職通算もまるごと
+              <strong>制度を反映</strong>
+              緩和事由（最長 4 年）・前職通算もまるごと自動計算
             </li>
             <li>
               <span className="ht-points__ic">🔒</span>
-              <strong>送信しません</strong>すべてブラウザの中で完結
+              <strong>送信しません</strong>
+              すべてブラウザの中で完結。データは端末に残るだけ
             </li>
           </ul>
         </div>
 
         <aside className="ht-card">
           <div className="ht-card__head">
-            <span className="ht-card__tag">プレビュー</span>
-            <h3>9 月の判定マップ</h3>
-            <p>各日に出産した場合の充足月数を、まる印で。</p>
+            <span className="ht-card__tag">サンプル</span>
+            <h3>出産日ごとの結果</h3>
+            <p>
+              出産日の候補ごとに「みなし被保険者期間」の月数を計算し、
+              色で結果を表示します。<strong>「予」</strong>は出産予定日です。
+            </p>
           </div>
 
           <div className="ht-grid">
             {SAMPLE_HEATMAP.map((c) => (
-              <div key={c.index} className={`ht-bubble ht-bubble--${c.status}`}>
+              <div
+                key={c.index}
+                className={`ht-bubble ht-bubble--${c.status}${c.isExpected ? ' is-expected' : ''}`}
+              >
+                {c.isExpected && (
+                  <span className="ht-bubble__pin" aria-label="出産予定日">
+                    予
+                  </span>
+                )}
                 <span className="ht-bubble__date">{c.label}</span>
                 <span className="ht-bubble__num">
                   {c.countedMonths.toFixed(1)}
@@ -85,9 +94,9 @@ export function Landing() {
           </div>
 
           <div className="ht-card__legend">
-            <span className="ht-leg ht-leg--pass">充足</span>
-            <span className="ht-leg ht-leg--border">あと少し</span>
-            <span className="ht-leg ht-leg--fail">不足</span>
+            <span className="ht-leg ht-leg--pass">受け取れる</span>
+            <span className="ht-leg ht-leg--near">あと少し届かない</span>
+            <span className="ht-leg ht-leg--fail">受け取れない</span>
           </div>
         </aside>
       </main>

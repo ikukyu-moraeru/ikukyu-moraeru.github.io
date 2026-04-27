@@ -64,15 +64,17 @@
   color: var(--bg);
   font-size: 0.95rem;
 }
-.ht-nav nav {
-  display: flex;
-  gap: 1.4rem;
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  color: var(--ink-soft);
+.ht-nav__sub {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
 }
-.ht-nav a:hover {
-  color: var(--pink-deep);
+@media (max-width: 520px) {
+  .ht-nav__sub {
+    display: none;
+  }
 }
 
 .ht-main {
@@ -295,47 +297,71 @@
   margin: 1.2rem 0 1.4rem;
 }
 .ht-bubble {
+  position: relative;
   aspect-ratio: 1;
-  border-radius: 14px;
+  border-radius: var(--r-sm);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.05rem;
-  transition: transform 0.2s ease;
-  cursor: pointer;
+  gap: 0.1rem;
+  transition: transform 0.18s var(--ease-pop);
   border: 1px solid var(--line);
 }
 .ht-bubble:hover {
-  transform: scale(1.08);
+  transform: translateY(-2px) scale(1.04);
 }
 .ht-bubble__date {
   font-family: var(--font-mono);
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   letter-spacing: 0.04em;
-  opacity: 0.7;
+  opacity: 0.78;
 }
 .ht-bubble__num {
   font-family: var(--font-h);
   font-weight: 900;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
 }
 .ht-bubble--pass {
   background: linear-gradient(160deg, var(--bg-3) 0%, var(--mint) 100%);
   color: #1f3a2c;
+  border-color: var(--mint);
 }
-.ht-bubble--border {
+.ht-bubble--near {
   background: linear-gradient(160deg, #fff5d4 0%, var(--gold) 100%);
   color: var(--gold-deep);
+  border-color: var(--gold);
 }
 .ht-bubble--fail {
   background: linear-gradient(160deg, var(--bg-2) 0%, var(--pink) 100%);
   color: #4a1924;
+  border-color: var(--pink);
+}
+.ht-bubble__pin {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 0.7rem;
+  color: #fff;
+  background: var(--plum);
+  border: 2px solid var(--paper);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 3px 6px rgba(58, 46, 79, 0.3);
+  z-index: 2;
 }
 
 .ht-card__legend {
   display: flex;
-  gap: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   justify-content: center;
 }
 .ht-leg {
@@ -343,14 +369,14 @@
   font-weight: 700;
   font-size: 0.78rem;
   padding: 0.4rem 0.9rem;
-  border-radius: 999px;
+  border-radius: var(--r-full);
 }
 .ht-leg--pass {
   background: var(--bg-3);
   color: var(--mint-deep);
 }
-.ht-leg--border {
-  background: #fff3cf;
+.ht-leg--near {
+  background: #fff5d4;
   color: var(--gold-deep);
 }
 .ht-leg--fail {
