@@ -12,6 +12,7 @@ import {
   subYears,
 } from "date-fns";
 import { buildCompleteMonths } from "./completeMonth";
+import { mergeInsuredSegments } from "./carryOver";
 import { computeRelaxationDays } from "./relaxation";
 import type {
   CompleteMonth,
@@ -28,9 +29,8 @@ import type {
 /**
  * Rule.md §2 / §3 の支給要件②（みなし被保険者期間 12 か月）判定。
  *
- * §3-4 の緩和（最長 4 年）は relaxation.ts に委譲し、
- * 緩和後の判定対象期間で完全月を生成する。
- * 前職通算（§4-2）は未適用（input.insuredSegments をそのまま使用）→ P4 で carryOver.ts を導入予定。
+ * §3-4 の緩和（最長 4 年）は relaxation.ts に委譲し、緩和後の判定対象期間で完全月を生成する。
+ * §4-2 の前職通算は carryOver.ts に委譲し、結合済みセグメントを `isFullyInsured` の判定対象とする。
  */
 
 const PRENATAL_DAYS_SINGLE = 42;
@@ -60,13 +60,18 @@ export function judgeEligibility(
   );
   const windowStart = fmt(subDays(parseISO(baseWindowStart), relaxationDays));
 
+  const mergedSegments = mergeInsuredSegments(
+    input.insuredSegments,
+    input.nonInsuredGaps,
+  );
+
   const { completeMonths, fragment } = buildCompleteMonths(
     childCareStartDate,
     windowStart,
   );
 
   const monthBreakdown: MonthJudgment[] = completeMonths.map((m) =>
-    judgeCompleteMonth(m, input.attendances, input.insuredSegments),
+    judgeCompleteMonth(m, input.attendances, mergedSegments),
   );
 
   let countedMonths = monthBreakdown.reduce((sum, j) => sum + j.counted, 0);
@@ -76,7 +81,7 @@ export function judgeEligibility(
     fragmentJudgment = judgeFragment(
       fragment,
       input.attendances,
-      input.insuredSegments,
+      mergedSegments,
     );
     countedMonths += fragmentJudgment.counted;
   }
@@ -140,9 +145,8 @@ function judgeFragment(
  * `[start, end]` が 1 つの被保険者セグメント（在職中なら end=null）に
  * 完全に内包されているかを判定する。
  *
- * 注意： Phase P2 ではセグメント結合（前職通算）を行わないため、複数セグメントを
- * またぐ完全月は「未加入」と判定される。これは P3 で carryOver.ts が
- * 結合済みセグメントを渡すことで解消する想定。
+ * 呼び出し側で `mergeInsuredSegments` による前職通算結合を済ませているため、
+ * 通算可能な期間は単一セグメントとして渡ってくる前提。
  */
 function isFullyInsured(
   start: DateISO,

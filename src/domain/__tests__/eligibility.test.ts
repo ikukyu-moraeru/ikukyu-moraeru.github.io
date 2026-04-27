@@ -130,6 +130,53 @@ describe("judgeEligibility (Phase P2: 緩和・通算なし)", () => {
     ).toBe(true);
   });
 
+  it("前職通算: 30 日空白で前後セグメントが連結され、両方の月が加算される", () => {
+    // 前職 2024-04-01..2025-04-15, 後職 2025-05-15..在職中。ギャップ 29 日 → 通算可。
+    const input = makeInput({
+      insuredSegments: [
+        { id: "prev", start: "2024-04-01", end: "2025-04-15" },
+        { id: "curr", start: "2025-05-15", end: null },
+      ],
+    });
+    const result = judgeEligibility(input, "2026-02-17");
+    // ギャップ期間 (2025-04-16..2025-05-14) を含む完全月は雇用保険未加入
+    // それ以外は連結済みセグメントでカバー
+    const uninsured = result.monthBreakdown.filter(
+      (m) => m.reason === "雇用保険未加入",
+    );
+    // ギャップにかかる完全月（2025-04-15..2025-05-14, 2025-03-15..2025-04-14 のうち 2025-04-16 以降を含むもの）が未加入
+    expect(uninsured.length).toBeGreaterThan(0);
+    expect(uninsured.length).toBeLessThan(24);
+    // 2024-04-15 開始の完全月（前職セグメントの一部）が加算されていることを確認
+    const earliest = result.monthBreakdown[result.monthBreakdown.length - 1];
+    expect(earliest.range.start).toBe("2024-04-15");
+    expect(earliest.counted).toBe(1);
+  });
+
+  it("前職通算リセット: 失業給付受給資格決定済みなら前職セグメントは判定対象外", () => {
+    const input = makeInput({
+      insuredSegments: [
+        { id: "prev", start: "2024-04-01", end: "2025-04-15" },
+        { id: "curr", start: "2025-05-15", end: null },
+      ],
+      nonInsuredGaps: [
+        {
+          id: "g1",
+          start: "2025-04-16",
+          end: "2025-05-14",
+          reason: "退職後無職",
+          basicAllowanceClaimed: true,
+        },
+      ],
+    });
+    const result = judgeEligibility(input, "2026-02-17");
+    // 後職 2025-05-15 開始 → 完全月 i=11 (2025-05-15..2025-06-14) 以降のみカウント
+    // i=11..1 で 11 ヶ月 → 不足 1
+    expect(result.countedMonths).toBe(11);
+    expect(result.isEligible).toBe(false);
+    expect(result.shortage).toBe(1);
+  });
+
   it("緩和事由（賃金なし産休 98 日）があると scanWindow.start が 98 日前倒し", () => {
     // 産前産後休業 2025-06-01 〜 2025-09-06（98 日連続、賃金なし）
     const input = makeInput({
