@@ -12,25 +12,25 @@ import {
 } from './state/share'
 import type { UserInput } from './domain/types'
 
-function useCurrentPage() {
-  const [hash, setHash] = useState(() => window.location.hash)
+function useCurrentPathname() {
+  const [pathname, setPathname] = useState(() => window.location.pathname)
   useEffect(() => {
-    const sync = () => setHash(window.location.hash)
-    window.addEventListener('hashchange', sync)
-    return () => window.removeEventListener('hashchange', sync)
+    const sync = () => setPathname(window.location.pathname)
+    window.addEventListener('popstate', sync)
+    return () => window.removeEventListener('popstate', sync)
   }, [])
-  return hash
+  return pathname
 }
 
 function App() {
   const { state, dispatch } = useAppState()
-  const currentPage = useCurrentPage()
+  const pathname = useCurrentPathname()
   const [importPreview, setImportPreview] = useState<UserInput | null>(null)
   const [importParseError, setImportParseError] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
 
   useEffect(() => {
-    const handleHashImport = () => {
+    const handleImport = () => {
       const data = readImportDataFromHash()
       if (!data) return
       const parsed = deserializeInput(data)
@@ -43,9 +43,9 @@ function App() {
       }
       setImportOpen(true)
     }
-    handleHashImport()
-    window.addEventListener('hashchange', handleHashImport)
-    return () => window.removeEventListener('hashchange', handleHashImport)
+    handleImport()
+    window.addEventListener('popstate', handleImport)
+    return () => window.removeEventListener('popstate', handleImport)
   }, [])
 
   const onImportConfirm = () => {
@@ -64,9 +64,9 @@ function App() {
 
   return (
     <>
-      {currentPage === '#/privacy' ? (
+      {pathname.endsWith('/privacy') ? (
         <Privacy />
-      ) : currentPage === '#/content-policy' ? (
+      ) : pathname.endsWith('/content-policy') ? (
         <ContentPolicy />
       ) : state.screen === 'landing' ? (
         <Landing />

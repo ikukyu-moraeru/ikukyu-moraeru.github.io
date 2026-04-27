@@ -38,13 +38,15 @@ const clamp = (n: number) => Math.max(1, Math.min(5, n))
 
 /* ---------------- routing helpers (hash-based) ----------------------- */
 
+const BASE = '/MaternityLeaveCalculator'
+
 function pathFromState(s: { screen: Screen; currentStep: number }): string {
-  if (s.screen === 'landing') return '/'
-  return s.currentStep === 1 ? '/start' : `/start/${s.currentStep}`
+  if (s.screen === 'landing') return `${BASE}/`
+  return s.currentStep === 1 ? `${BASE}/start` : `${BASE}/start/${s.currentStep}`
 }
 
-function stateFromHash(hash: string): { screen: Screen; currentStep: number } {
-  const path = hash.replace(/^#/, '') || '/'
+function stateFromPathname(pathname: string): { screen: Screen; currentStep: number } {
+  const path = pathname.replace(BASE, '') || '/'
   if (path === '' || path === '/') return { screen: 'landing', currentStep: 1 }
   const m = path.match(/^\/start(?:\/(\d+))?\/?$/)
   if (m) {
@@ -54,10 +56,10 @@ function stateFromHash(hash: string): { screen: Screen; currentStep: number } {
   return { screen: 'landing', currentStep: 1 }
 }
 
-function readCurrentHashState(): { screen: Screen; currentStep: number } {
+function readCurrentPathState(): { screen: Screen; currentStep: number } {
   if (typeof window === 'undefined')
     return { screen: 'landing', currentStep: 1 }
-  return stateFromHash(window.location.hash)
+  return stateFromPathname(window.location.pathname)
 }
 
 function navigateTo(
@@ -65,14 +67,13 @@ function navigateTo(
   mode: 'push' | 'replace' = 'push',
 ) {
   if (typeof window === 'undefined') return
-  const target = `#${pathFromState(next)}`
-  const cur = `${window.location.pathname}${window.location.search}${window.location.hash || ''}`
-  const desired = `${window.location.pathname}${window.location.search}${target}`
-  if (cur === desired) return
+  const target = pathFromState(next)
+  const cur = window.location.pathname
+  if (cur === target) return
   if (mode === 'replace') {
-    window.history.replaceState(null, '', desired)
+    window.history.replaceState(null, '', target)
   } else {
-    window.history.pushState(null, '', desired)
+    window.history.pushState(null, '', target)
   }
 }
 
@@ -113,8 +114,8 @@ function loadInitial(): AppState {
   } catch {
     /* ignore */
   }
-  const fromHash = readCurrentHashState()
-  return { ...fromHash, input: inputFromStorage, meta: metaFromStorage }
+  const fromPath = readCurrentPathState()
+  return { ...fromPath, input: inputFromStorage, meta: metaFromStorage }
 }
 
 export type Action =
@@ -189,7 +190,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   // URL → state（戻る/進む、リンク踏み替え）
   useEffect(() => {
     const sync = () => {
-      const next = readCurrentHashState()
+      const next = readCurrentPathState()
       dispatch({
         type: 'SYNC_FROM_HASH',
         screen: next.screen,
@@ -197,10 +198,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       })
     }
     window.addEventListener('popstate', sync)
-    window.addEventListener('hashchange', sync)
     return () => {
       window.removeEventListener('popstate', sync)
-      window.removeEventListener('hashchange', sync)
     }
   }, [])
 

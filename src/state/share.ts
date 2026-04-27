@@ -112,22 +112,25 @@ export function deserializeInput(data: string): UserInput | null {
   }
 }
 
+const APP_BASE = '/MaternityLeaveCalculator'
+
 export function buildShareUrl(input: UserInput): string {
   if (typeof window === 'undefined') return ''
   const data = serializeInput(input)
-  const base = `${window.location.origin}${window.location.pathname}${window.location.search}`
-  return `${base}#/import?data=${data}`
+  return `${window.location.origin}${APP_BASE}/import?data=${data}`
 }
 
 export function readImportDataFromHash(): string | null {
   if (typeof window === 'undefined') return null
-  const hash = window.location.hash || ''
-  const match = hash.match(/^#\/import\?data=([^&]+)$/)
-  return match ? match[1] : null
+  // pathname ベース: /MaternityLeaveCalculator/import?data=...
+  if (window.location.pathname.endsWith('/import')) {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('data')
+  }
+  return null
 }
 
 export function clearImportFromHash() {
   if (typeof window === 'undefined') return
-  const url = `${window.location.origin}${window.location.pathname}${window.location.search}#/`
-  window.history.replaceState(null, '', url)
+  window.history.replaceState(null, '', `${APP_BASE}/`)
 }
