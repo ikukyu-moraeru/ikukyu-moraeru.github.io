@@ -92,6 +92,16 @@ export interface FragmentMonth {
 }
 
 /**
+ * 完全月・端数月の判定で使う集計後出勤量。
+ * 入力 `MonthlyAttendance` は暦月ベースだが、完全月は暦月境界をまたぐため、
+ * 各完全月にかかる暦月の日数比で按分した値を保持する。
+ */
+export interface JudgedAttendance {
+  basicWageDays: number;
+  basicWageHours: number;
+}
+
+/**
  * 各完全月の判定結果。
  */
 export interface MonthJudgment {
@@ -103,7 +113,7 @@ export interface MonthJudgment {
     | "条件未達"
     | "雇用保険未加入"
     | "前職通算外";
-  attendance?: MonthlyAttendance;
+  attendance?: JudgedAttendance;
 }
 
 /**
@@ -120,5 +130,10 @@ export interface EligibilityResult {
   isEligible: boolean;
   shortage: number; // 12 - countedMonths（不足月数。0 以上）
   monthBreakdown: MonthJudgment[];
-  fragmentJudgment?: { range: FragmentMonth; counted: 0 | 0.5; reason: string };
+  fragmentJudgment?: {
+    range: FragmentMonth;
+    counted: 0 | 0.5;
+    reason: "11日以上" | "条件未達" | "15日未満" | "雇用保険未加入";
+    attendance?: JudgedAttendance;
+  };
 }
