@@ -573,6 +573,13 @@
   color: var(--ink);
   font-weight: 500;
 }
+.ac-cell__hours-mark {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 0.55rem;
+  opacity: 0.8;
+}
 .ac-cell--work {
   background: var(--mint);
   border-color: var(--mint-deep);
@@ -630,8 +637,14 @@
 }
 .ac-day-detail__head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.7rem;
+  flex-wrap: wrap;
+}
+.ac-day-detail__head > div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
   flex-wrap: wrap;
 }
 .ac-day-detail__small {
@@ -646,6 +659,16 @@
   font-weight: 900;
   font-size: 1.15rem;
   color: var(--plum);
+}
+.ac-day-detail__status {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: var(--bg);
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  color: var(--ink-soft);
 }
 .ac-day-detail__clear {
   margin-left: auto;
@@ -663,45 +686,19 @@
   color: var(--pink-deep);
 }
 
-.ac-day-detail__choices {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.4rem;
-}
-.ac-choice {
-  padding: 0.7rem 0.5rem;
-  border-radius: 12px;
-  border: 1.5px solid var(--line);
+.ac-day-detail__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.7;
   background: var(--bg);
+  padding: 0.55rem 0.85rem;
+  border-radius: 10px;
+  border-left: 3px solid var(--mint);
+}
+.ac-day-detail__hint strong {
   font-family: var(--font-h);
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--ink);
-  transition: all 0.15s ease;
-  cursor: pointer;
-}
-.ac-choice:hover {
-  border-color: var(--plum);
-}
-.ac-choice.is-selected.ac-choice--work {
-  background: var(--mint);
-  border-color: var(--mint-deep);
-  color: #fff;
-}
-.ac-choice.is-selected.ac-choice--paid_leave {
-  background: var(--bg-3);
-  border-color: var(--mint);
-  color: var(--mint-deep);
-}
-.ac-choice.is-selected.ac-choice--paid_special {
-  background: #fff5d4;
-  border-color: var(--gold);
-  color: var(--gold-deep);
-}
-.ac-choice.is-selected.ac-choice--absent {
-  background: var(--bg-2);
-  border-color: var(--pink);
-  color: var(--pink-deep);
+  color: var(--plum);
 }
 
 .ac-day-detail__hours label {

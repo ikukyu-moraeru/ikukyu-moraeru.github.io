@@ -117,6 +117,7 @@ function deriveDay(
 }
 
 function nextStatus(current: AttendanceStatus | null): AttendanceStatus | null {
+  // 未入力 → 出勤 → 有給 → 特休 → 欠勤 → 未入力 のサイクル
   if (current === null) return STATUS_CYCLE[0]
   const idx = STATUS_CYCLE.indexOf(current)
   if (idx < 0 || idx === STATUS_CYCLE.length - 1) return null
@@ -574,17 +575,38 @@ export function Step4Attendance() {
                     }
                   })()
                   const isSelectedDay = d.date === selectedDate
+                  const hasHours =
+                    (d.state.kind === 'work' ||
+                      d.state.kind === 'paid_leave' ||
+                      d.state.kind === 'paid_special') &&
+                    typeof d.state.hours === 'number'
                   return (
                     <button
                       key={d.date}
                       className={`${klass} ${isSelectedDay ? 'is-selected' : ''}`}
-                      onClick={() => {
-                        if (isSelectedDay) cycleDay(d)
-                        else setSelectedDate(d.date)
+                      title="クリック: 状態を切替 / Shift+クリック・右クリック: 未入力に戻す"
+                      onClick={(e) => {
+                        if (e.shiftKey) {
+                          setStatus(d.date, null)
+                          setSelectedDate(d.date)
+                          return
+                        }
+                        cycleDay(d)
+                        setSelectedDate(d.date)
+                      }}
+                      onContextMenu={(e) => {
+                        e.preventDefault()
+                        setStatus(d.date, null)
+                        setSelectedDate(d.date)
                       }}
                     >
                       <span className="ac-cell__day">{dn}</span>
                       {label && <span className="ac-cell__label">{label}</span>}
+                      {hasHours && (
+                        <span className="ac-cell__hours-mark" aria-hidden>
+                          ⏱
+                        </span>
+                      )}
                     </button>
                   )
                 })}
@@ -598,7 +620,6 @@ export function Step4Attendance() {
       {selectedDay && selectedMonth.reason !== '雇用保険未加入' && (
         <DayDetailPanel
           day={selectedDay}
-          onSetStatus={(s) => setStatus(selectedDay.date, s)}
           onClear={() => {
             setStatus(selectedDay.date, null)
           }}
@@ -615,14 +636,12 @@ export function Step4Attendance() {
 
 interface DayDetailPanelProps {
   day: DayInfo
-  onSetStatus: (status: AttendanceStatus) => void
   onClear: () => void
   onHoursChange: (hours: number | null) => void
 }
 
 function DayDetailPanel({
   day,
-  onSetStatus,
   onClear,
   onHoursChange,
 }: DayDetailPanelProps) {
@@ -643,13 +662,36 @@ function DayDetailPanel({
 
   const [, mm, dd] = day.date.split('-')
 
+  const statusLabel = (() => {
+    switch (currentStatus) {
+      case 'work':
+        return '🟢 出勤'
+      case 'paid_leave':
+        return '🅿️ 有給'
+      case 'paid_special':
+        return '✨ 特休'
+      case 'absent':
+        return '✕ 欠勤'
+      default:
+        return '— 未入力'
+    }
+  })()
+
+  const allowsHours =
+    currentStatus === 'work' ||
+    currentStatus === 'paid_leave' ||
+    currentStatus === 'paid_special'
+
   return (
     <div className="ac-day-detail">
       <header className="ac-day-detail__head">
-        <span className="ac-day-detail__small">選択した日</span>
-        <strong>
-          {Number(mm)} 月 {Number(dd)} 日
-        </strong>
+        <div>
+          <span className="ac-day-detail__small">選択した日</span>
+          <strong>
+            {Number(mm)} 月 {Number(dd)} 日
+          </strong>
+          <span className="ac-day-detail__status">{statusLabel}</span>
+        </div>
         <button
           className="ac-day-detail__clear"
           onClick={onClear}
@@ -659,59 +701,39 @@ function DayDetailPanel({
         </button>
       </header>
 
-      <div className="ac-day-detail__choices">
-        {STATUS_CYCLE.map((s) => (
-          <button
-            key={s}
-            className={`ac-choice ac-choice--${s} ${currentStatus === s ? 'is-selected' : ''}`}
-            onClick={() => onSetStatus(s)}
-          >
-            <span className="ac-choice__label">
-              {s === 'work'
-                ? '🟢 出勤'
-                : s === 'paid_leave'
-                  ? '🅿️ 有給'
-                  : s === 'paid_special'
-                    ? '✨ 特休'
-                    : '✕ 欠勤'}
-            </span>
-          </button>
-        ))}
-      </div>
+      <p className="ac-day-detail__hint">
+        セルをタップ（クリック）すると <strong>出勤 → 有給 → 特休 → 欠勤 → 未入力</strong> の順に切り替わります。Shift+クリック または 右クリックで未入力に戻せます。
+      </p>
 
-      {(currentStatus === 'work' ||
-        currentStatus === 'paid_leave' ||
-        currentStatus === 'paid_special') && (
-        <div className="ac-day-detail__hours">
-          <label htmlFor="day-hours">
-            <span className="ac-day-detail__hours-label">この日の労働時間（任意）</span>
-            <span className="ac-day-detail__hours-hint">
-              80 時間ルール（11 日未満の月でも 80 時間以上で達成）に必要な人だけ入力。
-              空欄でも 11 日以上を満たせば達成できます。
-            </span>
-          </label>
-          <div className="ac-day-detail__hours-row">
-            <input
-              id="day-hours"
-              type="number"
-              min={0}
-              max={24}
-              step={0.5}
-              value={currentHours ?? ''}
-              placeholder="—"
-              onChange={(e) => {
-                const v = e.target.value
-                if (v === '') onHoursChange(null)
-                else {
-                  const n = Number(v)
-                  if (Number.isFinite(n)) onHoursChange(n)
-                }
-              }}
-            />
-            <span>時間</span>
-          </div>
+      <div className="ac-day-detail__hours">
+        <label htmlFor="day-hours">
+          <span className="ac-day-detail__hours-label">この日の労働時間（任意）</span>
+          <span className="ac-day-detail__hours-hint">
+            80 時間ルール（11 日未満の月でも 80 時間以上で達成）狙いの方だけ入力すれば OK です。空欄でも 11 日以上を満たせば達成できます。
+          </span>
+        </label>
+        <div className="ac-day-detail__hours-row">
+          <input
+            id="day-hours"
+            type="number"
+            min={0}
+            max={24}
+            step={0.5}
+            value={currentHours ?? ''}
+            placeholder={allowsHours ? '—' : '出勤系の状態のみ'}
+            disabled={!allowsHours}
+            onChange={(e) => {
+              const v = e.target.value
+              if (v === '') onHoursChange(null)
+              else {
+                const n = Number(v)
+                if (Number.isFinite(n)) onHoursChange(n)
+              }
+            }}
+          />
+          <span>時間</span>
         </div>
-      )}
+      </div>
     </div>
   )
 }
