@@ -153,6 +153,14 @@
 .share-section__btn--x:hover {
   background: #2a2a2a;
 }
+.share-section__btn--threads {
+  background: #101010;
+  color: #fff;
+  border: 1px solid #2a2a2a;
+}
+.share-section__btn--threads:hover {
+  background: #232323;
+}
 .share-section__btn--line {
   background: #06c755;
   color: #fff;

@@ -75,6 +75,7 @@ export function ShareModal({ open, onClose }: Props) {
   }
 
   const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(snsText)}`
+  const threadsUrl = `https://www.threads.net/intent/post?text=${encodeURIComponent(snsText)}`
   const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(APP_URL)}&text=${encodeURIComponent(snsText)}`
 
   return createPortal(
@@ -132,6 +133,14 @@ export function ShareModal({ open, onClose }: Props) {
               rel="noopener noreferrer"
             >
               𝕏 で投稿
+            </a>
+            <a
+              className="share-section__btn share-section__btn--threads"
+              href={threadsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Threads で投稿
             </a>
             <a
               className="share-section__btn share-section__btn--line"

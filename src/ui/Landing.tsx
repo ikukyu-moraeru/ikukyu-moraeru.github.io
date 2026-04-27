@@ -3,6 +3,13 @@ import { SAMPLE_HEATMAP } from '../preview/sample'
 import { SocialShare } from './components/SocialShare'
 import './Landing.css'
 
+/**
+ * countedMonths は 0.5 刻み。整数のときは ".0" を省いて表示する（"12.0" ではなく "12"）。
+ */
+function formatMonths(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(1)
+}
+
 export function Landing() {
   const { dispatch } = useAppState()
   return (
@@ -87,7 +94,7 @@ export function Landing() {
                 )}
                 <span className="ht-bubble__date">{c.label}</span>
                 <span className="ht-bubble__num">
-                  {c.countedMonths.toFixed(1)}
+                  {formatMonths(c.countedMonths)}
                 </span>
               </div>
             ))}

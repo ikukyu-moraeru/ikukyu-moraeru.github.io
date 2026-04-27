@@ -43,25 +43,12 @@ export function Wizard() {
         >
           ← 表紙へ
         </button>
-        <div className="wz-nav__right">
-          {isResult && (
-            <button
-              type="button"
-              className="wz-share"
-              onClick={() => setShareOpen(true)}
-              aria-label="結果をシェア"
-            >
-              <span aria-hidden>📤</span>
-              <span>シェア</span>
-            </button>
-          )}
-          <div className="wz-progress">
-            <span className="wz-progress__num">
-              {String(state.currentStep).padStart(2, '0')}
-            </span>
-            <span className="wz-progress__sep">／</span>
-            <span className="wz-progress__total">05</span>
-          </div>
+        <div className="wz-progress">
+          <span className="wz-progress__num">
+            {String(state.currentStep).padStart(2, '0')}
+          </span>
+          <span className="wz-progress__sep">／</span>
+          <span className="wz-progress__total">05</span>
         </div>
       </header>
 
@@ -101,6 +88,17 @@ export function Wizard() {
             <h1 className="wz-page-title">{cur.title}</h1>
             <p className="wz-page-caption">{cur.caption}</p>
           </div>
+          {isResult && (
+            <button
+              type="button"
+              className="wz-page-head__share"
+              onClick={() => setShareOpen(true)}
+              aria-label="結果をシェア"
+            >
+              <span aria-hidden>📤</span>
+              <span>シェア</span>
+            </button>
+          )}
         </header>
 
         <section className="wz-card" key={state.currentStep}>
