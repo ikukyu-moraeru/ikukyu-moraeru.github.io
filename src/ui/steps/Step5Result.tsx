@@ -1,9 +1,23 @@
 import { useMemo, useState } from 'react'
-import { addDays, format, parseISO } from 'date-fns'
+import {
+  addDays,
+  addMonths,
+  endOfMonth,
+  format,
+  isAfter,
+  isBefore,
+  parseISO,
+  startOfMonth,
+} from 'date-fns'
 import { useAppState } from '../../state/AppState'
 import { scanBirthDates } from '../../domain/birthDateScan'
 import { summarizeScan } from '../../domain/summary'
-import type { EligibilityResult } from '../../domain/types'
+import type {
+  EligibilityResult,
+  InsuredEmploymentSegment,
+  LeavePeriod,
+  UserInput,
+} from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
 import './steps.css'
 import './Step5Result.css'
@@ -94,26 +108,12 @@ export function Step5Result() {
       </div>
 
       {summary.failStreaks.length > 0 && (
-        <div className="r5-fails">
-          <span className="r5-fails__label">
-            条件にあと少し届かない日
-          </span>
-          <ul>
-            {summary.failStreaks.map((s) => (
-              <li key={`${s.start}_${s.end}`}>
-                <span className="r5-fails__range">
-                  {jpDate(s.start)}
-                  {s.start !== s.end && <> 〜 {jpDate(s.end)}</>}
-                </span>
-                <span className="r5-fails__days">{s.days} 日間</span>
-              </li>
-            ))}
-          </ul>
-          <p className="r5-fails__hint">
-            Step 4 で「11 日以上 働いた月」「80 時間以上 働いた月」をもう一度見直してみると、結果が変わるかもしれません。
-          </p>
-        </div>
+        <p className="r5-hint">
+          🌱 下のヒートマップで紫の日が「あと少し届かない日」です。Step 4 で「11 日以上 働いた月」「80 時間以上 働いた月」をもう一度見直してみると、結果が変わるかもしれません。
+        </p>
       )}
+
+      <MissingMonthsHint input={state.input} results={results} />
 
       <section className="r5-heat">
         <header>
@@ -317,4 +317,110 @@ function DetailTimeline({ result, isMultipleBirth }: DetailTimelineProps) {
       ))}
     </ol>
   )
+}
+
+interface MissingMonthsHintProps {
+  input: UserInput
+  results: EligibilityResult[]
+}
+
+const MAX_MISSING_DISPLAY = 6
+
+function MissingMonthsHint({ input, results }: MissingMonthsHintProps) {
+  const missing = useMemo(
+    () => detectMissingMonths(input, results),
+    [input, results],
+  )
+  if (missing.length === 0) return null
+  const head = missing.slice(0, MAX_MISSING_DISPLAY)
+  const restCount = missing.length - head.length
+  return (
+    <div className="r5-missing">
+      <span className="r5-missing__label">
+        まだ出勤情報が入っていなさそうな月
+      </span>
+      <ul>
+        {head.map((m) => (
+          <li key={m}>{jpMonth(m)}</li>
+        ))}
+        {restCount > 0 && <li className="r5-missing__more">他 {restCount} か月</li>}
+      </ul>
+      <p className="r5-missing__hint">
+        判定対象期間に含まれているのに、Step 4 でまだ何も入力していない月のようです。これらの月の出勤情報を入れると、結果がより正確になります。
+      </p>
+    </div>
+  )
+}
+
+function jpMonth(ym: string): string {
+  const [y, m] = ym.split('-')
+  return `${y} 年 ${Number(m)} 月`
+}
+
+/**
+ * 判定対象期間（全候補の最広）の各暦月のうち、
+ * - 出勤情報が 1 件も入っておらず、
+ * - 休業期間（leavePeriod）に全日が内包されておらず、
+ * - 被保険者セグメントが少しでも重なっている
+ * を満たす月を「未入力候補」として返す。
+ */
+function detectMissingMonths(
+  input: UserInput,
+  results: EligibilityResult[],
+): string[] {
+  if (results.length === 0) return []
+  const earliest = results
+    .map((r) => r.scanWindow.start)
+    .reduce((a, b) => (a < b ? a : b))
+  const latest = results
+    .map((r) => r.scanWindow.end)
+    .reduce((a, b) => (a > b ? a : b))
+
+  const inputMonthKeys = new Set(
+    input.attendances.map((a) => a.date.slice(0, 7)),
+  )
+
+  const out: string[] = []
+  let cursor = startOfMonth(parseISO(earliest))
+  const last = startOfMonth(parseISO(latest))
+  while (!isAfter(cursor, last)) {
+    const ym = format(cursor, 'yyyy-MM')
+    const monthStart = cursor
+    const monthEnd = endOfMonth(cursor)
+    if (
+      !inputMonthKeys.has(ym) &&
+      monthOverlapsAnyInsured(monthStart, monthEnd, input.insuredSegments) &&
+      !monthFullyCoveredByLeave(monthStart, monthEnd, input.leavePeriods)
+    ) {
+      out.push(ym)
+    }
+    cursor = addMonths(cursor, 1)
+  }
+  return out
+}
+
+function monthOverlapsAnyInsured(
+  monthStart: Date,
+  monthEnd: Date,
+  segments: InsuredEmploymentSegment[],
+): boolean {
+  if (segments.length === 0) return true // 未入力なら全月対象とみなす
+  return segments.some((seg) => {
+    const segStart = parseISO(seg.start)
+    const segEnd = seg.end ? parseISO(seg.end) : new Date(8640000000000000)
+    return !isAfter(segStart, monthEnd) && !isBefore(segEnd, monthStart)
+  })
+}
+
+function monthFullyCoveredByLeave(
+  monthStart: Date,
+  monthEnd: Date,
+  leaves: LeavePeriod[],
+): boolean {
+  return leaves.some((p) => {
+    if (!p.start || !p.end) return false
+    const ls = parseISO(p.start)
+    const le = parseISO(p.end)
+    return !isAfter(ls, monthStart) && !isBefore(le, monthEnd)
+  })
 }
