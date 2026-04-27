@@ -53,6 +53,20 @@ function jpDate(iso: string | null) {
   return `${y} 年 ${Number(m)} 月 ${Number(d)} 日`
 }
 
+/**
+ * scanRange の中央日 = 出産予定日として扱う（Step1 の deriveExpected と整合）。
+ */
+function deriveExpectedBirthDate(start: string, end: string): string {
+  if (!start || !end) return ''
+  try {
+    const s = parseISO(start).getTime()
+    const e = parseISO(end).getTime()
+    return format(new Date((s + e) / 2), 'yyyy-MM-dd')
+  } catch {
+    return ''
+  }
+}
+
 export function Step5Result() {
   const { state } = useAppState()
   const results = useMemo(() => scanBirthDates(state.input), [state.input])
@@ -84,6 +98,11 @@ export function Step5Result() {
   const selectedResult = selected
     ? results.find((r) => r.birthDate === selected)
     : null
+
+  const expectedBirthDate = deriveExpectedBirthDate(
+    state.input.scanRange.start,
+    state.input.scanRange.end,
+  )
 
   const verdict =
     summary.passDays === summary.totalDays
@@ -151,22 +170,35 @@ export function Step5Result() {
           {results.map((r) => {
             const status = classify(r)
             const isSelected = r.birthDate === selected
+            const isExpected = r.birthDate === expectedBirthDate
             const [, mm, dd] = r.birthDate.split('-')
+            const className = [
+              'r5-cell',
+              `r5-cell--${status}`,
+              isSelected && 'is-selected',
+              isExpected && 'is-expected',
+            ]
+              .filter(Boolean)
+              .join(' ')
+            const verdictLabel = r.isEligible
+              ? '受け取れる'
+              : isNearMiss(r)
+                ? 'あと少し届かない'
+                : '受け取れない'
             return (
               <button
                 key={r.birthDate}
-                className={`r5-cell r5-cell--${status} ${isSelected ? 'is-selected' : ''}`}
+                className={className}
                 onClick={() =>
                   setSelected(r.birthDate === selected ? null : r.birthDate)
                 }
-                title={`${r.birthDate}: ${r.countedMonths.toFixed(1)} か月（${
-                  r.isEligible
-                    ? '受け取れる'
-                    : isNearMiss(r)
-                      ? 'あと少し届かない'
-                      : '受け取れない'
-                }）`}
+                title={`${r.birthDate}${isExpected ? '（出産予定日）' : ''}: ${r.countedMonths.toFixed(1)} か月（${verdictLabel}）`}
               >
+                {isExpected && (
+                  <span className="r5-cell__pin" aria-label="出産予定日">
+                    予
+                  </span>
+                )}
                 <span className="r5-cell__date">
                   {Number(mm)}/{Number(dd)}
                 </span>
@@ -402,23 +434,26 @@ function detectMissingMonths(
   results: EligibilityResult[],
 ): string[] {
   if (results.length === 0) return []
-  const earliest = results
-    .map((r) => r.scanWindow.start)
-    .reduce((a, b) => (a < b ? a : b))
-  const latest = results
-    .map((r) => r.scanWindow.end)
-    .reduce((a, b) => (a > b ? a : b))
+  // Step4 のカレンダー表示は中央候補日（scanRange 中央 = 出産予定日）の
+  // scanWindow を基準に組み立てている。Step5 の警告判定もこれに合わせる
+  // ことで「Step4 で入力できる月」と「未入力警告される月」を一致させる。
+  const center = results[Math.floor(results.length / 2)]
+  const startBound = center.scanWindow.start
+  const endBound = center.scanWindow.end
 
   const inputMonthKeys = new Set(
     input.attendances.map((a) => a.date.slice(0, 7)),
   )
 
   const out: string[] = []
-  let cursor = startOfMonth(parseISO(earliest))
-  const last = startOfMonth(parseISO(latest))
+  let cursor = startOfMonth(parseISO(startBound))
+  const last = startOfMonth(parseISO(endBound))
   while (!isAfter(cursor, last)) {
     const ym = format(cursor, 'yyyy-MM')
-    if (!inputMonthKeys.has(ym) && monthHasInputableDay(cursor, input, latest)) {
+    if (
+      !inputMonthKeys.has(ym) &&
+      monthHasInputableDay(cursor, input, endBound)
+    ) {
       out.push(ym)
     }
     cursor = addMonths(cursor, 1)
