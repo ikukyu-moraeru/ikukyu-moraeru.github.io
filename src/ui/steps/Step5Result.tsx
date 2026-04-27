@@ -213,7 +213,10 @@ export function Step5Result() {
 
           {selectedResult.fragmentJudgment && (
             <>
-              <h4 className="r5-detail__subtitle">端数月（先頭）</h4>
+              <h4 className="r5-detail__subtitle">
+                端数月（先頭）
+                <span className="r5-detail__inline-note">参考表示</span>
+              </h4>
               <ul className="r5-months">
                 <li
                   className={`r5-month r5-month--${selectedResult.fragmentJudgment.counted === 0.5 ? 'pass' : 'fail'}`}
@@ -240,6 +243,13 @@ export function Step5Result() {
                   </span>
                 </li>
               </ul>
+              <p className="r5-detail__caveat">
+                ※ 端数月（1 か月未満の余り期間）の <strong>+0.5 か月</strong> は法令（業務取扱要領 59533）に定義されていますが、
+                完全月のカウント（0 / 1 整数）と合算したとき、{' '}
+                <strong>育児休業給付金の「12 か月以上」判定では結果に影響しません</strong>
+                （N + 0.5 で 12 の境界を跨ぐケースが構造上存在しないため）。
+                基本手当（50103）など <strong>「6 か月以上」</strong> の閾値を持つ給付の計算式を準用しているため記録としてだけ残しています。
+              </p>
             </>
           )}
         </section>

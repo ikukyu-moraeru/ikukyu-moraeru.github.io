@@ -544,6 +544,34 @@
   margin: 1rem 0 0;
 }
 
+.r5-detail__inline-note {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  background: var(--bg-2);
+  color: var(--ink-mute);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.r5-detail__caveat {
+  margin: 0.6rem 0 0;
+  padding: 0.55rem 0.85rem;
+  background: var(--bg);
+  border-left: 3px solid var(--ink-mute);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.r5-detail__caveat strong {
+  font-family: var(--font-h);
+  color: var(--plum);
+}
+
 /* streaks */
 .r5-streaks {
   background: linear-gradient(135deg, var(--bg-3) 0%, #fff 100%);
