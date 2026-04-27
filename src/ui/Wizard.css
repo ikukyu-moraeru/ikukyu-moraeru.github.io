@@ -221,8 +221,9 @@
   font-weight: 700;
   font-size: 0.92rem;
   color: var(--ink-soft);
-  padding: 0.7rem 1rem;
-  border-radius: 14px;
+  min-height: 44px;
+  padding: 0.7rem 1.1rem;
+  border-radius: var(--r-sm);
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.55);
   transition: all 0.2s ease;
@@ -241,6 +242,7 @@
 
 .wz-foot__next {
   font-size: 0.95rem;
+  min-height: 48px;
   padding: 0.85rem 1.4rem;
 }
 
@@ -251,7 +253,7 @@
 
 @media (max-width: 720px) {
   .wz-step__label {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
   }
   .wz-step__bubble {
     width: 36px;
@@ -268,5 +270,33 @@
   .wz-foot__hint {
     grid-column: span 2;
     order: 3;
+  }
+}
+@media (max-width: 420px) {
+  .wz-stepper {
+    padding: 0 0.6rem;
+    gap: 0;
+  }
+  .wz-step button {
+    padding: 0.4rem 0.1rem;
+  }
+  .wz-step__bubble {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+  .wz-step__label {
+    font-size: 0.66rem;
+    letter-spacing: 0;
+  }
+  .wz-step button::before {
+    top: calc(0.4rem + 16px);
+  }
+  .wz-back {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.85rem;
+  }
+  .wz-page-emoji {
+    font-size: 2.4rem;
   }
 }

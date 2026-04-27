@@ -27,7 +27,8 @@
 .st-input {
   background: var(--bg);
   border: 1.5px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--r-sm);
+  min-height: 44px;
   padding: 0.7rem 1rem;
   font-family: var(--font-body);
   font-size: 1rem;
@@ -136,16 +137,22 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.7rem 1.2rem;
-  border-radius: 999px;
+  min-height: 44px;
+  padding: 0.7rem 1.3rem;
+  border-radius: var(--r-full);
   background: var(--mint);
   color: #fff;
   font-family: var(--font-h);
   font-weight: 700;
   font-size: 0.95rem;
-  box-shadow: 0 6px 14px rgba(108, 190, 154, 0.35);
-  transition: transform 0.2s ease;
+  box-shadow: var(--sh-press-mint);
+  transition: transform 0.18s var(--ease-pop), box-shadow 0.2s ease;
 }
 .st-add:hover {
   transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(108, 190, 154, 0.42);
+}
+.st-add:active {
+  transform: translateY(1px);
+  box-shadow: 0 3px 8px rgba(108, 190, 154, 0.3);
 }

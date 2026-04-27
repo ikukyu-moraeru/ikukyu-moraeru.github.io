@@ -69,9 +69,17 @@
   font-family: var(--font-h);
   font-weight: 700;
   font-size: 0.85rem;
-  padding: 0.55rem 0.95rem;
-  border-radius: 999px;
-  transition: all 0.2s ease;
+  min-height: 40px;
+  padding: 0.55rem 1rem;
+  border-radius: var(--r-full);
+  transition: transform 0.18s var(--ease-pop), background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+@media (max-width: 480px) {
+  .at-quick__btn {
+    min-height: 44px;
+    flex: 1 1 auto;
+  }
 }
 .at-quick__btn:hover {
   background: var(--plum-deep);
@@ -162,9 +170,10 @@
 }
 .at-row__input {
   width: 5.5rem;
-  padding: 0.45rem 0.6rem;
+  min-height: 44px;
+  padding: 0.55rem 0.7rem;
   text-align: right;
-  border-radius: 10px;
+  border-radius: var(--r-sm);
   background: #fff;
   font-family: var(--font-mono);
   font-size: 0.95rem;
@@ -195,6 +204,7 @@
   .at-row {
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem 0.7rem;
+    padding: 0.7rem 0.85rem;
   }
   .at-row__head {
     grid-column: span 2;
@@ -208,11 +218,21 @@
   }
   .at-row__field {
     width: 100%;
+    justify-content: space-between;
   }
   .at-info {
     grid-template-columns: 1fr;
   }
   .at-info__counter {
     justify-content: flex-start;
+  }
+}
+@media (max-width: 380px) {
+  .at-row {
+    grid-template-columns: 1fr;
+  }
+  .at-row__head,
+  .at-row__badge {
+    grid-column: 1;
   }
 }
