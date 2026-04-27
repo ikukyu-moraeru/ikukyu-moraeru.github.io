@@ -1,24 +1,4 @@
-.theme-health {
-  --bg: #fff7f3;
-  --bg-2: #fde6df;
-  --bg-3: #cee9d6;
-  --pink: #ec8aa3;
-  --pink-deep: #c45c7a;
-  --mint: #6cbe9a;
-  --mint-deep: #3f8e6c;
-  --plum: #3a2e4f;
-  --ink: #2b2233;
-  --ink-soft: #5b5469;
-  --ink-mute: #8d869a;
-
-  --font-h: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
-  --font-body: "Plus Jakarta Sans", "Noto Sans JP", sans-serif;
-  --font-mono: "DM Mono", monospace;
-
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-weight: 400;
+.ht-page {
   min-height: 100%;
   position: relative;
   overflow: hidden;
@@ -176,15 +156,21 @@
 .ht-btn--primary {
   background: var(--plum);
   color: #fff;
-  box-shadow: 0 8px 0 0 #1c1428, 0 14px 24px rgba(58, 46, 79, 0.25);
+  box-shadow:
+    0 8px 0 0 var(--plum-deep),
+    0 14px 24px rgba(58, 46, 79, 0.25);
 }
 .ht-btn--primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 0 0 #1c1428, 0 16px 28px rgba(58, 46, 79, 0.3);
+  box-shadow:
+    0 10px 0 0 var(--plum-deep),
+    0 16px 28px rgba(58, 46, 79, 0.3);
 }
 .ht-btn--primary:active {
   transform: translateY(4px);
-  box-shadow: 0 4px 0 0 #1c1428, 0 6px 12px rgba(58, 46, 79, 0.2);
+  box-shadow:
+    0 4px 0 0 var(--plum-deep),
+    0 6px 12px rgba(58, 46, 79, 0.2);
 }
 .ht-btn__chip {
   background: var(--pink);
@@ -215,7 +201,7 @@
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(58, 46, 79, 0.08);
+  border: 1px solid var(--line);
   border-radius: 16px;
   padding: 0.85rem 1rem;
   display: grid;
@@ -235,12 +221,12 @@
   font-size: 1.35rem;
 }
 
-/* card / heatmap */
+/* card / heatmap (sample on landing) */
 .ht-card {
   background: #fff;
   border-radius: 28px;
   padding: clamp(1.2rem, 2vw, 1.8rem);
-  border: 1px solid rgba(58, 46, 79, 0.06);
+  border: 1px solid var(--line);
   box-shadow:
     0 30px 60px -20px rgba(58, 46, 79, 0.18),
     0 0 0 8px rgba(255, 255, 255, 0.5);
@@ -315,7 +301,7 @@
   gap: 0.05rem;
   transition: transform 0.2s ease;
   cursor: pointer;
-  border: 1px solid rgba(58, 46, 79, 0.08);
+  border: 1px solid var(--line);
 }
 .ht-bubble:hover {
   transform: scale(1.08);
@@ -336,8 +322,8 @@
   color: #1f3a2c;
 }
 .ht-bubble--border {
-  background: linear-gradient(160deg, #fff5d4 0%, #f3cf76 100%);
-  color: #5a4015;
+  background: linear-gradient(160deg, #fff5d4 0%, var(--gold) 100%);
+  color: var(--gold-deep);
 }
 .ht-bubble--fail {
   background: linear-gradient(160deg, var(--bg-2) 0%, var(--pink) 100%);
@@ -362,7 +348,7 @@
 }
 .ht-leg--border {
   background: #fff3cf;
-  color: #8a6a1a;
+  color: var(--gold-deep);
 }
 .ht-leg--fail {
   background: var(--bg-2);

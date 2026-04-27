@@ -1,9 +1,11 @@
-import './HealthTheme.css'
-import { SAMPLE_HEATMAP } from '../sample'
+import { useAppState } from '../state/AppState'
+import { SAMPLE_HEATMAP } from '../preview/sample'
+import './Landing.css'
 
-export function HealthTheme() {
+export function Landing() {
+  const { dispatch } = useAppState()
   return (
-    <div className="theme-health">
+    <div className="ht-page">
       <div className="ht-blob ht-blob--1" />
       <div className="ht-blob ht-blob--2" />
       <div className="ht-blob ht-blob--3" />
@@ -39,11 +41,19 @@ export function HealthTheme() {
           </p>
 
           <div className="ht-cta">
-            <button className="ht-btn ht-btn--primary">
+            <button
+              className="ht-btn ht-btn--primary"
+              onClick={() => dispatch({ type: 'GOTO_WIZARD' })}
+            >
               <span>判定をはじめる</span>
               <span className="ht-btn__chip">3 分</span>
             </button>
-            <button className="ht-btn ht-btn--ghost">サンプルを見る</button>
+            <button
+              className="ht-btn ht-btn--ghost"
+              onClick={() => dispatch({ type: 'GOTO_WIZARD' })}
+            >
+              サンプルを見る
+            </button>
           </div>
 
           <ul className="ht-points">
@@ -73,7 +83,9 @@ export function HealthTheme() {
             {SAMPLE_HEATMAP.map((c) => (
               <div key={c.index} className={`ht-bubble ht-bubble--${c.status}`}>
                 <span className="ht-bubble__date">{c.label}</span>
-                <span className="ht-bubble__num">{c.countedMonths.toFixed(1)}</span>
+                <span className="ht-bubble__num">
+                  {c.countedMonths.toFixed(1)}
+                </span>
               </div>
             ))}
           </div>

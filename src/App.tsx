@@ -1,7 +1,10 @@
-import { HealthTheme } from './preview/themes/HealthTheme'
+import { Landing } from './ui/Landing'
+import { Wizard } from './ui/Wizard'
+import { useAppState } from './state/AppState'
 
 function App() {
-  return <HealthTheme />
+  const { state } = useAppState()
+  return state.screen === 'landing' ? <Landing /> : <Wizard />
 }
 
 export default App
