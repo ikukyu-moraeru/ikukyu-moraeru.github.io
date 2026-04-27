@@ -28,26 +28,19 @@ export interface LeavePeriod {
 }
 
 /**
- * 雇用保険に加入していなかった期間（転職空白・無職・短時間労働等）。
- * `basicAllowanceClaimed = true` の場合、それ以前の被保険者期間は通算対象外（Rule.md §4-1 イ / §4-2）。
- */
-export interface NonInsuredGap {
-  id: string;
-  start: DateISO;
-  end: DateISO;
-  reason: "転職の空白" | "退職後無職" | "短時間労働で未加入" | "その他";
-  basicAllowanceClaimed: boolean;
-}
-
-/**
  * 雇用保険に加入していたセグメント（1事業所 = 1セグメント想定）。
  * 在職中の場合 `end` は null。
+ *
+ * `claimedBasicAllowanceAfterEnd = true` の場合、この離職後に失業給付（基本手当）の
+ * 受給資格決定を受けたことを意味し、それ以前の被保険者期間は通算対象外
+ * （Rule.md §4-1 イ / §4-2）になる。
  */
 export interface InsuredEmploymentSegment {
   id: string;
   start: DateISO;
   end: DateISO | null;
   employerName?: string;
+  claimedBasicAllowanceAfterEnd?: boolean;
 }
 
 /**
@@ -61,7 +54,7 @@ export interface InsuredEmploymentSegment {
  * - absent        : 欠勤・無給休暇。賃金支払基礎日数にカウントしない。
  *
  * 注: 公休（土日祝）／休業期間中／未加入期間／入社前後 などは
- *     `LeavePeriod` / `InsuredEmploymentSegment` / `NonInsuredGap` から自動推論できるため、
+ *     `LeavePeriod` / `InsuredEmploymentSegment` から自動推論できるため、
  *     ここには含めない。UI 側で自動着色して扱う。
  */
 export type AttendanceStatus = "work" | "paid_leave" | "paid_special" | "absent";
@@ -84,7 +77,6 @@ export interface UserInput {
   isMultipleBirth: boolean; // 多胎妊娠
   scanRange: { start: DateISO; end: DateISO }; // 出産日候補のスキャン範囲
   insuredSegments: InsuredEmploymentSegment[];
-  nonInsuredGaps: NonInsuredGap[];
   leavePeriods: LeavePeriod[];
   attendances: DailyAttendance[];
 }

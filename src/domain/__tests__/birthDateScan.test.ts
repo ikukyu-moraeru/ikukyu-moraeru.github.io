@@ -6,7 +6,6 @@ const baseInput: UserInput = {
   isMultipleBirth: false,
   scanRange: { start: "2026-09-01", end: "2026-09-03" },
   insuredSegments: [{ id: "s1", start: "2020-01-01", end: null }],
-  nonInsuredGaps: [],
   leavePeriods: [],
   attendances: [],
 };

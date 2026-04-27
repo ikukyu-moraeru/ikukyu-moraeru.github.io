@@ -30,7 +30,6 @@ export const emptyInput: UserInput = {
   isMultipleBirth: false,
   scanRange: { start: '', end: '' },
   insuredSegments: [],
-  nonInsuredGaps: [],
   leavePeriods: [],
   attendances: [],
 }

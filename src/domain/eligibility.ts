@@ -62,10 +62,7 @@ export function judgeEligibility(
   const windowStart = fmt(subDays(parseISO(baseWindowStart), relaxationDays));
   const windowEnd = baseWindowEnd;
 
-  const mergedSegments = mergeInsuredSegments(
-    input.insuredSegments,
-    input.nonInsuredGaps,
-  );
+  const mergedSegments = mergeInsuredSegments(input.insuredSegments);
 
   const { completeMonths, fragment } = buildCompleteMonths(
     childCareStartDate,

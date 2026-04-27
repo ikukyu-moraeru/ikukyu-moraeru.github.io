@@ -30,7 +30,6 @@ function buildSimple(): UserInput {
     isMultipleBirth: false,
     scanRange: { ...SCAN_RANGE },
     insuredSegments: [{ id: "main", start: "2023-01-01", end: null }],
-    nonInsuredGaps: [],
     leavePeriods: [],
     attendances: fillWeekdays("2023-01-01", "2026-12-31"),
   };
@@ -41,17 +40,14 @@ function buildTransition(): UserInput {
     isMultipleBirth: false,
     scanRange: { ...SCAN_RANGE },
     insuredSegments: [
-      { id: "prev", start: "2024-04-01", end: "2025-10-31", employerName: "前職" },
-      { id: "curr", start: "2025-12-01", end: null, employerName: "現職" },
-    ],
-    nonInsuredGaps: [
       {
-        id: "g1",
-        start: "2025-11-01",
-        end: "2025-11-30",
-        reason: "転職の空白",
-        basicAllowanceClaimed: false,
+        id: "prev",
+        start: "2024-04-01",
+        end: "2025-10-31",
+        employerName: "前職",
+        claimedBasicAllowanceAfterEnd: false,
       },
+      { id: "curr", start: "2025-12-01", end: null, employerName: "現職" },
     ],
     leavePeriods: [],
     // 平日を出勤に。空白期間 (2025-11) は除外。
@@ -69,7 +65,6 @@ function buildSickness(): UserInput {
     insuredSegments: [
       { id: "main", start: "2024-09-01", end: null, employerName: "勤務先" },
     ],
-    nonInsuredGaps: [],
     leavePeriods: [
       {
         id: "sick1",

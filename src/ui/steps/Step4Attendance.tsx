@@ -72,10 +72,6 @@ function inSegment(date: string, segments: UserInput['insuredSegments']): boolea
   })
 }
 
-function inGap(date: string, gaps: UserInput['nonInsuredGaps']): boolean {
-  return gaps.some((g) => g.start <= date && date <= g.end)
-}
-
 function inLeave(date: string, leaves: UserInput['leavePeriods']): boolean {
   return leaves.some((l) => l.start <= date && date <= l.end)
 }
@@ -102,9 +98,6 @@ function deriveDay(
   }
   const insured = inSegment(date, input.insuredSegments)
   if (!insured) {
-    return { date, state: { kind: 'out' }, isBasic: false, overridden: false }
-  }
-  if (inGap(date, input.nonInsuredGaps)) {
     return { date, state: { kind: 'out' }, isBasic: false, overridden: false }
   }
   if (inLeave(date, input.leavePeriods)) {

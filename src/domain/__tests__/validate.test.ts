@@ -8,7 +8,6 @@ const okInput: UserInput = {
   insuredSegments: [
     { id: "s1", start: "2024-01-01", end: null, employerName: "Co" },
   ],
-  nonInsuredGaps: [],
   leavePeriods: [],
   attendances: [
     { date: "2024-01-15", status: "work", hours: 8 },
@@ -101,97 +100,6 @@ describe("validateUserInput", () => {
         (i) => i.severity === "warning" && i.itemId === "L2",
       );
       expect(overlap).toBeDefined();
-    });
-  });
-
-  describe("NonInsuredGap", () => {
-    it("start > end は error", () => {
-      const issues = validateUserInput({
-        ...okInput,
-        nonInsuredGaps: [
-          {
-            id: "G1",
-            start: "2025-04-01",
-            end: "2025-03-01",
-            reason: "転職の空白",
-            basicAllowanceClaimed: false,
-          },
-        ],
-      });
-      const target = issues.find((i) => i.itemId === "G1");
-      expect(target?.severity).toBe("error");
-    });
-
-    it("同一カテゴリ内の重複は warning", () => {
-      const issues = validateUserInput({
-        ...okInput,
-        nonInsuredGaps: [
-          {
-            id: "G1",
-            start: "2025-03-01",
-            end: "2025-04-30",
-            reason: "転職の空白",
-            basicAllowanceClaimed: false,
-          },
-          {
-            id: "G2",
-            start: "2025-04-15",
-            end: "2025-05-15",
-            reason: "退職後無職",
-            basicAllowanceClaimed: false,
-          },
-        ],
-      });
-      const overlap = issues.find(
-        (i) => i.severity === "warning" && i.itemId === "G2",
-      );
-      expect(overlap).toBeDefined();
-    });
-  });
-
-  describe("Segment / Gap の重複", () => {
-    it("被保険者セグメントと未加入期間が重複していたら warning", () => {
-      const issues = validateUserInput({
-        ...okInput,
-        insuredSegments: [
-          { id: "S1", start: "2024-01-01", end: "2025-12-31" },
-        ],
-        nonInsuredGaps: [
-          {
-            id: "G1",
-            start: "2025-06-01",
-            end: "2025-06-30",
-            reason: "短時間労働で未加入",
-            basicAllowanceClaimed: false,
-          },
-        ],
-      });
-      const overlap = issues.find(
-        (i) =>
-          i.severity === "warning" &&
-          i.itemId === "G1" &&
-          /時間軸で重複/.test(i.message),
-      );
-      expect(overlap).toBeDefined();
-    });
-
-    it("セグメントとギャップが時間軸で重ならないなら issues なし", () => {
-      const issues = validateUserInput({
-        ...okInput,
-        insuredSegments: [
-          { id: "S1", start: "2024-01-01", end: "2024-12-31" },
-        ],
-        nonInsuredGaps: [
-          {
-            id: "G1",
-            start: "2025-01-01",
-            end: "2025-03-31",
-            reason: "退職後無職",
-            basicAllowanceClaimed: false,
-          },
-        ],
-      });
-      expect(issues).toEqual([]);
     });
   });
 

@@ -44,7 +44,6 @@ function makeInput(overrides: Partial<UserInput> = {}): UserInput {
     isMultipleBirth: false,
     scanRange: { start: "2026-02-17", end: "2026-02-17" },
     insuredSegments: [fullCoverageSegment],
-    nonInsuredGaps: [],
     leavePeriods: [],
     attendances: fillWorkDays("2024-01-01", "2026-04-14"),
     ...overrides,
@@ -240,17 +239,13 @@ describe("judgeEligibility", () => {
   it("前職通算リセット: 失業給付受給資格決定済みなら前職セグメントは判定対象外", () => {
     const input = makeInput({
       insuredSegments: [
-        { id: "prev", start: "2024-04-01", end: "2025-04-15" },
-        { id: "curr", start: "2025-05-15", end: null },
-      ],
-      nonInsuredGaps: [
         {
-          id: "g1",
-          start: "2025-04-16",
-          end: "2025-05-14",
-          reason: "退職後無職",
-          basicAllowanceClaimed: true,
+          id: "prev",
+          start: "2024-04-01",
+          end: "2025-04-15",
+          claimedBasicAllowanceAfterEnd: true,
         },
+        { id: "curr", start: "2025-05-15", end: null },
       ],
     });
     const result = judgeEligibility(input, "2026-02-17");
