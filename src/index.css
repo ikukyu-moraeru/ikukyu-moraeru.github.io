@@ -13,9 +13,43 @@
   --plum-deep: #1c1428;
   --ink: #2b2233;
   --ink-soft: #5b5469;
-  --ink-mute: #8d869a;
+  --ink-mute: #756d83; /* WCAG AA on --bg (4.5:1+) — 旧値 #8d869a は薄すぎ */
   --line: rgba(58, 46, 79, 0.12);
   --paper: #fff;
+
+  /* radius scale (4 / 12 / 18 / 24 / 28 / full) */
+  --r-xs: 4px;
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-xl: 28px;
+  --r-full: 999px;
+
+  /* spacing scale (rem-based, 8pt base) */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+
+  /* shadow scale */
+  --sh-sm: 0 2px 6px rgba(58, 46, 79, 0.08);
+  --sh-md: 0 8px 18px rgba(58, 46, 79, 0.15);
+  --sh-lg: 0 30px 60px -20px rgba(58, 46, 79, 0.18),
+    0 0 0 8px rgba(255, 255, 255, 0.55);
+  --sh-press-plum: 0 4px 0 0 var(--plum-deep), 0 6px 12px rgba(58, 46, 79, 0.2);
+  --sh-press-mint: 0 6px 14px rgba(108, 190, 154, 0.35);
+  --sh-press-pink: 0 6px 14px rgba(236, 138, 163, 0.35);
+
+  /* focus ring (a11y) */
+  --ring: 0 0 0 3px rgba(58, 46, 79, 0.18),
+    0 0 0 6px rgba(58, 46, 79, 0.32);
+
+  /* motion */
+  --ease-pop: cubic-bezier(0.22, 0.61, 0.36, 1);
 
   /* type */
   --font-h: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
@@ -28,6 +62,13 @@
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "palt" 1;
+  font-size: 16px;
+}
+
+@media (max-width: 480px) {
+  :root {
+    font-size: 15px;
+  }
 }
 
 * {
@@ -62,6 +103,18 @@ button:disabled {
 :focus-visible {
   outline: 2px solid var(--plum);
   outline-offset: 3px;
+  box-shadow: var(--ring);
+  border-radius: var(--r-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 input,
