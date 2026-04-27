@@ -1,8 +1,8 @@
-import { addMonths, format } from "date-fns";
-import type { MonthlyAttendance, UserInput } from "./types";
+import { addDays, format, parseISO } from "date-fns";
+import type { DailyAttendance, UserInput } from "./types";
 
 /**
- * ランディング画面の「サンプルを見る」用の UserInput 生成。
+ * ランディング画面の「サンプルを見る」用 / 開発・テスト用の UserInput 生成。
  *
  * いずれも出産予定日中央 = 2026-09-15、走査範囲 ±14 日（2026-09-01 〜 2026-09-29）で固定。
  *  - simple:     同一会社で 3 年勤務、フルタイム。全候補で余裕を持って充足。
@@ -13,8 +13,6 @@ import type { MonthlyAttendance, UserInput } from "./types";
 export type SampleScenario = "simple" | "transition" | "sickness";
 
 const SCAN_RANGE = { start: "2026-09-01", end: "2026-09-29" };
-const FULL_DAYS = 22;
-const FULL_HOURS = 168;
 
 export function buildSampleInput(scenario: SampleScenario): UserInput {
   switch (scenario) {
@@ -34,17 +32,11 @@ function buildSimple(): UserInput {
     insuredSegments: [{ id: "main", start: "2023-01-01", end: null }],
     nonInsuredGaps: [],
     leavePeriods: [],
-    attendances: fillMonths("2023-01", "2026-12", () => ({
-      basicWageDays: FULL_DAYS,
-      basicWageHours: FULL_HOURS,
-    })),
+    attendances: fillWeekdays("2023-01-01", "2026-12-31"),
   };
 }
 
 function buildTransition(): UserInput {
-  // 前職: 2024-04-01..2025-10-31（19 ヶ月）
-  // 空白: 2025-11-01..2025-11-30（30 日、基本手当未受給）
-  // 後職: 2025-12-01..在職中
   return {
     isMultipleBirth: false,
     scanRange: { ...SCAN_RANGE },
@@ -62,16 +54,15 @@ function buildTransition(): UserInput {
       },
     ],
     leavePeriods: [],
-    attendances: fillMonths("2024-04", "2026-12", (ym) => {
-      if (ym === "2025-11") return { basicWageDays: 0, basicWageHours: 0 };
-      return { basicWageDays: FULL_DAYS, basicWageHours: FULL_HOURS };
-    }),
+    // 平日を出勤に。空白期間 (2025-11) は除外。
+    attendances: [
+      ...fillWeekdays("2024-04-01", "2025-10-31"),
+      ...fillWeekdays("2025-12-01", "2026-12-31"),
+    ],
   };
 }
 
 function buildSickness(): UserInput {
-  // 同一会社 2024-09-01..在職中。
-  // 病気休職: 2025-06-01..2025-07-30（60 日連続、賃金なし）→ 緩和加算 60 日。
   return {
     isMultipleBirth: false,
     scanRange: { ...SCAN_RANGE },
@@ -88,36 +79,32 @@ function buildSickness(): UserInput {
         hasWageDuringLeave: false,
       },
     ],
-    attendances: fillMonths("2024-09", "2026-12", (ym) => {
-      if (ym === "2025-06" || ym === "2025-07") {
-        return { basicWageDays: 0, basicWageHours: 0 };
-      }
-      return { basicWageDays: FULL_DAYS, basicWageHours: FULL_HOURS };
-    }),
+    // 病休期間は除外。
+    attendances: [
+      ...fillWeekdays("2024-09-01", "2025-05-31"),
+      ...fillWeekdays("2025-07-31", "2026-12-31"),
+    ],
   };
 }
 
 /**
- * `startYm` 〜 `endYm`（共に "YYYY-MM" inclusive）で月別出勤を生成する。
+ * `[startISO, endISO]` (inclusive) の平日を全部 'work' で埋める。
+ * 土日は出力に含めない（UI 側で自動着色する想定）。
  */
-function fillMonths(
-  startYm: string,
-  endYm: string,
-  factory: (monthKey: string) => Pick<MonthlyAttendance, "basicWageDays" | "basicWageHours">,
-): MonthlyAttendance[] {
-  const out: MonthlyAttendance[] = [];
-  let cursor = parseYm(startYm);
-  const last = parseYm(endYm);
+function fillWeekdays(startISO: string, endISO: string): DailyAttendance[] {
+  const out: DailyAttendance[] = [];
+  let cursor = parseISO(startISO);
+  const last = parseISO(endISO);
   while (cursor.getTime() <= last.getTime()) {
-    const monthKey = format(cursor, "yyyy-MM");
-    const { basicWageDays, basicWageHours } = factory(monthKey);
-    out.push({ monthKey, basicWageDays, basicWageHours });
-    cursor = addMonths(cursor, 1);
+    const day = cursor.getDay(); // 0 = Sun, 6 = Sat
+    if (day !== 0 && day !== 6) {
+      out.push({
+        date: format(cursor, "yyyy-MM-dd"),
+        status: "work",
+        hours: 8,
+      });
+    }
+    cursor = addDays(cursor, 1);
   }
   return out;
-}
-
-function parseYm(ym: string): Date {
-  const [y, m] = ym.split("-").map(Number);
-  return new Date(y, m - 1, 1);
 }

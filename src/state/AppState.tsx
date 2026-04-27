@@ -78,7 +78,18 @@ function loadInitial(): AppState {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as { input?: Partial<UserInput> }
-      inputFromStorage = { ...emptyInput, ...(parsed.input ?? {}) }
+      const candidate = { ...emptyInput, ...(parsed.input ?? {}) }
+      // 旧形式 (MonthlyAttendance with monthKey) は破棄
+      if (Array.isArray(candidate.attendances)) {
+        candidate.attendances = candidate.attendances.filter(
+          (a: unknown): a is UserInput['attendances'][number] => {
+            if (!a || typeof a !== 'object') return false
+            const obj = a as Record<string, unknown>
+            return typeof obj.date === 'string' && typeof obj.status === 'string'
+          },
+        )
+      }
+      inputFromStorage = candidate
     }
   } catch {
     /* ignore */

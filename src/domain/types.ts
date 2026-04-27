@@ -51,13 +51,30 @@ export interface InsuredEmploymentSegment {
 }
 
 /**
- * 月単位の出勤情報。
- * 「完全月」とは別概念で、暦月での集計値。判定ロジック側で完全月にマッピングする。
+ * 1 日の出勤ステータス。
+ * ユーザーが明示的に入力した日のみ `DailyAttendance` として保存する。
+ * 配列に存在しない日は「未入力」（賃金支払基礎日数にカウントしない）扱い。
+ *
+ * - work          : 実労働（出社・在宅問わず）。賃金支払基礎日数にカウント。
+ * - paid_leave    : 年次有給休暇。賃金支払基礎日数にカウント（有給日も基礎日数に含まれる）。
+ * - paid_special  : 賃金が支払われる特別休暇 / 休業手当（労基法 26 条）対象日。同上。
+ * - absent        : 欠勤・無給休暇。賃金支払基礎日数にカウントしない。
+ *
+ * 注: 公休（土日祝）／休業期間中／未加入期間／入社前後 などは
+ *     `LeavePeriod` / `InsuredEmploymentSegment` / `NonInsuredGap` から自動推論できるため、
+ *     ここには含めない。UI 側で自動着色して扱う。
  */
-export interface MonthlyAttendance {
-  monthKey: string; // "YYYY-MM"
-  basicWageDays: number;
-  basicWageHours: number;
+export type AttendanceStatus = "work" | "paid_leave" | "paid_special" | "absent";
+
+/**
+ * ユーザーが明示的に入力した 1 日分の勤務情報。
+ * `hours` は任意（時間入力したい人向け）。`hours` が無い日は 80 時間ルールには寄与しない。
+ */
+export interface DailyAttendance {
+  date: DateISO; // "YYYY-MM-DD"
+  status: AttendanceStatus;
+  hours?: number;
+  note?: string;
 }
 
 /**
@@ -69,7 +86,7 @@ export interface UserInput {
   insuredSegments: InsuredEmploymentSegment[];
   nonInsuredGaps: NonInsuredGap[];
   leavePeriods: LeavePeriod[];
-  attendances: MonthlyAttendance[];
+  attendances: DailyAttendance[];
 }
 
 /**
@@ -92,9 +109,8 @@ export interface FragmentMonth {
 }
 
 /**
- * 完全月・端数月の判定で使う集計後出勤量。
- * 入力 `MonthlyAttendance` は暦月ベースだが、完全月は暦月境界をまたぐため、
- * 各完全月にかかる暦月の日数比で按分した値を保持する。
+ * 完全月・端数月の判定で使う集計値。
+ * `DailyAttendance` を期間内で日付フィルタして集計した結果を保持する（按分なし）。
  */
 export interface JudgedAttendance {
   basicWageDays: number;

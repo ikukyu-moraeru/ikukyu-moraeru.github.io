@@ -1,13 +1,9 @@
 import {
   addDays,
-  addMonths,
-  differenceInCalendarDays,
-  endOfMonth,
   format,
   isAfter,
   isBefore,
   parseISO,
-  startOfMonth,
   subDays,
   subYears,
 } from "date-fns";
@@ -16,26 +12,30 @@ import { mergeInsuredSegments } from "./carryOver";
 import { computeRelaxationDays } from "./relaxation";
 import type {
   CompleteMonth,
+  DailyAttendance,
   DateISO,
   EligibilityResult,
   FragmentMonth,
   InsuredEmploymentSegment,
   JudgedAttendance,
   MonthJudgment,
-  MonthlyAttendance,
   UserInput,
 } from "./types";
 
 /**
  * Rule.md §2 / §3 の支給要件②（みなし被保険者期間 12 か月）判定。
  *
- * §3-4 の緩和（最長 4 年）は relaxation.ts に委譲し、緩和後の判定対象期間で完全月を生成する。
- * §4-2 の前職通算は carryOver.ts に委譲し、結合済みセグメントを `isFullyInsured` の判定対象とする。
+ * - 緩和（§3-4）と前職通算（§4-2）は relaxation.ts / carryOver.ts に委譲。
+ * - 完全月 / 端数月の出勤量は `DailyAttendance[]` を日付フィルタして集計（按分なし）。
+ * - 80 時間ルールは 2020-08-01 以降の月にのみ適用（厚労省 LL020615 保 01）。
  */
 
 const PRENATAL_DAYS_SINGLE = 42;
 const PRENATAL_DAYS_MULTIPLE = 98;
 const POSTNATAL_DAYS = 56;
+
+/** 賃金支払基礎時間数 80 時間ルールの施行日。 */
+const HOURS_RULE_START: DateISO = "2020-08-01";
 
 const fmt = (d: Date): DateISO => format(d, "yyyy-MM-dd");
 
@@ -52,13 +52,15 @@ export function judgeEligibility(
   const childCareStartDate = fmt(childCareStartD);
 
   const baseWindowStart = fmt(subYears(childCareStartD, 2));
-  const windowEnd = fmt(subDays(childCareStartD, 1));
+  const baseWindowEnd = fmt(subDays(childCareStartD, 1));
+
   const relaxationDays = computeRelaxationDays(
     input.leavePeriods,
     baseWindowStart,
-    windowEnd,
+    baseWindowEnd,
   );
   const windowStart = fmt(subDays(parseISO(baseWindowStart), relaxationDays));
+  const windowEnd = baseWindowEnd;
 
   const mergedSegments = mergeInsuredSegments(
     input.insuredSegments,
@@ -103,7 +105,7 @@ export function judgeEligibility(
 
 function judgeCompleteMonth(
   month: CompleteMonth,
-  attendances: MonthlyAttendance[],
+  attendances: DailyAttendance[],
   segments: InsuredEmploymentSegment[],
 ): MonthJudgment {
   if (!isFullyInsured(month.start, month.end, segments)) {
@@ -113,7 +115,7 @@ function judgeCompleteMonth(
   if (attendance.basicWageDays >= 11) {
     return { range: month, counted: 1, reason: "11日以上", attendance };
   }
-  if (attendance.basicWageHours >= 80) {
+  if (canApplyHoursRule(month.end) && attendance.basicWageHours >= 80) {
     return { range: month, counted: 1, reason: "80時間以上", attendance };
   }
   return { range: month, counted: 0, reason: "条件未達", attendance };
@@ -121,7 +123,7 @@ function judgeCompleteMonth(
 
 function judgeFragment(
   fragment: FragmentMonth,
-  attendances: MonthlyAttendance[],
+  attendances: DailyAttendance[],
   segments: InsuredEmploymentSegment[],
 ): NonNullable<EligibilityResult["fragmentJudgment"]> {
   if (!isFullyInsured(fragment.start, fragment.end, segments)) {
@@ -143,10 +145,7 @@ function judgeFragment(
 
 /**
  * `[start, end]` が 1 つの被保険者セグメント（在職中なら end=null）に
- * 完全に内包されているかを判定する。
- *
- * 呼び出し側で `mergeInsuredSegments` による前職通算結合を済ませているため、
- * 通算可能な期間は単一セグメントとして渡ってくる前提。
+ * 完全に内包されているかを判定する。前職通算は `mergeInsuredSegments` で済んでいる前提。
  */
 function isFullyInsured(
   start: DateISO,
@@ -163,41 +162,39 @@ function isFullyInsured(
 }
 
 /**
- * 完全月／端数月の `[start, end]` 範囲に対し、暦月ベースで入力された
- * `MonthlyAttendance[]` を日数比で按分して合算する。
+ * `DailyAttendance[]` を `[start, end]` (inclusive) でフィルタし、
+ * 賃金支払基礎日数 / 時間数を集計する（按分なし）。
  *
- * 完全月は暦月境界をまたぐ（例： 2026-03-15〜2026-04-14）ため、
- * - 2026-03 の 17 日分（3/15〜3/31）/ 31 日 ×（3 月の値）
- * - 2026-04 の 14 日分（4/01〜4/14）/ 30 日 ×（4 月の値）
- * を合計する。
+ * - 賃金支払基礎日数 = `status ∈ {work, paid_leave, paid_special}` の日数
+ * - 賃金支払基礎時間数 = 上記日のうち `hours` がある日の合計（時間未入力日は 0 寄与）
  */
 function aggregateAttendance(
   start: DateISO,
   end: DateISO,
-  attendances: MonthlyAttendance[],
+  attendances: DailyAttendance[],
 ): JudgedAttendance {
-  const s = parseISO(start);
-  const e = parseISO(end);
   let basicWageDays = 0;
   let basicWageHours = 0;
-
-  let cursor = startOfMonth(s);
-  const lastMonth = startOfMonth(e);
-  while (!isAfter(cursor, lastMonth)) {
-    const ym = format(cursor, "yyyy-MM");
-    const att = attendances.find((a) => a.monthKey === ym);
-    if (att) {
-      const monthStart = startOfMonth(cursor);
-      const monthEnd = endOfMonth(cursor);
-      const overlapStart = isBefore(monthStart, s) ? s : monthStart;
-      const overlapEnd = isAfter(monthEnd, e) ? e : monthEnd;
-      const overlapDays = differenceInCalendarDays(overlapEnd, overlapStart) + 1;
-      const totalDays = differenceInCalendarDays(monthEnd, monthStart) + 1;
-      const ratio = overlapDays / totalDays;
-      basicWageDays += att.basicWageDays * ratio;
-      basicWageHours += att.basicWageHours * ratio;
+  for (const a of attendances) {
+    if (a.date < start || a.date > end) continue;
+    if (
+      a.status === "work" ||
+      a.status === "paid_leave" ||
+      a.status === "paid_special"
+    ) {
+      basicWageDays += 1;
+      if (typeof a.hours === "number" && Number.isFinite(a.hours)) {
+        basicWageHours += a.hours;
+      }
     }
-    cursor = addMonths(cursor, 1);
   }
   return { basicWageDays, basicWageHours };
+}
+
+/**
+ * 80 時間ルールを完全月の終端日に対して適用してよいかを判定する。
+ * 厚労省 LL020615 保 01: 2020-08-01 以降の月に限り適用。
+ */
+function canApplyHoursRule(monthEnd: DateISO): boolean {
+  return monthEnd >= HOURS_RULE_START;
 }

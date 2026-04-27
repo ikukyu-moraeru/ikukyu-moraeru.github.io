@@ -113,24 +113,18 @@ function validateAttendances(
 ) {
   const seen = new Set<string>();
   for (const a of attendances) {
-    if (seen.has(a.monthKey)) {
+    if (seen.has(a.date)) {
       issues.push({
         severity: "error",
-        message: `月別出勤情報に同一月（${a.monthKey}）の重複があります。`,
+        message: `日別出勤情報に同一日（${a.date}）の重複があります。`,
       });
     }
-    seen.add(a.monthKey);
+    seen.add(a.date);
 
-    if (!isNonNegativeFinite(a.basicWageDays)) {
+    if (a.hours !== undefined && !isNonNegativeFinite(a.hours)) {
       issues.push({
         severity: "error",
-        message: `${a.monthKey} の賃金支払基礎日数の値が不正です。`,
-      });
-    }
-    if (!isNonNegativeFinite(a.basicWageHours)) {
-      issues.push({
-        severity: "error",
-        message: `${a.monthKey} の賃金支払基礎時間数の値が不正です。`,
+        message: `${a.date} の労働時間の値が不正です。`,
       });
     }
   }

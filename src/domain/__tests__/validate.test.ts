@@ -11,8 +11,8 @@ const okInput: UserInput = {
   nonInsuredGaps: [],
   leavePeriods: [],
   attendances: [
-    { monthKey: "2024-01", basicWageDays: 22, basicWageHours: 168 },
-    { monthKey: "2024-02", basicWageDays: 20, basicWageHours: 160 },
+    { date: "2024-01-15", status: "work", hours: 8 },
+    { date: "2024-01-16", status: "work", hours: 8 },
   ],
 };
 
@@ -196,44 +196,48 @@ describe("validateUserInput", () => {
   });
 
   describe("attendances", () => {
-    it("monthKey 重複は error", () => {
+    it("date 重複は error", () => {
       const issues = validateUserInput({
         ...okInput,
         attendances: [
-          { monthKey: "2024-01", basicWageDays: 22, basicWageHours: 168 },
-          { monthKey: "2024-01", basicWageDays: 20, basicWageHours: 160 },
+          { date: "2024-01-15", status: "work", hours: 8 },
+          { date: "2024-01-15", status: "paid_leave" },
         ],
       });
       const dup = issues.find(
-        (i) => i.severity === "error" && /同一月/.test(i.message),
+        (i) => i.severity === "error" && /同一日/.test(i.message),
       );
       expect(dup).toBeDefined();
     });
 
-    it("負の値は error", () => {
+    it("hours が負の値は error", () => {
       const issues = validateUserInput({
         ...okInput,
-        attendances: [
-          { monthKey: "2024-01", basicWageDays: -1, basicWageHours: 168 },
-        ],
+        attendances: [{ date: "2024-01-15", status: "work", hours: -1 }],
       });
       const neg = issues.find(
-        (i) => i.severity === "error" && /賃金支払基礎日数/.test(i.message),
+        (i) => i.severity === "error" && /労働時間/.test(i.message),
       );
       expect(neg).toBeDefined();
     });
 
-    it("NaN は error", () => {
+    it("hours が NaN は error", () => {
       const issues = validateUserInput({
         ...okInput,
-        attendances: [
-          { monthKey: "2024-01", basicWageDays: 22, basicWageHours: NaN },
-        ],
+        attendances: [{ date: "2024-01-15", status: "work", hours: NaN }],
       });
       const nan = issues.find(
-        (i) => i.severity === "error" && /賃金支払基礎時間数/.test(i.message),
+        (i) => i.severity === "error" && /労働時間/.test(i.message),
       );
       expect(nan).toBeDefined();
+    });
+
+    it("hours 未設定は OK", () => {
+      const issues = validateUserInput({
+        ...okInput,
+        attendances: [{ date: "2024-01-15", status: "work" }],
+      });
+      expect(issues).toEqual([]);
     });
   });
 });
