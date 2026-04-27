@@ -31,6 +31,21 @@ describe("mergeInsuredSegments (Rule §4-2)", () => {
     expect(mergeInsuredSegments([s], [])).toEqual([s]);
   });
 
+  it("離職翌日に再就職（ギャップ 0 日）→ 前後を 1 セグメントに連結", () => {
+    // 2024-06-30 退職 → 2024-07-01 入社（実質連続）。
+    // 連結しないと完全月 (例: 2024-06-15..2024-07-14) が isFullyInsured で
+    // false になり「雇用保険未加入」と誤判定されてしまう。
+    const segments = [
+      seg("a", "2023-01-01", "2024-06-30", "Co A"),
+      seg("b", "2024-07-01", null, "Co B"),
+    ];
+    const result = mergeInsuredSegments(segments, []);
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("a");
+    expect(result[0].start).toBe("2023-01-01");
+    expect(result[0].end).toBeNull();
+  });
+
   it("30 日空白・基本手当受給なし → 前職と通算（両セグメント残る）", () => {
     const segments = [
       seg("a", "2023-01-01", "2023-12-31", "Co A"),

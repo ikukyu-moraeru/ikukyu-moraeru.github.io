@@ -59,6 +59,18 @@ export function mergeInsuredSegments(
       continue;
     }
 
+    if (gapDays === 0) {
+      // 離職翌日に再就職（実質ギャップなし）。雇用保険的に連続するため
+      // 前後セグメントを 1 つに連結する。連結しないと、両者の境界をまたぐ
+      // 完全月（例: 6/15..7/14）が isFullyInsured で false 判定されてしまう。
+      if (seg.end === null) {
+        kept[kept.length - 1] = { ...prev, end: null };
+      } else if (isAfter(parseISO(seg.end), prevEnd)) {
+        kept[kept.length - 1] = { ...prev, end: seg.end };
+      }
+      continue;
+    }
+
     const claimed = hasBasicAllowanceClaimedBetween(
       addDays(prevEnd, 1),
       addDays(nextStart, -1),
