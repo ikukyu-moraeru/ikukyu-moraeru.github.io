@@ -61,7 +61,6 @@ export function Wizard() {
               <button
                 onClick={() => dispatch({ type: 'SET_STEP', step: s.num })}
                 aria-current={status === 'current' ? 'step' : undefined}
-                disabled={s.num > state.currentStep}
               >
                 <span className="wz-step__bubble">
                   {status === 'done' ? '✓' : s.num}
