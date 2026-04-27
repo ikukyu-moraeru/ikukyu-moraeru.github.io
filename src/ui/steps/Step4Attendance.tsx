@@ -80,6 +80,7 @@ function deriveDay(
   date: string,
   override: DailyAttendance | undefined,
   input: UserInput,
+  scanWindowEnd?: string,
 ): DayInfo {
   if (override) {
     const isBasic =
@@ -95,6 +96,10 @@ function deriveDay(
       isBasic,
       overridden: true,
     }
+  }
+  // 育休開始日（scanWindow.end）より後は判定対象外として扱う。
+  if (scanWindowEnd && date > scanWindowEnd) {
+    return { date, state: { kind: 'out' }, isBasic: false, overridden: false }
   }
   const insured = inSegment(date, input.insuredSegments)
   if (!insured) {
@@ -233,7 +238,12 @@ export function Step4Attendance() {
       const last = parseISO(monthEnd)
       while (cur.getTime() <= last.getTime()) {
         const date = format(cur, 'yyyy-MM-dd')
-        const info = deriveDay(date, overrideMap.get(date), state.input)
+        const info = deriveDay(
+          date,
+          overrideMap.get(date),
+          state.input,
+          result.scanWindow.end,
+        )
         if (info.state.kind === 'out') outCount += 1
         else if (info.state.kind === 'leave') leaveCount += 1
         totalCount += 1
@@ -347,7 +357,9 @@ export function Step4Attendance() {
     const end = parseISO(selectedCalMonth.end)
     while (d.getTime() <= end.getTime()) {
       const date = format(d, 'yyyy-MM-dd')
-      days.push(deriveDay(date, overrideMap.get(date), state.input))
+      days.push(
+        deriveDay(date, overrideMap.get(date), state.input, result.scanWindow.end),
+      )
       d = addDays(d, 1)
     }
   }
