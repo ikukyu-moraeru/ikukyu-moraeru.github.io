@@ -117,6 +117,22 @@ button:disabled {
   }
 }
 
+@media (forced-colors: active) {
+  .ht-bubble,
+  .r5-cell,
+  .at-row__badge,
+  .lp-card,
+  .at-row,
+  .ht-card,
+  .wz-card {
+    border: 1px solid CanvasText;
+  }
+  :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
 input,
 select,
 textarea {

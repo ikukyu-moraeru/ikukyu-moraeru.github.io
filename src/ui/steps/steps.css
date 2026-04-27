@@ -35,13 +35,22 @@
   color: var(--ink);
   transition: all 0.2s ease;
 }
+.st-input::placeholder {
+  color: var(--ink-mute);
+  opacity: 1;
+}
 .st-input:hover {
   border-color: var(--ink-mute);
 }
-.st-input:focus {
+.st-input:focus-visible {
   outline: none;
-  border-color: var(--pink);
-  box-shadow: 0 0 0 4px rgba(236, 138, 163, 0.18);
+  border-color: var(--pink-deep);
+  box-shadow: 0 0 0 4px rgba(196, 92, 122, 0.28);
+}
+.st-input:disabled,
+.st-input[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* radio-card group */
@@ -80,6 +89,10 @@
   background: var(--bg-2);
   border-color: var(--pink);
   box-shadow: 0 8px 16px rgba(236, 138, 163, 0.18);
+}
+.st-radio-card:has(input:focus-visible) {
+  border-color: var(--pink-deep);
+  box-shadow: 0 0 0 3px rgba(196, 92, 122, 0.28);
 }
 .st-radio-card__sub {
   display: block;

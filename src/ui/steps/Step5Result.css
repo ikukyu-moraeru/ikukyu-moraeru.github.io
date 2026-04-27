@@ -172,11 +172,29 @@
 }
 .r5-cell:hover {
   transform: translateY(-3px) scale(1.04);
+  box-shadow: var(--sh-md);
+}
+.r5-cell:focus-visible {
+  outline: 3px solid var(--plum);
+  outline-offset: 2px;
+  z-index: 1;
 }
 .r5-cell.is-selected {
   outline: 3px solid var(--plum);
   outline-offset: 2px;
   z-index: 1;
+  animation: r5CellPop 0.32s var(--ease-pop);
+}
+@keyframes r5CellPop {
+  0% {
+    transform: scale(1);
+  }
+  55% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1.06);
+  }
 }
 .r5-cell__date {
   font-family: var(--font-mono);

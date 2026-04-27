@@ -160,6 +160,10 @@
 .lp-toggle:hover {
   border-color: var(--mint);
 }
+.lp-toggle:has(input:focus-visible) {
+  border-color: var(--mint-deep);
+  box-shadow: 0 0 0 3px rgba(63, 142, 108, 0.28);
+}
 
 .lp-warn {
   background: var(--bg-2);
