@@ -38,8 +38,8 @@ export function Landing() {
           </span>
 
           <h1 className="ht-h1">
-            <span className="ht-h1__line">育休給付金、</span>
-            <span className="ht-h1__line ht-h1__accent">もらえる？</span>
+            <span className="ht-h1__line">出産日がずれても、</span>
+            <span className="ht-h1__line ht-h1__accent">受け取れるか。</span>
           </h1>
 
           <p className="ht-lede">
