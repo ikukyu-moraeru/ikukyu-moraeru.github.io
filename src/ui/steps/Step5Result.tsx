@@ -50,6 +50,13 @@ function jpDate(iso: string | null) {
 }
 
 /**
+ * countedMonths は 0.5 刻み。整数のときは ".0" を省いて表示する（"12.0" ではなく "12"）。
+ */
+function formatMonths(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(1)
+}
+
+/**
  * scanRange の中央日 = 出産予定日として扱う（Step1 の deriveExpected と整合）。
  */
 function deriveExpectedBirthDate(start: string, end: string): string {
@@ -196,7 +203,7 @@ export function Step5Result() {
                 onClick={() =>
                   setSelected(r.birthDate === selected ? null : r.birthDate)
                 }
-                title={`${r.birthDate}${isExpected ? '（出産予定日）' : ''}: ${r.countedMonths.toFixed(1)} か月（${verdictLabel}）`}
+                title={`${r.birthDate}${isExpected ? '（出産予定日）' : ''}: ${formatMonths(r.countedMonths)} か月（${verdictLabel}）`}
               >
                 {isExpected && (
                   <span className="r5-cell__pin" aria-label="出産予定日">
@@ -207,7 +214,7 @@ export function Step5Result() {
                   {Number(mm)}/{Number(dd)}
                 </span>
                 <span className="r5-cell__num">
-                  {r.countedMonths.toFixed(1)}
+                  {formatMonths(r.countedMonths)}
                 </span>
               </button>
             )
