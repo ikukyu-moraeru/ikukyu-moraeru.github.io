@@ -26,6 +26,15 @@
     />
   </head>
   <body>
+    <script>
+      // 404.html で保存した pathname を History API で復元する
+      var redirect = sessionStorage.getItem('spa:redirect');
+      if (redirect) {
+        sessionStorage.removeItem('spa:redirect');
+        var base = '/MaternityLeaveCalculator';
+        history.replaceState(null, '', base + redirect);
+      }
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
