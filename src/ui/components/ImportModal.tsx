@@ -99,27 +99,11 @@ function ImportPreview({ input }: { input: UserInput }) {
   const segCount = input.insuredSegments?.length ?? 0
   const leaveCount = input.leavePeriods?.length ?? 0
   const attCount = input.attendances?.length ?? 0
-  const scan =
-    input.scanRange?.start && input.scanRange?.end
-      ? `${input.scanRange.start} 〜 ${input.scanRange.end}`
-      : '未設定'
   return (
     <dl className="import-modal__summary">
       <div>
-        <dt>多胎</dt>
-        <dd>{input.isMultipleBirth ? 'はい' : 'いいえ'}</dd>
-      </div>
-      <div>
-        <dt>出産日候補</dt>
-        <dd>{scan}</dd>
-      </div>
-      <div>
         <dt>育休開始日</dt>
-        <dd>
-          {input.customChildCareStart
-            ? `${input.customChildCareStart}（カスタム）`
-            : '自動（産後休業の翌日）'}
-        </dd>
+        <dd>{input.customChildCareStart ?? '自動'}</dd>
       </div>
       <div>
         <dt>加入期間</dt>
