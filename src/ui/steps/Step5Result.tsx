@@ -5,7 +5,6 @@ import {
   endOfMonth,
   format,
   isAfter,
-  isBefore,
   parseISO,
   startOfMonth,
 } from 'date-fns'
@@ -385,11 +384,15 @@ function jpMonth(ym: string): string {
 }
 
 /**
- * 判定対象期間（全候補の最広）の各暦月のうち、
+ * 判定対象期間の各暦月のうち、
  * - 出勤情報が 1 件も入っておらず、
- * - 休業期間（leavePeriod）に全日が内包されておらず、
- * - 被保険者セグメントが少しでも重なっている
+ * - その月の中に「入力されるべき日」（雇用保険加入中・休業期間外・育休開始日より前）が
+ *   1 日でも残っている
  * を満たす月を「未入力候補」として返す。
+ *
+ * 月途中で産休に入る月や、月途中で育休開始日を迎える月でも、
+ * 入力対象の日が残っているなら警告する。逆に月内の全日が
+ * 「休業中／加入外／育休開始日以降」で埋まっているなら警告しない。
  */
 function detectMissingMonths(
   input: UserInput,
@@ -412,13 +415,7 @@ function detectMissingMonths(
   const last = startOfMonth(parseISO(latest))
   while (!isAfter(cursor, last)) {
     const ym = format(cursor, 'yyyy-MM')
-    const monthStart = cursor
-    const monthEnd = endOfMonth(cursor)
-    if (
-      !inputMonthKeys.has(ym) &&
-      monthOverlapsAnyInsured(monthStart, monthEnd, input.insuredSegments) &&
-      !monthFullyCoveredByLeave(monthStart, monthEnd, input.leavePeriods)
-    ) {
+    if (!inputMonthKeys.has(ym) && monthHasInputableDay(cursor, input, latest)) {
       out.push(ym)
     }
     cursor = addMonths(cursor, 1)
@@ -426,28 +423,49 @@ function detectMissingMonths(
   return out
 }
 
-function monthOverlapsAnyInsured(
-  monthStart: Date,
-  monthEnd: Date,
+/**
+ * 月内に「ユーザーが入力すべき日」が 1 日でも残っているか。
+ * 入力すべき日 = 加入中 かつ 休業期間外 かつ 判定窓内（育休開始日より前）
+ */
+function monthHasInputableDay(
+  cursor: Date,
+  input: UserInput,
+  scanWindowEnd: string,
+): boolean {
+  const monthEnd = endOfMonth(cursor)
+  let cur = cursor
+  while (cur.getTime() <= monthEnd.getTime()) {
+    const date = format(cur, 'yyyy-MM-dd')
+    if (date > scanWindowEnd) {
+      cur = addDays(cur, 1)
+      continue
+    }
+    if (!isInsuredDay(date, input.insuredSegments)) {
+      cur = addDays(cur, 1)
+      continue
+    }
+    if (isInLeave(date, input.leavePeriods)) {
+      cur = addDays(cur, 1)
+      continue
+    }
+    return true
+  }
+  return false
+}
+
+function isInsuredDay(
+  date: string,
   segments: InsuredEmploymentSegment[],
 ): boolean {
-  if (segments.length === 0) return true // 未入力なら全月対象とみなす
-  return segments.some((seg) => {
-    const segStart = parseISO(seg.start)
-    const segEnd = seg.end ? parseISO(seg.end) : new Date(8640000000000000)
-    return !isAfter(segStart, monthEnd) && !isBefore(segEnd, monthStart)
+  if (segments.length === 0) return true
+  return segments.some((s) => {
+    const segEnd = s.end ?? '9999-12-31'
+    return s.start <= date && date <= segEnd
   })
 }
 
-function monthFullyCoveredByLeave(
-  monthStart: Date,
-  monthEnd: Date,
-  leaves: LeavePeriod[],
-): boolean {
-  return leaves.some((p) => {
-    if (!p.start || !p.end) return false
-    const ls = parseISO(p.start)
-    const le = parseISO(p.end)
-    return !isAfter(ls, monthStart) && !isBefore(le, monthEnd)
-  })
+function isInLeave(date: string, leaves: LeavePeriod[]): boolean {
+  return leaves.some(
+    (l) => l.start && l.end && l.start <= date && date <= l.end,
+  )
 }
