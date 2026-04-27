@@ -1,0 +1,218 @@
+.at-info {
+  background: linear-gradient(135deg, var(--bg-3) 0%, #fff 100%);
+  border-radius: 20px;
+  padding: 1.1rem 1.3rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.at-info__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mint-deep);
+  margin-bottom: 0.25rem;
+}
+.at-info strong {
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 1.05rem;
+  color: var(--plum);
+  letter-spacing: 0;
+}
+.at-info__sub {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--ink-mute);
+  margin-top: 0.2rem;
+}
+
+.at-info__counter {
+  text-align: right;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.at-info__big {
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 2.4rem;
+  color: var(--mint-deep);
+  line-height: 1;
+}
+.at-info__cap {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  text-align: left;
+  line-height: 1.4;
+}
+
+.at-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.at-quick__label {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.at-quick__btn {
+  background: var(--plum);
+  color: #fff;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+.at-quick__btn:hover {
+  background: var(--plum-deep);
+  transform: translateY(-1px);
+}
+.at-quick__btn--ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--line);
+}
+.at-quick__btn--ghost:hover {
+  background: var(--bg-2);
+  color: var(--pink-deep);
+  border-color: var(--pink);
+}
+
+.at-warn-mark {
+  color: var(--gold-deep);
+  font-weight: 700;
+}
+
+.at-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.at-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1.4fr) auto auto auto;
+  gap: 0.7rem 1rem;
+  align-items: center;
+  padding: 0.55rem 0.95rem;
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.at-row--pass {
+  border-color: var(--mint);
+  background: linear-gradient(90deg, rgba(206, 233, 214, 0.4) 0%, var(--bg) 60%);
+}
+.at-row--border {
+  border-color: var(--gold);
+  background: linear-gradient(90deg, rgba(243, 207, 118, 0.18) 0%, var(--bg) 60%);
+}
+.at-row--fail {
+  border-color: var(--line);
+}
+
+.at-row__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.at-row__year {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-mute);
+  letter-spacing: 0.06em;
+}
+.at-row__month {
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 1.05rem;
+  color: var(--plum);
+}
+.at-row__warn {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: var(--gold-deep);
+  background: #fff5d4;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+}
+
+.at-row__field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.at-row__field span {
+  font-size: 0.78rem;
+  color: var(--ink-mute);
+}
+.at-row__input {
+  width: 5.5rem;
+  padding: 0.45rem 0.6rem;
+  text-align: right;
+  border-radius: 10px;
+  background: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+}
+
+.at-row__badge {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.at-row__badge--pass {
+  background: var(--bg-3);
+  color: var(--mint-deep);
+}
+.at-row__badge--border {
+  background: #fff3cf;
+  color: var(--gold-deep);
+}
+.at-row__badge--fail {
+  background: var(--bg-2);
+  color: var(--pink-deep);
+}
+
+@media (max-width: 640px) {
+  .at-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 0.7rem;
+  }
+  .at-row__head {
+    grid-column: span 2;
+  }
+  .at-row__badge {
+    grid-column: span 2;
+    justify-self: start;
+  }
+  .at-row__input {
+    width: 100%;
+  }
+  .at-row__field {
+    width: 100%;
+  }
+  .at-info {
+    grid-template-columns: 1fr;
+  }
+  .at-info__counter {
+    justify-content: flex-start;
+  }
+}
