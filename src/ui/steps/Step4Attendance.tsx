@@ -544,28 +544,31 @@ export function Step4Attendance() {
                     )}
                   </span>
                   <span className="ac-month__statusrow">
-                    {m.status === 'pass' && (
-                      <span className="ac-month__check">✓ 達成見込</span>
-                    )}
-                    {m.status === 'fail' && (
-                      <span className="ac-month__x">未達</span>
-                    )}
-                    {m.status === 'out' && (
-                      <span className="ac-month__out-mark">対象外</span>
-                    )}
-                    {m.status === 'leave' && (
-                      <span className="ac-month__out-mark">休業中</span>
-                    )}
-                    {m.volatile && (
-                      <span
-                        className="ac-month__warn"
-                        title="出産日次第で結果が変わる可能性"
-                      >
-                        ⚠
-                      </span>
-                    )}
-                    {isOptional && (
-                      <span className="ac-month__skip">不要</span>
+                    {isOptional ? (
+                      <span className="ac-month__skip">入力不要</span>
+                    ) : (
+                      <>
+                        {m.status === 'pass' && (
+                          <span className="ac-month__check">✓ 達成見込</span>
+                        )}
+                        {m.status === 'fail' && (
+                          <span className="ac-month__x">未達</span>
+                        )}
+                        {m.status === 'out' && (
+                          <span className="ac-month__out-mark">対象外</span>
+                        )}
+                        {m.status === 'leave' && (
+                          <span className="ac-month__out-mark">休業中</span>
+                        )}
+                        {m.volatile && (
+                          <span
+                            className="ac-month__warn"
+                            title="出産日次第で結果が変わる可能性"
+                          >
+                            ⚠
+                          </span>
+                        )}
+                      </>
                     )}
                   </span>
                 </button>
