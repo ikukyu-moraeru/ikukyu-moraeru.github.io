@@ -1,5 +1,6 @@
 import { useAppState } from '../../state/AppState'
 import type { LeavePeriod, LeaveType } from '../../domain/types'
+import { AUTO_MATERNITY_ID } from './Step1BasicInfo'
 import { IssueBanner } from '../components/IssueBanner'
 import './steps.css'
 import './Step2LeavePeriods.css'
@@ -39,7 +40,16 @@ export function Step2LeavePeriods() {
   const add = () => update([...periods, newPeriod()])
   const patch = (id: string, patch: Partial<LeavePeriod>) =>
     update(periods.map((p) => (p.id === id ? { ...p, ...patch } : p)))
-  const remove = (id: string) => update(periods.filter((p) => p.id !== id))
+  const remove = (id: string) => {
+    if (id === AUTO_MATERNITY_ID) {
+      // 自動シードを意図的に消したと記録 → Step1 が再追加しない
+      dispatch({
+        type: 'PATCH_META',
+        patch: { suppressAutoMaternity: true },
+      })
+    }
+    update(periods.filter((p) => p.id !== id))
+  }
 
   const ids = periods.map((p) => p.id)
 
@@ -70,10 +80,22 @@ export function Step2LeavePeriods() {
           {periods.map((p, i) => {
             const opt =
               LEAVE_OPTIONS.find((o) => o.value === p.type) ?? LEAVE_OPTIONS[0]
+            const isAuto = p.id === AUTO_MATERNITY_ID
             return (
-              <li key={p.id} className="lp-card">
+              <li
+                key={p.id}
+                className={`lp-card${isAuto ? ' lp-card--auto' : ''}`}
+              >
                 <header className="lp-card__head">
                   <span className="lp-card__index">{String(i + 1).padStart(2, '0')}</span>
+                  {isAuto && (
+                    <span
+                      className="lp-card__auto-badge"
+                      title="Step1 の出産予定日から自動入力された産前産後休業。Step1 を変更すると追従します。削除すると自動追加は止まります。"
+                    >
+                      自動入力
+                    </span>
+                  )}
                   <span className="lp-card__emoji" aria-hidden>
                     {opt.emoji}
                   </span>

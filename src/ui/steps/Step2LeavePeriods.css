@@ -27,6 +27,32 @@
   transform: translateY(-1px);
 }
 
+.lp-card--auto {
+  background: linear-gradient(160deg, var(--bg-3) 0%, #fff 60%);
+  border-color: var(--mint);
+}
+.lp-card--auto::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  border: 1px dashed rgba(63, 142, 108, 0.45);
+  margin: 4px;
+}
+
+.lp-card__auto-badge {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--mint-deep);
+  background: var(--bg-3);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--mint);
+}
+
 .lp-card__head {
   display: grid;
   grid-template-columns: auto auto 1fr auto;
