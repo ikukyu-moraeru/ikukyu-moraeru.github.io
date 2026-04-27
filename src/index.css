@@ -1,17 +1,127 @@
+/* =========================================================================
+   THE LEDGER — design tokens
+   editorial / printed-paper aesthetics. 明朝 × Fraunces × 深緑松葉。
+   ========================================================================= */
+
 :root {
-  font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
-  color-scheme: light dark;
+  /* paper palette */
+  --paper: #f4ecdc;
+  --paper-deep: #ebe1cb;
+  --paper-shadow: #d6c9a8;
+  --ink: #1a1612;
+  --ink-soft: #4a443a;
+  --ink-mute: #8a8270;
+  --rule: #c8b993;
+  --rule-soft: #ddd0ac;
+
+  /* accents */
+  --pine: #2f4a3a;          /* 松葉色 */
+  --pine-deep: #1f3327;
+  --vermillion: #b04a32;    /* 朱 */
+  --vermillion-soft: #d97a5a;
+  --gold: #b89052;
+  --plum: #7a3a4a;
+
+  /* type */
+  --font-display: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-serif-en: "Fraunces", "Times New Roman", serif;
+  --font-body: "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+
+  /* scale */
+  --leading-tight: 1.15;
+  --leading-body: 1.7;
+  --tracking-display: -0.02em;
+  --tracking-caps: 0.18em;
+
+  /* motion */
+  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--paper);
+  font-feature-settings: "palt" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
 }
 
 body {
-  margin: 0;
-  background: var(--bg, #fafafa);
-  color: var(--fg, #222);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(184, 144, 82, 0.08), transparent 45%),
+    radial-gradient(circle at 88% 92%, rgba(47, 74, 58, 0.08), transparent 50%),
+    var(--paper);
+  background-attachment: fixed;
+  position: relative;
 }
 
-@media (prefers-color-scheme: dark) {
-  body {
-    background: #1a1a1a;
-    color: #f0f0f0;
-  }
+/* paper grain overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.30 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.40'/></svg>");
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+
+/* selection */
+::selection {
+  background: var(--pine);
+  color: var(--paper);
+}
+
+/* link reset */
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+/* utility — small caps wordmark */
+.eyebrow {
+  font-family: var(--font-serif-en);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--ink-mute);
+}
+
+.numeric {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* focus */
+:focus-visible {
+  outline: 2px solid var(--pine);
+  outline-offset: 3px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
