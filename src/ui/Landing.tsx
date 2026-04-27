@@ -48,12 +48,6 @@ export function Landing() {
               <span>判定をはじめる</span>
               <span className="ht-btn__chip">3 分</span>
             </button>
-            <button
-              className="ht-btn ht-btn--ghost"
-              onClick={() => dispatch({ type: 'GOTO_WIZARD' })}
-            >
-              サンプルを見る
-            </button>
           </div>
 
           <ul className="ht-points">
