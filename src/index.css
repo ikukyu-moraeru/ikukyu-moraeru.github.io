@@ -133,6 +133,83 @@ button:disabled {
   }
 }
 
+@media print {
+  :root {
+    font-size: 11pt;
+    background: #fff !important;
+  }
+  body {
+    background: #fff !important;
+  }
+  /* 装飾・操作要素は隠す */
+  .ht-blob,
+  .ht-nav,
+  .wz-nav,
+  .wz-stepper,
+  .wz-foot,
+  .ht-foot,
+  .wz-back,
+  .st-add,
+  .at-quick,
+  .lp-card__del,
+  .r5-cell:hover,
+  .r5-detail__hint,
+  .r5-disclaimer + * {
+    display: none !important;
+  }
+  .ht-page {
+    padding-bottom: 0;
+  }
+  .wz-card,
+  .ht-card,
+  .r5-heat,
+  .r5-detail,
+  .r5-stats__cell,
+  .lp-card,
+  .at-row {
+    box-shadow: none !important;
+    border: 1px solid #999 !important;
+    page-break-inside: avoid;
+    background: #fff !important;
+  }
+  .r5-stats {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  .r5-heat__grid {
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 4px !important;
+  }
+  .r5-cell {
+    aspect-ratio: 1 !important;
+    border: 1px solid #777 !important;
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .r5-verdict {
+    page-break-after: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .r5-detail {
+    page-break-before: auto;
+  }
+  .r5-month {
+    page-break-inside: avoid;
+  }
+  a {
+    text-decoration: none;
+    color: #000;
+  }
+  /* 印刷時はアニメーション無効化 */
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 input,
 select,
 textarea {
