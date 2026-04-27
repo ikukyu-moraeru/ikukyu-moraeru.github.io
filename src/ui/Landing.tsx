@@ -169,6 +169,8 @@ export function Landing() {
           © 2026 {SERVICE_NAME} · ローカル動作 · 個人情報は送信しません
           {' · '}
           <a className="ht-foot__link" href="#/privacy">プライバシーポリシー</a>
+          {' · '}
+          <a className="ht-foot__link" href="#/content-policy">コンテンツポリシー</a>
         </p>
       </footer>
     </div>
