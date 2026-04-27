@@ -151,15 +151,6 @@ export function Step5Result() {
           <span className="r5-verdict__small">判定結果</span>
           <h2 className="r5-verdict__title">{verdictTitle}</h2>
         </div>
-        <button
-          type="button"
-          className="r5-verdict__share"
-          onClick={() => setShareOpen(true)}
-          aria-label="結果を URL でシェアする"
-        >
-          <span aria-hidden>📤</span>
-          <span>シェア</span>
-        </button>
       </div>
 
       <div className="r5-stats">
@@ -234,9 +225,18 @@ export function Step5Result() {
         </div>
 
         <footer>
-          <span className="r5-leg r5-leg--pass">受け取れる</span>
-          <span className="r5-leg r5-leg--near">あと少し届かない</span>
-          <span className="r5-leg r5-leg--fail">受け取れない</span>
+          <span className="r5-leg r5-leg--pass">
+            受け取れる
+            <span className="r5-leg__sub">12 か月以上</span>
+          </span>
+          <span className="r5-leg r5-leg--near">
+            あと少し届かない
+            <span className="r5-leg__sub">11〜12 か月</span>
+          </span>
+          <span className="r5-leg r5-leg--fail">
+            受け取れない
+            <span className="r5-leg__sub">11 か月未満</span>
+          </span>
         </footer>
       </section>
 

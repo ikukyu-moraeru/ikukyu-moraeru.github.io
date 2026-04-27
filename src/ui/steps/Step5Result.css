@@ -266,11 +266,21 @@
   gap: 0.6rem;
 }
 .r5-leg {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
   font-family: var(--font-h);
   font-weight: 700;
   font-size: 0.78rem;
   padding: 0.3rem 0.85rem;
-  border-radius: 999px;
+  border-radius: var(--r-full);
+}
+.r5-leg__sub {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
 }
 .r5-leg--pass {
   background: var(--bg-3);
