@@ -12,6 +12,7 @@ import {
   subYears,
 } from "date-fns";
 import { buildCompleteMonths } from "./completeMonth";
+import { computeRelaxationDays } from "./relaxation";
 import type {
   CompleteMonth,
   DateISO,
@@ -27,11 +28,9 @@ import type {
 /**
  * Rule.md §2 / §3 の支給要件②（みなし被保険者期間 12 か月）判定。
  *
- * 本ファイルは Phase P2 までのスコープ：
- *   - 緩和（§3-4） は未適用（relaxationDays = 0 で固定）
- *   - 前職通算（§4-2）は未適用（input.insuredSegments をそのまま使用）
- * 後フェーズで relaxation.ts / carryOver.ts を導入し、`scanWindow` と
- * `insuredSegments` の前処理として差し込む形にする。
+ * §3-4 の緩和（最長 4 年）は relaxation.ts に委譲し、
+ * 緩和後の判定対象期間で完全月を生成する。
+ * 前職通算（§4-2）は未適用（input.insuredSegments をそのまま使用）→ P4 で carryOver.ts を導入予定。
  */
 
 const PRENATAL_DAYS_SINGLE = 42;
@@ -53,8 +52,13 @@ export function judgeEligibility(
   const childCareStartDate = fmt(childCareStartD);
 
   const baseWindowStart = fmt(subYears(childCareStartD, 2));
-  const windowStart = baseWindowStart;
   const windowEnd = fmt(subDays(childCareStartD, 1));
+  const relaxationDays = computeRelaxationDays(
+    input.leavePeriods,
+    baseWindowStart,
+    windowEnd,
+  );
+  const windowStart = fmt(subDays(parseISO(baseWindowStart), relaxationDays));
 
   const { completeMonths, fragment } = buildCompleteMonths(
     childCareStartDate,
@@ -83,7 +87,7 @@ export function judgeEligibility(
     childCareStartDate,
     scanWindow: { start: windowStart, end: windowEnd },
     baseWindowStart,
-    relaxationDays: 0,
+    relaxationDays,
     countedMonths,
     isEligible: countedMonths >= 12,
     shortage: Math.max(0, 12 - countedMonths),

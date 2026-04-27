@@ -130,6 +130,28 @@ describe("judgeEligibility (Phase P2: 緩和・通算なし)", () => {
     ).toBe(true);
   });
 
+  it("緩和事由（賃金なし産休 98 日）があると scanWindow.start が 98 日前倒し", () => {
+    // 産前産後休業 2025-06-01 〜 2025-09-06（98 日連続、賃金なし）
+    const input = makeInput({
+      leavePeriods: [
+        {
+          id: "p1",
+          type: "産休",
+          start: "2025-06-01",
+          end: "2025-09-06",
+          hasWageDuringLeave: false,
+        },
+      ],
+    });
+    const result = judgeEligibility(input, "2026-02-17");
+
+    expect(result.relaxationDays).toBe(98);
+    expect(result.baseWindowStart).toBe("2024-04-15");
+    // 2024-04-15 - 98 日 = 2024-01-08（2024 はうるう年）
+    expect(result.scanWindow.start).toBe("2024-01-08");
+    expect(result.scanWindow.end).toBe("2026-04-14");
+  });
+
   it("各完全月の attendance は暦月の値を日数比で按分した合計値が入る", () => {
     // 2026-03 = 22 日 / 168 時間, 2026-04 = 0 日 / 0 時間 のみ入力
     const attendances: MonthlyAttendance[] = [
