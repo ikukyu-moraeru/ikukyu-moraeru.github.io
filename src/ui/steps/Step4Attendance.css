@@ -1,7 +1,7 @@
 .at-info {
   background: linear-gradient(135deg, var(--bg-3) 0%, #fff 100%);
-  border-radius: 20px;
-  padding: 1.1rem 1.3rem;
+  border-radius: var(--r-md);
+  padding: 1.15rem 1.3rem;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 1rem;
@@ -114,10 +114,10 @@
   grid-template-columns: minmax(140px, 1.4fr) auto auto auto;
   gap: 0.7rem 1rem;
   align-items: center;
-  padding: 0.55rem 0.95rem;
+  padding: 0.65rem 1rem;
   background: var(--bg);
   border: 1.5px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--r-sm);
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 .at-row--pass {

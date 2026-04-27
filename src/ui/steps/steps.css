@@ -1,6 +1,6 @@
 .st-section {
   display: grid;
-  gap: 1.4rem;
+  gap: var(--sp-5);
 }
 
 .st-field {
@@ -54,8 +54,8 @@
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  padding: 1rem 1.1rem;
-  border-radius: 18px;
+  padding: var(--sp-4) 1.1rem;
+  border-radius: var(--r-md);
   border: 2px solid var(--line);
   background: var(--bg);
   cursor: pointer;
@@ -104,14 +104,15 @@
 
 .st-summary {
   background: var(--bg-2);
-  border-radius: 16px;
-  padding: 1rem 1.2rem;
+  border-radius: var(--r-md);
+  padding: var(--sp-4) 1.25rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 1.6rem;
   font-family: var(--font-body);
   color: var(--plum);
   font-size: 0.92rem;
+  line-height: 1.7;
 }
 .st-summary strong {
   font-family: var(--font-h);

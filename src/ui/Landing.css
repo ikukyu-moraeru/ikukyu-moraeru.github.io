@@ -202,13 +202,14 @@
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 0.85rem 1rem;
+  border-radius: var(--r-md);
+  padding: 0.95rem 1.1rem;
   display: grid;
   grid-template-columns: auto auto 1fr;
   gap: 0.7rem;
   align-items: center;
   font-size: 0.92rem;
+  line-height: 1.6;
   color: var(--ink-soft);
 }
 .ht-points strong {
@@ -224,12 +225,10 @@
 /* card / heatmap (sample on landing) */
 .ht-card {
   background: #fff;
-  border-radius: 28px;
+  border-radius: var(--r-xl);
   padding: clamp(1.2rem, 2vw, 1.8rem);
   border: 1px solid var(--line);
-  box-shadow:
-    0 30px 60px -20px rgba(58, 46, 79, 0.18),
-    0 0 0 8px rgba(255, 255, 255, 0.5);
+  box-shadow: var(--sh-lg);
   position: relative;
 }
 .ht-card::before {

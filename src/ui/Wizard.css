@@ -183,13 +183,11 @@
 
 .wz-card {
   background: #fff;
-  border-radius: 28px;
+  border-radius: var(--r-xl);
   border: 1px solid var(--line);
   padding: clamp(1.4rem, 3vw, 2.2rem);
-  box-shadow:
-    0 30px 60px -20px rgba(58, 46, 79, 0.18),
-    0 0 0 8px rgba(255, 255, 255, 0.55);
-  animation: wzPop 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  box-shadow: var(--sh-lg);
+  animation: wzPop 0.45s var(--ease-pop) both;
 }
 
 @keyframes wzPop {

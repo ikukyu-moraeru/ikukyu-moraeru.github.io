@@ -1,6 +1,6 @@
 .lp-empty {
   background: var(--bg);
-  border-radius: 18px;
+  border-radius: var(--r-md);
   border: 2px dashed var(--line);
 }
 
@@ -15,11 +15,11 @@
 .lp-card {
   background: var(--bg);
   border: 1.5px solid var(--line);
-  border-radius: 22px;
-  padding: 1.1rem 1.2rem 1.2rem;
+  border-radius: var(--r-lg);
+  padding: 1.15rem 1.25rem 1.25rem;
   position: relative;
   display: grid;
-  gap: 0.95rem;
+  gap: 1rem;
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 .lp-card:hover {
@@ -105,10 +105,10 @@
   grid-template-columns: auto 1fr;
   gap: 0.7rem;
   align-items: start;
-  padding: 0.8rem 1rem;
+  padding: 0.85rem 1.05rem;
   background: var(--bg);
   border: 1.5px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--r-sm);
   cursor: pointer;
 }
 .lp-toggle input {
