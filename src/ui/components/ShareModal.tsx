@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { buildShareUrl } from '../../state/share'
 import { useAppState } from '../../state/AppState'
 import { scanBirthDates } from '../../domain/birthDateScan'
 import { summarizeScan } from '../../domain/summary'
+import { ModalOverlay } from './ModalOverlay'
 import './ShareModal.css'
 
 interface Props {
@@ -52,17 +52,6 @@ export function ShareModal({ open, onClose }: Props) {
     }
   }, [open])
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
-
-  if (!open) return null
-
   const copy = async (kind: 'sns' | 'url', text: string) => {
     if (kind === 'url' && !agreed) return
     try {
@@ -78,13 +67,8 @@ export function ShareModal({ open, onClose }: Props) {
   const threadsUrl = `https://www.threads.net/intent/post?text=${encodeURIComponent(snsText)}`
   const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(APP_URL)}&text=${encodeURIComponent(snsText)}`
 
-  return createPortal(
-    <div
-      className="share-mask"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
-    >
+  return (
+    <ModalOverlay open={open} onClose={onClose}>
       <div className="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-title">
         <header className="share-modal__head">
           <h2 id="share-title" className="share-modal__title">
@@ -209,7 +193,6 @@ export function ShareModal({ open, onClose }: Props) {
           </p>
         </section>
       </div>
-    </div>,
-    document.body,
+    </ModalOverlay>
   )
 }

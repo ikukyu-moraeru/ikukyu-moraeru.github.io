@@ -1,6 +1,5 @@
-import { useEffect } from 'react'
-import { createPortal } from 'react-dom'
 import type { UserInput } from '../../domain/types'
+import { ModalOverlay } from './ModalOverlay'
 import './ShareModal.css'
 import './ImportModal.css'
 
@@ -19,26 +18,8 @@ export function ImportModal({
   onConfirm,
   onCancel,
 }: Props) {
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => {
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [open, onCancel])
-
-  if (!open) return null
-
-  return createPortal(
-    <div
-      className="share-mask"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onCancel()
-      }}
-    >
+  return (
+    <ModalOverlay open={open} onClose={onCancel}>
       <div
         className="share-modal import-modal"
         role="dialog"
@@ -92,8 +73,7 @@ export function ImportModal({
           )}
         </div>
       </div>
-    </div>,
-    document.body,
+    </ModalOverlay>
   )
 }
 
