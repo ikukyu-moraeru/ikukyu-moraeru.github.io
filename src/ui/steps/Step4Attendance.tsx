@@ -20,6 +20,7 @@ import type {
 } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
 import { classifyDay } from '../shared/dayClassification'
+import { deriveExpectedBirthDate } from '../shared/formatUtils'
 import './steps.css'
 import './Step4Attendance.css'
 
@@ -58,13 +59,6 @@ const STATUS_CYCLE: AttendanceStatus[] = ['work', 'absent']
 /* 期間判定ユーティリティ                                               */
 /* -------------------------------------------------------------------- */
 
-function expectedFromScan(scan: UserInput['scanRange']): string | null {
-  if (!scan.start || !scan.end) return null
-  const s = parseISO(scan.start).getTime()
-  const e = parseISO(scan.end).getTime()
-  if (Number.isNaN(s) || Number.isNaN(e)) return null
-  return format(new Date((s + e) / 2), 'yyyy-MM-dd')
-}
 
 /**
  * Step4 の表示用 DayInfo を、共通の classifyDay 結果から組み立てる。
@@ -144,7 +138,10 @@ export function Step4Attendance() {
     }
   }
 
-  const expected = expectedFromScan(state.input.scanRange)
+  const expected = deriveExpectedBirthDate(
+    state.input.scanRange.start,
+    state.input.scanRange.end,
+  ) || null
 
   const result: EligibilityResult | null = useMemo(() => {
     if (!expected) return null
