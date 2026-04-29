@@ -149,7 +149,7 @@
   z-index: 1;
   max-width: 880px;
   margin: 2rem auto 0;
-  padding: 0 clamp(1rem, 4vw, 3rem);
+  padding: 0 clamp(0.6rem, 3vw, 3rem);
 }
 
 .wz-page-head {
@@ -248,7 +248,7 @@
   z-index: 1;
   margin: 2rem auto 0;
   max-width: 880px;
-  padding: 1.2rem clamp(1rem, 4vw, 3rem) 0;
+  padding: 1.2rem clamp(0.6rem, 3vw, 3rem) 0;
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 1rem;
