@@ -51,14 +51,21 @@
     padding: 0.65rem 0.85rem;
   }
 }
-/* iOS Safari の <input type="date"> は内部に固定自然幅を持つため、明示的に縮めて親 grid セルに収まるようにする */
+/* iOS Safari/WebKit の <input type="date"> は内部 shadow DOM (::-webkit-datetime-edit) と border 描画が
+   外側の box から張り出す既知の問題を持つ。以下の3点で根本対策する：
+   1) -webkit-appearance: none でネイティブ widget レンダリングを無効化（自然幅が消え、border が忠実に描画される）
+   2) ::-webkit-date-and-time-value に min-width:0 / text-align:left でテキストの位置と幅を明示
+   3) font-size 16px で iOS の自動 zoom を防止（root 15px に対して input だけ明示） */
+input[type="date"].st-input,
+input[type="time"].st-input {
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-min-logical-width: 0;
+  font-size: 16px;
+}
 .st-input::-webkit-date-and-time-value {
   min-width: 0;
   text-align: left;
-}
-input[type="date"].st-input,
-input[type="time"].st-input {
-  -webkit-min-logical-width: 0;
 }
 .st-input::placeholder {
   color: var(--ink-mute);

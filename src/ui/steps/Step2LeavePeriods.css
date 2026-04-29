@@ -89,6 +89,9 @@
   gap: 1rem;
   transition: border-color 0.2s ease, transform 0.2s ease;
   min-width: 0;
+  /* WebKit (iOS) で border-radius + 子要素の overflow が破綻するバグを stacking context で隔離する
+     （子の <input type="date"> が border から外側に描画される現象を抑止） */
+  isolation: isolate;
 }
 .lp-card > * {
   min-width: 0;
