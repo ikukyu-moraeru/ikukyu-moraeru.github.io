@@ -6,6 +6,7 @@
 .st-field {
   display: grid;
   gap: 0.45rem;
+  min-width: 0;
 }
 
 .st-field__label {
@@ -37,7 +38,14 @@
   /* grid/flex 子要素として収まるように */
   min-width: 0;
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
+}
+@media (max-width: 420px) {
+  /* iOS の date 入力は内部スピナーで自然幅が大きい。狭画面では padding を詰めて溢れを防ぐ。 */
+  .st-input {
+    padding: 0.6rem 0.7rem;
+  }
 }
 .st-input::placeholder {
   color: var(--ink-mute);
@@ -112,6 +120,10 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
+  min-width: 0;
+}
+.st-row > * {
+  min-width: 0;
 }
 @media (min-width: 560px) {
   .st-row--two {
