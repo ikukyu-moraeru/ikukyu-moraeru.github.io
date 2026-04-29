@@ -73,6 +73,10 @@
   padding: 0;
   display: grid;
   gap: 1rem;
+  min-width: 0;
+}
+.lp-list > * {
+  min-width: 0;
 }
 
 .lp-card {
@@ -84,6 +88,10 @@
   display: grid;
   gap: 1rem;
   transition: border-color 0.2s ease, transform 0.2s ease;
+  min-width: 0;
+  overflow: hidden;
+}
+.lp-card > * {
   min-width: 0;
 }
 .lp-card:hover {

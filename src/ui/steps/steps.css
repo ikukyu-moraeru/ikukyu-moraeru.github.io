@@ -1,6 +1,10 @@
 .st-section {
   display: grid;
   gap: var(--sp-5);
+  min-width: 0;
+}
+.st-section > * {
+  min-width: 0;
 }
 
 .st-field {
@@ -46,6 +50,15 @@
   .st-input {
     padding: 0.6rem 0.7rem;
   }
+}
+/* iOS Safari の <input type="date"> は内部に固定自然幅を持つため、明示的に縮めて親 grid セルに収まるようにする */
+.st-input::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
+}
+input[type="date"].st-input,
+input[type="time"].st-input {
+  -webkit-min-logical-width: 0;
 }
 .st-input::placeholder {
   color: var(--ink-mute);
