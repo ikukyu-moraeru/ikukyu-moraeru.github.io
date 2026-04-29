@@ -1,9 +1,23 @@
+import { addDays, format, parseISO } from 'date-fns'
 import { useAppState } from '../../state/AppState'
 import type { InsuredEmploymentSegment } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
+import { DateInput } from '../components/DateInput'
+import { deriveExpectedBirthDate } from '../shared/formatUtils'
 import './steps.css'
 import './Step2LeavePeriods.css'
 import './Step3Segments.css'
+
+/** 雇用保険加入期間の現実的下限（運用上の現職実績として 1990 年以前は対象外で十分）。 */
+const SEGMENT_MIN = '1990-01-01'
+
+function segmentMax(expected: string): string | undefined {
+  if (!expected) return undefined
+  const exp = parseISO(expected)
+  if (Number.isNaN(exp.getTime())) return undefined
+  // 育休開始（出産予定日 + 産後 56 日 + 1 日）以降の入退社は判定に影響しないため、出産予定日 +1 年で十分。
+  return format(addDays(exp, 365), 'yyyy-MM-dd')
+}
 
 function uid(prefix: string) {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -18,6 +32,12 @@ function newSegment(): InsuredEmploymentSegment {
 export function Step3Segments() {
   const { state, dispatch } = useAppState()
   const segments = state.input.insuredSegments
+  const segMax = segmentMax(
+    deriveExpectedBirthDate(
+      state.input.scanRange.start,
+      state.input.scanRange.end,
+    ),
+  )
 
   const updateSegments = (next: InsuredEmploymentSegment[]) =>
     dispatch({ type: 'PATCH_INPUT', patch: { insuredSegments: next } })
@@ -97,15 +117,13 @@ export function Step3Segments() {
                       >
                         入社日
                       </label>
-                      <input
+                      <DateInput
                         id={`ss-${s.id}`}
-                        type="date"
                         className="st-input"
                         value={s.start}
-                        max={s.end ?? undefined}
-                        onChange={(e) =>
-                          patchSegment(s.id, { start: e.target.value })
-                        }
+                        min={SEGMENT_MIN}
+                        max={s.end ?? segMax}
+                        onChange={(v) => patchSegment(s.id, { start: v })}
                       />
                     </div>
                     <div className="st-field">
@@ -115,16 +133,16 @@ export function Step3Segments() {
                       >
                         退職日
                       </label>
-                      <input
+                      <DateInput
                         id={`se-${s.id}`}
-                        type="date"
                         className="st-input"
                         value={s.end ?? ''}
-                        min={s.start || undefined}
+                        min={s.start || SEGMENT_MIN}
+                        max={segMax}
                         disabled={isCurrent && s.end === null}
-                        onChange={(e) =>
+                        onChange={(v) =>
                           patchSegment(s.id, {
-                            end: e.target.value || (isCurrent ? null : ''),
+                            end: v || (isCurrent ? null : ''),
                           })
                         }
                       />
