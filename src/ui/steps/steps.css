@@ -34,6 +34,10 @@
   font-size: 1rem;
   color: var(--ink);
   transition: all 0.2s ease;
+  /* grid/flex 子要素として収まるように */
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 .st-input::placeholder {
   color: var(--ink-mute);
