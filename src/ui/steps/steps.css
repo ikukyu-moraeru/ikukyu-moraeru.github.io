@@ -46,9 +46,9 @@
   box-sizing: border-box;
 }
 @media (max-width: 420px) {
-  /* iOS の date 入力は内部スピナーで自然幅が大きい。狭画面では padding を詰めて溢れを防ぐ。 */
+  /* iOS の date 入力は内部スピナーで自然幅が大きい。狭画面でも padding は読みやすさを残しつつ、min-width:0 で grid セルから溢れないようにする。 */
   .st-input {
-    padding: 0.6rem 0.7rem;
+    padding: 0.65rem 0.85rem;
   }
 }
 /* iOS Safari の <input type="date"> は内部に固定自然幅を持つため、明示的に縮めて親 grid セルに収まるようにする */
