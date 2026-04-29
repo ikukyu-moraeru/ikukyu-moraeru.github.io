@@ -1,9 +1,46 @@
+import { addDays, format, parseISO, subDays } from 'date-fns'
 import { useAppState } from '../../state/AppState'
 import type { LeavePeriod, LeaveType } from '../../domain/types'
 import { AUTO_MATERNITY_ID } from './Step1BasicInfo'
 import { IssueBanner } from '../components/IssueBanner'
+import { DateInput } from '../components/DateInput'
+import { deriveExpectedBirthDate } from '../shared/formatUtils'
 import './steps.css'
 import './Step2LeavePeriods.css'
+
+/**
+ * 休業種別ごとの妥当な範囲を出産予定日基準で算出する。
+ * 範囲は「明らかに変な日付を弾く」ガードであり、医師判断や会社規定で
+ * 実際の取得日が前後してもおかしくない幅を残してある。
+ */
+function leaveBounds(
+  type: LeaveType,
+  expected: string,
+): { min?: string; max?: string } {
+  if (!expected) return {}
+  const exp = parseISO(expected)
+  if (Number.isNaN(exp.getTime())) return {}
+  switch (type) {
+    case '産休':
+      // 産前休業 最長 98 日（多胎）+ 産後休業 56 日 + 多少のずれ
+      return {
+        min: format(subDays(exp, 180), 'yyyy-MM-dd'),
+        max: format(addDays(exp, 90), 'yyyy-MM-dd'),
+      }
+    case '育休':
+      // 出産予定日の 30 日前 〜 子の 2 歳
+      return {
+        min: format(subDays(exp, 30), 'yyyy-MM-dd'),
+        max: format(addDays(exp, 365 * 2), 'yyyy-MM-dd'),
+      }
+    default:
+      // 病気休職/介護等は雇用期間内であれば任意。判定対象期間（最長 4 年）を超える設定は不要。
+      return {
+        min: format(subDays(exp, 365 * 4 + 200), 'yyyy-MM-dd'),
+        max: format(addDays(exp, 365 * 2), 'yyyy-MM-dd'),
+      }
+  }
+}
 
 const LEAVE_OPTIONS: { value: LeaveType; emoji: string; label: string }[] = [
   { value: '産休', emoji: '🤰', label: '産前産後休業（労基法 65 条）' },
@@ -37,6 +74,10 @@ function newPeriod(): LeavePeriod {
 export function Step2LeavePeriods() {
   const { state, dispatch } = useAppState()
   const periods = state.input.leavePeriods
+  const expectedForBounds = deriveExpectedBirthDate(
+    state.input.scanRange.start,
+    state.input.scanRange.end,
+  )
 
   const update = (next: LeavePeriod[]) =>
     dispatch({ type: 'PATCH_INPUT', patch: { leavePeriods: next } })
@@ -112,6 +153,7 @@ export function Step2LeavePeriods() {
             const opt =
               LEAVE_OPTIONS.find((o) => o.value === p.type) ?? LEAVE_OPTIONS[0]
             const isAuto = p.id === AUTO_MATERNITY_ID
+            const bounds = leaveBounds(p.type, expectedForBounds)
             return (
               <li
                 key={p.id}
@@ -157,26 +199,26 @@ export function Step2LeavePeriods() {
                     <label className="st-field__label" htmlFor={`s-${p.id}`}>
                       開始日
                     </label>
-                    <input
+                    <DateInput
                       id={`s-${p.id}`}
-                      type="date"
                       className="st-input"
                       value={p.start}
-                      max={p.end || undefined}
-                      onChange={(e) => patch(p.id, { start: e.target.value })}
+                      min={bounds.min}
+                      max={p.end || bounds.max}
+                      onChange={(v) => patch(p.id, { start: v })}
                     />
                   </div>
                   <div className="st-field">
                     <label className="st-field__label" htmlFor={`e-${p.id}`}>
                       終了日
                     </label>
-                    <input
+                    <DateInput
                       id={`e-${p.id}`}
-                      type="date"
                       className="st-input"
                       value={p.end}
-                      min={p.start || undefined}
-                      onChange={(e) => patch(p.id, { end: e.target.value })}
+                      min={p.start || bounds.min}
+                      max={bounds.max}
+                      onChange={(v) => patch(p.id, { end: v })}
                     />
                   </div>
                 </div>
