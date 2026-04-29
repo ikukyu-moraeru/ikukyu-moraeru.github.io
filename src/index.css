@@ -81,9 +81,6 @@ body,
   margin: 0;
   padding: 0;
   min-height: 100%;
-  /* スマホで横スクロールが発生しないようにする（要素の自然幅が viewport を超えても画面端で切る） */
-  overflow-x: hidden;
-  max-width: 100%;
 }
 
 a {
