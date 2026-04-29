@@ -51,21 +51,36 @@
     padding: 0.65rem 0.85rem;
   }
 }
-/* iOS Safari/WebKit の <input type="date"> は内部 shadow DOM (::-webkit-datetime-edit) と border 描画が
-   外側の box から張り出す既知の問題を持つ。以下の3点で根本対策する：
-   1) -webkit-appearance: none でネイティブ widget レンダリングを無効化（自然幅が消え、border が忠実に描画される）
-   2) ::-webkit-date-and-time-value に min-width:0 / text-align:left でテキストの位置と幅を明示
-   3) font-size 16px で iOS の自動 zoom を防止（root 15px に対して input だけ明示） */
+/* iOS WebKit (Safari/Chrome 両方) の <input type="date"> 描画はみ出し対策。
+   iOS Chrome は Apple のネイティブ date picker を使うため appearance:none では shadow DOM の余分 padding が残る。
+   - -webkit-appearance: textfield（textfield 化でネイティブ widget の自然幅をリセット、Chrome iOS でも効く）
+   - display: block（iOS の inline-flex デフォルトを上書きして width: 100% を効かせる）
+   - shadow DOM 子要素 (::-webkit-datetime-edit*, ::-webkit-calendar-picker-indicator) の padding/margin を 0 化
+   - font-size 16px で iOS 自動 zoom を防止 */
 input[type="date"].st-input,
 input[type="time"].st-input {
-  -webkit-appearance: none;
-  appearance: none;
+  -webkit-appearance: textfield;
+  appearance: textfield;
   -webkit-min-logical-width: 0;
+  display: block;
   font-size: 16px;
 }
 .st-input::-webkit-date-and-time-value {
   min-width: 0;
   text-align: left;
+}
+.st-input::-webkit-datetime-edit,
+.st-input::-webkit-datetime-edit-fields-wrapper,
+.st-input::-webkit-datetime-edit-text,
+.st-input::-webkit-datetime-edit-month-field,
+.st-input::-webkit-datetime-edit-day-field,
+.st-input::-webkit-datetime-edit-year-field {
+  padding: 0;
+  margin: 0;
+}
+.st-input::-webkit-calendar-picker-indicator {
+  padding: 0;
+  margin: 0;
 }
 .st-input::placeholder {
   color: var(--ink-mute);
