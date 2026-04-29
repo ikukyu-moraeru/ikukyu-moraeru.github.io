@@ -15,6 +15,7 @@ import type { EligibilityResult, UserInput } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
 import { AdSlot } from '../components/AdSlot'
 import { isInputableDay } from '../shared/dayClassification'
+import { jpDate, formatMonths, deriveExpectedBirthDate } from '../shared/formatUtils'
 import './steps.css'
 import './Step5Result.css'
 
@@ -44,32 +45,6 @@ function failVerdictLabel(r: EligibilityResult): string {
   return isNearMiss(r) ? 'あと少し届きません' : '受け取れません'
 }
 
-function jpDate(iso: string | null) {
-  if (!iso) return ''
-  const [y, m, d] = iso.split('-')
-  return `${y} 年 ${Number(m)} 月 ${Number(d)} 日`
-}
-
-/**
- * countedMonths は 0.5 刻み。整数のときは ".0" を省いて表示する（"12.0" ではなく "12"）。
- */
-function formatMonths(n: number): string {
-  return Number.isInteger(n) ? String(n) : n.toFixed(1)
-}
-
-/**
- * scanRange の中央日 = 出産予定日として扱う（Step1 の deriveExpected と整合）。
- */
-function deriveExpectedBirthDate(start: string, end: string): string {
-  if (!start || !end) return ''
-  try {
-    const s = parseISO(start).getTime()
-    const e = parseISO(end).getTime()
-    return format(new Date((s + e) / 2), 'yyyy-MM-dd')
-  } catch {
-    return ''
-  }
-}
 
 export function Step5Result() {
   const { state } = useAppState()
@@ -440,7 +415,7 @@ function MissingMonthsHint({ input, results }: MissingMonthsHintProps) {
 
 function jpMonth(ym: string): string {
   const [y, m] = ym.split('-')
-  return `${y} 年 ${Number(m)} 月`
+  return `${y}年${Number(m)}月`
 }
 
 /**

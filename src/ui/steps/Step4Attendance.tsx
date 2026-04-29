@@ -20,6 +20,7 @@ import type {
 } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
 import { classifyDay } from '../shared/dayClassification'
+import { deriveExpectedBirthDate } from '../shared/formatUtils'
 import './steps.css'
 import './Step4Attendance.css'
 
@@ -53,18 +54,6 @@ interface DayInfo {
  * 詳細パネルから明示的に選べるようにする。
  */
 const STATUS_CYCLE: AttendanceStatus[] = ['work', 'absent']
-
-/* -------------------------------------------------------------------- */
-/* 期間判定ユーティリティ                                               */
-/* -------------------------------------------------------------------- */
-
-function expectedFromScan(scan: UserInput['scanRange']): string | null {
-  if (!scan.start || !scan.end) return null
-  const s = parseISO(scan.start).getTime()
-  const e = parseISO(scan.end).getTime()
-  if (Number.isNaN(s) || Number.isNaN(e)) return null
-  return format(new Date((s + e) / 2), 'yyyy-MM-dd')
-}
 
 /**
  * Step4 の表示用 DayInfo を、共通の classifyDay 結果から組み立てる。
@@ -144,7 +133,10 @@ export function Step4Attendance() {
     }
   }
 
-  const expected = expectedFromScan(state.input.scanRange)
+  const expected = deriveExpectedBirthDate(
+    state.input.scanRange.start,
+    state.input.scanRange.end,
+  ) || null
 
   const result: EligibilityResult | null = useMemo(() => {
     if (!expected) return null
@@ -152,34 +144,15 @@ export function Step4Attendance() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.input, expected])
 
-  if (!expected || !result) {
-    return (
-      <div className="st-empty">
-        <span className="st-empty__emoji" aria-hidden>
-          📅
-        </span>
-        Step 1 で出産予定日を入力すると、判定対象期間が決まります。
-      </div>
-    )
-  }
-
-  const overrideMap = new Map<string, DailyAttendance>()
-  for (const a of state.input.attendances) overrideMap.set(a.date, a)
-
-  /* 達成ラインの計算（直近順に累積し 12 を超えたインデックス） */
-  let cumulative = 0
-  let achievedAt = -1 // 0-indexed
-  for (let i = 0; i < result.monthBreakdown.length; i++) {
-    cumulative += result.monthBreakdown[i].counted
-    if (cumulative >= 12 && achievedAt === -1) {
-      achievedAt = i
-    }
-  }
-  const achieved = achievedAt >= 0
-  const remainingNeeded = Math.max(0, 12 - result.countedMonths)
+  const overrideMap = useMemo(() => {
+    const map = new Map<string, DailyAttendance>()
+    for (const a of state.input.attendances) map.set(a.date, a)
+    return map
+  }, [state.input.attendances])
 
   /* 暦月リスト生成（最新月から逆順） */
-  const calendarMonths: CalendarMonth[] = (() => {
+  const calendarMonths = useMemo<CalendarMonth[]>(() => {
+    if (!result) return []
     const list: CalendarMonth[] = []
     let cursor = startOfMonth(parseISO(result.scanWindow.start))
     const stop = startOfMonth(parseISO(result.scanWindow.end))
@@ -252,7 +225,30 @@ export function Step4Attendance() {
       cursor = addMonths(cursor, 1)
     }
     return list.reverse() // 直近順
-  })()
+  }, [state.input, result, overrideMap])
+
+  if (!expected || !result) {
+    return (
+      <div className="st-empty">
+        <span className="st-empty__emoji" aria-hidden>
+          📅
+        </span>
+        Step 1 で出産予定日を入力すると、判定対象期間が決まります。
+      </div>
+    )
+  }
+
+  /* 達成ラインの計算（直近順に累積し 12 を超えたインデックス） */
+  let cumulative = 0
+  let achievedAt = -1 // 0-indexed
+  for (let i = 0; i < result.monthBreakdown.length; i++) {
+    cumulative += result.monthBreakdown[i].counted
+    if (cumulative >= 12 && achievedAt === -1) {
+      achievedAt = i
+    }
+  }
+  const achieved = achievedAt >= 0
+  const remainingNeeded = Math.max(0, 12 - result.countedMonths)
 
   // 達成ラインを暦月ベースで計算（直近順に pass を数えて 12 に達した暦月）
   let calAchievedAt = -1

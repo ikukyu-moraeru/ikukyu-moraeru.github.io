@@ -2,14 +2,8 @@ import { useAppState } from '../state/AppState'
 import { SAMPLE_HEATMAP } from '../preview/sample'
 import { SocialShare } from './components/SocialShare'
 import { AdSlot } from './components/AdSlot'
+import { formatMonths } from './shared/formatUtils'
 import './Landing.css'
-
-/**
- * countedMonths は 0.5 刻み。整数のときは ".0" を省いて表示する（"12.0" ではなく "12"）。
- */
-function formatMonths(n: number): string {
-  return Number.isInteger(n) ? String(n) : n.toFixed(1)
-}
 
 const SERVICE_NAME = '育休もらえる？'
 

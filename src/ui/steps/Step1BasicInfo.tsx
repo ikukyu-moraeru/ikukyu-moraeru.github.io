@@ -4,32 +4,15 @@ import { useAppState } from '../../state/AppState'
 import { computeMaternityTimeline } from '../../domain/maternityTimeline'
 import type { LeavePeriod } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
+import { jpDate, deriveExpectedBirthDate } from '../shared/formatUtils'
 import './steps.css'
 
 export const AUTO_MATERNITY_ID = 'auto:maternity'
-
-function jpDate(iso: string) {
-  if (!iso) return ''
-  const [y, m, d] = iso.split('-')
-  return `${y}年${Number(m)}月${Number(d)}日`
-}
 
 const DEFAULT_SPREAD = 14
 
 function isoDate(d: Date) {
   return format(d, 'yyyy-MM-dd')
-}
-
-function deriveExpected(scanStart: string, scanEnd: string): string {
-  if (!scanStart || !scanEnd) return ''
-  try {
-    const s = parseISO(scanStart).getTime()
-    const e = parseISO(scanEnd).getTime()
-    const mid = new Date((s + e) / 2)
-    return isoDate(mid)
-  } catch {
-    return ''
-  }
 }
 
 function deriveSpread(expected: string, scanStart: string): number {
@@ -45,7 +28,7 @@ function deriveSpread(expected: string, scanStart: string): number {
 
 export function Step1BasicInfo() {
   const { state, dispatch } = useAppState()
-  const initialExpected = deriveExpected(
+  const initialExpected = deriveExpectedBirthDate(
     state.input.scanRange.start,
     state.input.scanRange.end,
   )
