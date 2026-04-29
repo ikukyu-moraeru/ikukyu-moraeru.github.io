@@ -101,30 +101,24 @@
 .lp-card--auto {
   background: linear-gradient(160deg, var(--bg-3) 0%, #fff 60%);
   border-color: var(--mint);
-  margin-top: 0.7rem;
-}
-.lp-card--auto::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  border: 1px dashed rgba(63, 142, 108, 0.45);
-  margin: 4px;
+  /* 上端中央のバッジ分の余白を確保 */
+  margin-top: 1.2rem;
 }
 
+/* 「自動入力」バッジはカード上端中央のタブとして配置（index バッジと重ならず、確実に視認できる） */
 .lp-card__auto-badge {
   position: absolute;
-  top: -0.7rem;
-  left: 1rem;
-  z-index: 2;
+  top: -0.65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
   font-family: var(--font-h);
   font-weight: 700;
   font-size: 0.7rem;
   letter-spacing: 0.06em;
   color: var(--mint-deep);
   background: #fff;
-  padding: 0.2rem 0.6rem;
+  padding: 0.2rem 0.7rem;
   border-radius: 999px;
   border: 1px solid var(--mint);
   white-space: nowrap;
