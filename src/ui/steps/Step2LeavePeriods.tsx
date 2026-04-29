@@ -16,17 +16,20 @@ import './Step2LeavePeriods.css'
 function leaveBounds(
   type: LeaveType,
   expected: string,
+  isMultipleBirth: boolean,
 ): { min?: string; max?: string } {
   if (!expected) return {}
   const exp = parseISO(expected)
   if (Number.isNaN(exp.getTime())) return {}
   switch (type) {
-    case '産休':
-      // 産前休業 最長 98 日（多胎）+ 産後休業 56 日 + 多少のずれ
+    case '産休': {
+      // 産前休業は単胎 42 日／多胎 98 日。早めに休業に入る人も想定して +30 日の余裕。
+      const prenatalMax = isMultipleBirth ? 98 : 42
       return {
-        min: format(subDays(exp, 180), 'yyyy-MM-dd'),
+        min: format(subDays(exp, prenatalMax + 30), 'yyyy-MM-dd'),
         max: format(addDays(exp, 90), 'yyyy-MM-dd'),
       }
+    }
     case '育休':
       // 出産予定日の 30 日前 〜 子の 2 歳
       return {
@@ -153,7 +156,11 @@ export function Step2LeavePeriods() {
             const opt =
               LEAVE_OPTIONS.find((o) => o.value === p.type) ?? LEAVE_OPTIONS[0]
             const isAuto = p.id === AUTO_MATERNITY_ID
-            const bounds = leaveBounds(p.type, expectedForBounds)
+            const bounds = leaveBounds(
+              p.type,
+              expectedForBounds,
+              state.input.isMultipleBirth,
+            )
             return (
               <li
                 key={p.id}
