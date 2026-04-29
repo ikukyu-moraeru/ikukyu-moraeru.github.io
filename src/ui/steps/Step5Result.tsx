@@ -415,7 +415,7 @@ function MissingMonthsHint({ input, results }: MissingMonthsHintProps) {
 
 function jpMonth(ym: string): string {
   const [y, m] = ym.split('-')
-  return `${y} 年 ${Number(m)} 月`
+  return `${y}年${Number(m)}月`
 }
 
 /**
