@@ -19,6 +19,14 @@ function segmentMax(expected: string): string | undefined {
   return format(addDays(exp, 365), 'yyyy-MM-dd')
 }
 
+/** 表示用ラベル：会社名は実名を求めず、現職/前職/N つ前 の通称で識別できるようにする。 */
+function employerLabel(index: number): string {
+  if (index === 0) return '現職'
+  if (index === 1) return '前職'
+  if (index === 2) return '前々職'
+  return `${index} つ前の職場`
+}
+
 function uid(prefix: string) {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
@@ -55,6 +63,11 @@ export function Step3Segments() {
         雇用保険に加入していた期間（在職した会社）を新しい順に登録してください。
         会社の間に空白期間（無職・短時間労働で未加入など）があった場合も、
         <strong>会社ごとに 1 件ずつ</strong>登録すれば自動で空白として扱われます。
+        <br />
+        <span className="lp-note">
+          ※ 判定上、会社名は不要です。<strong>「現職」「前職」</strong>のままで OK。
+          結果を共有するときに個人情報が漏れないよう、実名は入れないことをおすすめします。
+        </span>
       </p>
 
       <section className="sg-section">
@@ -94,7 +107,8 @@ export function Step3Segments() {
                     <input
                       className="st-input lp-card__type sg-card__name"
                       type="text"
-                      placeholder="会社名（任意）"
+                      placeholder={employerLabel(i)}
+                      aria-label={`${employerLabel(i)}（表示名・任意）`}
                       value={s.employerName ?? ''}
                       onChange={(e) =>
                         patchSegment(s.id, { employerName: e.target.value })
