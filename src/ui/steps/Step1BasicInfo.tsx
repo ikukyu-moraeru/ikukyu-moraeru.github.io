@@ -4,12 +4,22 @@ import { useAppState } from '../../state/AppState'
 import { computeMaternityTimeline } from '../../domain/maternityTimeline'
 import type { LeavePeriod } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
+import { DateInput } from '../components/DateInput'
 import { jpDate, deriveExpectedBirthDate } from '../shared/formatUtils'
 import './steps.css'
 
 export const AUTO_MATERNITY_ID = 'auto:maternity'
 
 const DEFAULT_SPREAD = 14
+
+/** 出産予定日として現実的な範囲（過去 2 年〜未来 1 年） */
+function expectedBirthDateBounds(): { min: string; max: string } {
+  const today = new Date()
+  return {
+    min: format(subDays(today, 365 * 2), 'yyyy-MM-dd'),
+    max: format(addDays(today, 365), 'yyyy-MM-dd'),
+  }
+}
 
 function isoDate(d: Date) {
   return format(d, 'yyyy-MM-dd')
@@ -39,6 +49,10 @@ export function Step1BasicInfo() {
 
   const [expected, setExpected] = useState<string>(initialExpected)
   const [spread, setSpread] = useState<number>(initialSpread || DEFAULT_SPREAD)
+  // spread の入力中は文字列で保持し、blur 確定時に clamp する。
+  // 入力途中で空欄になった瞬間に DEFAULT_SPREAD へ戻ってしまう違和感を防ぐ。
+  const [spreadDraft, setSpreadDraft] = useState<string>(String(spread))
+  useEffect(() => setSpreadDraft(String(spread)), [spread])
 
   // 入力変化を scanRange に反映
   useEffect(() => {
@@ -165,12 +179,13 @@ export function Step1BasicInfo() {
         <p className="st-field__hint">
           母子手帳に書かれている予定日を入力してください。
         </p>
-        <input
+        <DateInput
           id="expectedDate"
           className="st-input"
-          type="date"
           value={expected}
-          onChange={(e) => setExpected(e.target.value)}
+          onChange={setExpected}
+          min={expectedBirthDateBounds().min}
+          max={expectedBirthDateBounds().max}
         />
       </div>
 
@@ -202,8 +217,20 @@ export function Step1BasicInfo() {
           type="number"
           min={1}
           max={120}
-          value={spread}
-          onChange={(e) => setSpread(Number(e.target.value) || DEFAULT_SPREAD)}
+          value={spreadDraft}
+          onChange={(e) => {
+            setSpreadDraft(e.target.value)
+            const n = Number(e.target.value)
+            if (Number.isFinite(n) && n >= 1 && n <= 120) {
+              setSpread(n)
+            }
+          }}
+          onBlur={() => {
+            const n = Number(spreadDraft)
+            if (!Number.isFinite(n) || n < 1) setSpread(DEFAULT_SPREAD)
+            else if (n > 120) setSpread(120)
+            else setSpread(n)
+          }}
         />
       </div>
 
@@ -353,6 +380,10 @@ function ChildCareStartField({
   const earliestPostnatalEnd = t?.postnatalLeaveEnd
     ? format(addDays(parseISO(t.postnatalLeaveEnd), 1), 'yyyy-MM-dd')
     : undefined
+  // 育休は子が 2 歳になるまで取得可能（雇用保険法）。便宜上、出産予定日 + 2 年を上限。
+  const latestChildCareStart = expectedBirthDate
+    ? format(addDays(parseISO(expectedBirthDate), 365 * 2), 'yyyy-MM-dd')
+    : undefined
 
   return (
     <div className="st-field">
@@ -401,12 +432,12 @@ function ChildCareStartField({
       </div>
       {useCustom && (
         <div style={{ marginTop: '0.7rem', display: 'grid', gap: '0.4rem' }}>
-          <input
+          <DateInput
             className="st-input"
-            type="date"
             value={customStart ?? ''}
             min={earliestPostnatalEnd}
-            onChange={(e) => onChange(e.target.value || defaultDate)}
+            max={latestChildCareStart}
+            onChange={(v) => onChange(v || defaultDate)}
           />
           {customStart && earliestPostnatalEnd && customStart < earliestPostnatalEnd && (
             <div className="lp-warn">
