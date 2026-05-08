@@ -62,11 +62,14 @@ function App() {
     setImportOpen(false)
   }
 
+  const isPrivacy = /\/privacy(\.html)?$/.test(pathname)
+  const isContentPolicy = /\/content-policy(\.html)?$/.test(pathname)
+
   return (
     <>
-      {pathname.endsWith('/privacy') ? (
+      {isPrivacy ? (
         <Privacy />
-      ) : pathname.endsWith('/content-policy') ? (
+      ) : isContentPolicy ? (
         <ContentPolicy />
       ) : state.screen === 'landing' ? (
         <Landing />
