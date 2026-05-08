@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>育休もらえる？ — 育児休業給付金の受給判定</title>
     <meta name="description" content="転職・休職・シフト制などで「育休給付金を受け取れるか微妙」な方向けのセルフ判定ツール。予定日が前後してもどの日に生まれたら受け取れるかを 1 日ずつ判定します。すべてブラウザで完結。" />
+    <link rel="canonical" href="https://nkjzm.github.io/MaternityLeaveCalculator/" />
     <!-- OGP -->
     <meta property="og:title" content="育休もらえる？ — 育児休業給付金の受給判定" />
     <meta property="og:description" content="転職・休職・シフト制でぎりぎりかも、な方へ。出産日のぶれや産休・転職・シフトを全部考慮して、あなたの場合に受け取れるかを 1 日ずつ判定します。" />
@@ -24,6 +25,82 @@
       href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://nkjzm.github.io/MaternityLeaveCalculator/#website",
+            "url": "https://nkjzm.github.io/MaternityLeaveCalculator/",
+            "name": "育休もらえる？",
+            "description": "育児休業給付金（および出生時育児休業給付金）の支給要件をブラウザで判定できるセルフ診断ツール。",
+            "inLanguage": "ja-JP"
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://nkjzm.github.io/MaternityLeaveCalculator/#webapp",
+            "name": "育休もらえる？ — 育児休業給付金の受給判定",
+            "url": "https://nkjzm.github.io/MaternityLeaveCalculator/",
+            "description": "転職・休職・シフト制で「育休給付金を受け取れるか微妙」な方向けのセルフ判定ツール。出産日のぶれや産休・転職・シフトを全部考慮し、出産予定日の前後を1日ずつ判定します。すべてブラウザで完結し、入力データは外部送信されません。",
+            "applicationCategory": "FinanceApplication",
+            "operatingSystem": "Any (Web Browser)",
+            "browserRequirements": "Requires JavaScript",
+            "inLanguage": "ja-JP",
+            "isAccessibleForFree": true,
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "JPY"
+            },
+            "featureList": [
+              "出産予定日のぶれを±任意日数で1日ごとに判定",
+              "産休・育休・転職・無職期間の影響を反映",
+              "前職通算と11日／80時間ルールの自動計算",
+              "入力データはブラウザ内のみで処理（送信なし）"
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://nkjzm.github.io/MaternityLeaveCalculator/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "育児休業給付金の受給要件は？",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "雇用保険の育児休業給付金は、休業前2年間で「11日以上働いた月（または賃金支払の基礎となった時間が80時間以上の月）」が12か月以上必要です。本ツールはこの「みなし被保険者期間12か月」要件を判定します。"
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "転職した場合でも前職の期間は通算できますか？",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "前職と現職の間に空白期間がない、または基本手当を受給していないなど一定の条件を満たせば、前職の被保険者期間と通算できます。本ツールでは前職の入力に対応しています。"
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "出産予定日が変わったらどうなりますか？",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "本ツールは予定日の前後（±任意日数）を1日ずつ判定し、どの日に生まれたら受け取れる／受け取れないかを可視化します。ぎりぎりのケースでも自分の状況を確認できます。"
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "入力したデータは送信されますか？",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "送信されません。すべての処理はあなたのブラウザ内で完結し、サーバーに個人情報が送信されることはありません。"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <script>
@@ -35,7 +112,31 @@
         history.replaceState(null, '', base + redirect);
       }
     </script>
-    <div id="root"></div>
+    <div id="root">
+      <div style="max-width:720px;margin:0 auto;padding:32px 20px;font-family:'Noto Sans JP',sans-serif;color:#2a2a2a;line-height:1.7;">
+        <p style="font-size:13px;color:#6b6b6b;margin:0 0 8px;">転職・休職・シフト制で、ぎりぎりかもしれない方へ</p>
+        <h1 style="font-size:28px;margin:0 0 16px;font-weight:700;">育休もらえる？ — 育児休業給付金の受給判定</h1>
+        <p style="margin:0 0 16px;">雇用保険の<strong>育児休業給付金</strong>は、休業前2年で<strong>「11日以上 働いた月」が12か月以上</strong>必要です。微妙な人ほど、自分の場合に当てはめないと判断できません。</p>
+        <p style="margin:0 0 16px;">このツールは、<strong>出産日のぶれ・産休・育休・転職・シフト</strong>を全部考慮して、出産予定日の前後を1日ずつ判定し、あなたの場合に受け取れるかを可視化します。すべてブラウザで完結し、入力データは外部送信されません。</p>
+        <h2 style="font-size:18px;margin:24px 0 8px;">こんな方の自己診断に</h2>
+        <ul style="margin:0 0 16px;padding-left:20px;">
+          <li>出産前に<strong>転職</strong>を経験した（前職と通算できる？）</li>
+          <li><strong>パート・シフト制</strong>で月の出勤日数が11日に届かない月がある</li>
+          <li><strong>つわり・病気休職</strong>で休んだ期間がある</li>
+          <li>出産前に<strong>退職・無職期間</strong>がある</li>
+          <li><strong>出産予定日がぎりぎり</strong>で「あと数日生まれが遅かったら…」が不安</li>
+          <li>ハローワーク・社労士に相談する前に<strong>自己診断したい</strong></li>
+        </ul>
+        <h2 style="font-size:18px;margin:24px 0 8px;">特長</h2>
+        <ul style="margin:0 0 16px;padding-left:20px;">
+          <li>出産日のぶれを考慮（予定日±任意日数を1日ずつ判定）</li>
+          <li>制度をまるごと反映（緩和の最長4年／前職通算／80時間ルールも自動計算）</li>
+          <li>送信しません（すべてブラウザで完結。データは端末から外に出ません）</li>
+        </ul>
+        <p style="font-size:12px;color:#888;margin:32px 0 0;">※ 本ツールは参考用です。最終判定は管轄のハローワーク（公共職業安定所）で行われます。</p>
+        <p style="font-size:12px;color:#888;margin:8px 0 0;">読み込み中… JavaScript を有効にすると判定ウィザードが表示されます。</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
