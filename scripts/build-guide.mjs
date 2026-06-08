@@ -39,6 +39,47 @@ const GUIDE_SLOT = process.env.VITE_ADSENSE_GUIDE_SLOT || ''
 
 const md = new MarkdownIt({ html: true, linkify: true, typographer: false })
 
+/**
+ * インライン注釈記法 `{{ラベル|URL}}` / `{{ラベル}}`。
+ * 本文の主張のすぐ横に、目立たない小さな注釈（出典など）を置くための拡張。
+ *  - URL ありなら別タブで開くリンク、なしなら span。
+ *  - 注釈テキストは常時 DOM に存在（ホバーで隠さない＝JS不要・全文表示）。
+ *  - 表示の地味さ（小さい/薄いグレー）は guide.css の .annot で制御。
+ * 独自トークンにするため linkify は URL を二重リンク化しない。
+ * 開始文字 `{`(0x7B) は markdown-it の text ルールが区切りとして扱うため確実に発火する。
+ */
+function annotPlugin(mdit) {
+  mdit.inline.ruler.before('emphasis', 'annot', (state, silent) => {
+    const src = state.src
+    const start = state.pos
+    if (src.charCodeAt(start) !== 0x7b || src.charCodeAt(start + 1) !== 0x7b) {
+      return false
+    }
+    const close = src.indexOf('}}', start + 2)
+    if (close < 0) return false
+    const inner = src.slice(start + 2, close).trim()
+    if (!inner) return false
+    if (!silent) {
+      const sep = inner.lastIndexOf('|')
+      const hasUrl = sep >= 0 && /^https?:\/\//.test(inner.slice(sep + 1).trim())
+      const token = state.push('annot', '', 0)
+      token.meta = hasUrl
+        ? { label: inner.slice(0, sep).trim(), url: inner.slice(sep + 1).trim() }
+        : { label: inner, url: '' }
+    }
+    state.pos = close + 2
+    return true
+  })
+  mdit.renderer.rules.annot = (tokens, idx) => {
+    const { label, url } = tokens[idx].meta
+    const e = mdit.utils.escapeHtml
+    return url
+      ? `<a class="annot" href="${e(url)}" target="_blank" rel="noopener noreferrer">${e(label)}</a>`
+      : `<span class="annot">${e(label)}</span>`
+  }
+}
+md.use(annotPlugin)
+
 const esc = (s = '') =>
   s
     .replace(/&/g, '&amp;')

@@ -262,3 +262,22 @@ blockquote {
 }
 .gfoot__inner a { color: var(--ink-mute); text-decoration: none; }
 .gfoot__inner a:hover { color: var(--pink-deep); }
+
+/* インライン注釈 ((ラベル|URL)) — 本文中に目立たず根拠を添える */
+.annot {
+  font-size: 0.72em;
+  color: var(--ink-mute);
+  vertical-align: 0.15em;
+  text-decoration: none;
+  margin: 0 0.15em;
+  line-height: 1;
+}
+.annot::before { content: "（"; }
+.annot::after { content: "）"; }
+a.annot {
+  border-bottom: 1px dotted var(--line);
+}
+a.annot:hover {
+  color: var(--pink-deep);
+  border-bottom-color: var(--pink-deep);
+}
