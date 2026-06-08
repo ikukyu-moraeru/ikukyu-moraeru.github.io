@@ -36,6 +36,7 @@ draft: false
 
 - 画像は原則使わない（著作権グレーなものは厳禁）。必要なら自作の図表・テキストのみ。
 - 内部リンク: ツールは `/`、関連記事は `/guide/<slug>/` で書く。
+- frontmatter の `related` や本文リンクは、**まだ執筆していない記事の slug を指すと404になる**。既に存在する記事の slug のみリンクし、未執筆ぶんは記事が増えた段階で追記する（または該当記事執筆時に相互リンクを張る）。
 
 ## 3. 執筆ディレクティブ
 
@@ -72,8 +73,16 @@ draft: false
 2. AIが該当 slug の `content/guide/<slug>.md` を作成（フォーマット遵守）。
 3. 人間が数値・要件をファクトチェック（YMYLのため必須）。
 4. `pnpm build` で `/guide/<slug>/` に静的HTML化され、sitemapにも反映される（配信の仕組みは `scripts/build-guide.mjs`）。
+5. commit / push すると GitHub Actions が自動デプロイし、`https://ikukyu-moraeru.github.io/guide/<slug>/` に公開される。
 
-## 6. やってはいけないこと
+## 6. プレビュー・確認方法
+
+- ローカル確認: `pnpm build && pnpm preview` → ブラウザで `/guide/<slug>/` や `/guide/` を開く。
+- **注意: `pnpm dev` ではガイド記事は表示されない**（ビルド時に生成する静的ページのため）。必ず build → preview で確認する。
+- 公開先: 記事 = `/guide/<slug>/`、一覧 = `/guide/`、sitemap = `/sitemap.xml`。
+- `pnpm build` 後にコンソールへ「記事 N 本…生成」と出れば取り込まれている。
+
+## 7. やってはいけないこと
 
 - 出典のない断定、`src/domain` の判定と矛盾する記述。
 - 他サイト文章のコピー、著作権グレー画像の使用。
