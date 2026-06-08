@@ -5,7 +5,7 @@ slug: "jukyu-youken"
 date: "2026-06-08"
 updated: "2026-06-08"
 tags: ["受給要件", "基礎知識"]
-related: ["part-time-shift-jitan", "kanwa-saichou-4nen", "tsuwari-kyuushoku-otoshiana"]
+related: ["part-time-shift-jitan", "kanwa-saichou-4nen", "tsuwari-kyuushoku-otoshiana", "chingin-shiharai-kiso-nissu", "80jikan-rule", "tenshoku-tsuusan"]
 draft: false
 ---
 
@@ -36,7 +36,7 @@ draft: false
 
 ## 転職していても前職の期間は通算できる（ただし落とし穴あり）
 
-転職を経験していても、前の職場での雇用保険の被保険者期間を通算できる場合があります。ただし、離職後に**失業給付（基本手当）の受給資格決定を受けていると、それ以前の期間は通算できなくなる**点に注意が必要です。
+転職を経験していても、前の職場での雇用保険の被保険者期間を通算できる場合があります。ただし、離職後に**失業給付（基本手当）の受給資格決定を受けていると、それ以前の期間は通算できなくなる**点に注意が必要です。詳しくは「[転職しても前職の雇用保険は通算できる](/guide/tenshoku-tsuusan/)」で解説しています。
 
 ## あなたの場合は、1日単位で判定できる
 
