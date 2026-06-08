@@ -207,7 +207,14 @@ function renderArticle(a) {
         <h1>${esc(fm.title)}</h1>
         <p class="meta">公開 ${fm.date}${fm.updated ? ` ・ 更新 ${fm.updated}` : ''}</p>
         ${bodyHtml}
-        <a class="tool-cta" href="/">あなたの場合をツールで判定する<small>出産日と勤務状況を入れるだけ・ブラウザ内で完結・登録不要</small></a>
+        <a class="tool-cta" href="/">
+          <span class="tool-cta__icon" aria-hidden="true">？</span>
+          <span class="tool-cta__body">
+            <span class="tool-cta__title">あなたの場合をツールで判定する</span>
+            <span class="tool-cta__sub">出産日と勤務状況を入れるだけ・ブラウザ内で完結・登録不要</span>
+          </span>
+          <span class="tool-cta__arrow" aria-hidden="true">→</span>
+        </a>
         ${relatedBlock}
         <div class="author"><strong>運営者</strong>：${AUTHOR}（<a href="${AUTHOR_URL}">nkjzm.jp</a>）。本サイトの解説は雇用保険法および厚生労働省の資料に基づいて作成しています。詳しくは<a href="/about/">運営者情報</a>をご覧ください。</div>
         <p class="disclaimer">※ 本記事は参考情報です。個別の受給可否の最終判定は、管轄のハローワーク（公共職業安定所）で行われます。</p>

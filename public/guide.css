@@ -171,27 +171,93 @@ blockquote {
   color: var(--ink-soft);
 }
 
-/* ツール導線 CTA（ツールの primary ボタンと同系） */
+/* ツール導線 CTA（サイトの暖色を使ったリッチなボタン：アイコン＋本文＋矢印チップ） */
 .tool-cta {
-  display: block;
-  margin: 2.2rem 0;
-  padding: 1.1rem 1.3rem;
-  background: linear-gradient(135deg, #4a3a63 0%, var(--plum) 100%);
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  margin: 2.8rem 0;
+  padding: 1.1rem 1.25rem;
+  background: linear-gradient(135deg, #ffb3c7 0%, var(--pink) 45%, var(--pink-deep) 100%);
   color: #fff;
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(236, 138, 163, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: transform 0.18s var(--ease-pop, ease), box-shadow 0.18s;
+}
+/* 左上からの光沢 */
+.tool-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.38), transparent 58%);
+  pointer-events: none;
+}
+.tool-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(236, 138, 163, 0.62),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.tool-cta__icon {
+  position: relative;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
   font-family: var(--font-h);
   font-weight: 700;
-  box-shadow: 0 4px 0 0 var(--plum-deep), 0 8px 16px rgba(58, 46, 79, 0.2);
+  font-size: 1.35rem;
+  text-shadow: 0 1px 2px rgba(120, 30, 60, 0.25);
 }
-.tool-cta:hover { transform: translateY(-1px); }
-.tool-cta small {
+.tool-cta__body {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.tool-cta__title {
   display: block;
-  font-family: var(--font-body);
-  font-weight: 400;
-  opacity: 0.85;
-  margin-top: 0.25rem;
-  font-size: 0.8rem;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 1.08rem;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(120, 30, 60, 0.25);
+}
+.tool-cta__sub {
+  display: block;
+  margin-top: 0.22rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+.tool-cta__arrow {
+  position: relative;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--pink-deep);
+  font-weight: 700;
+  font-size: 1.05rem;
+  box-shadow: 0 3px 8px rgba(120, 30, 60, 0.2);
+  transition: transform 0.18s var(--ease-pop, ease);
+}
+.tool-cta:hover .tool-cta__arrow {
+  transform: translateX(4px);
+}
+@media (max-width: 480px) {
+  .tool-cta__icon {
+    display: none;
+  }
 }
 
 /* 広告枠 */
