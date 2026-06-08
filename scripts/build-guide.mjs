@@ -208,12 +208,12 @@ function renderArticle(a) {
         <p class="meta">公開 ${fm.date}${fm.updated ? ` ・ 更新 ${fm.updated}` : ''}</p>
         ${bodyHtml}
         <a class="tool-cta" href="/">
-          <span class="tool-cta__icon" aria-hidden="true">？</span>
           <span class="tool-cta__body">
-            <span class="tool-cta__title">あなたの場合をツールで判定する</span>
-            <span class="tool-cta__sub">出産日と勤務状況を入れるだけ・ブラウザ内で完結・登録不要</span>
+            <span class="tool-cta__label">無料の判定ツール</span>
+            <span class="tool-cta__title">あなたの場合、もらえる？を確かめる</span>
+            <span class="tool-cta__sub">出産日と勤務状況を入れるだけ。ブラウザ内で完結・登録不要。</span>
           </span>
-          <span class="tool-cta__arrow" aria-hidden="true">→</span>
+          <span class="tool-cta__btn">判定する →</span>
         </a>
         ${relatedBlock}
         <div class="author"><strong>運営者</strong>：${AUTHOR}（<a href="${AUTHOR_URL}">nkjzm.jp</a>）。本サイトの解説は雇用保険法および厚生労働省の資料に基づいて作成しています。詳しくは<a href="/about/">運営者情報</a>をご覧ください。</div>
