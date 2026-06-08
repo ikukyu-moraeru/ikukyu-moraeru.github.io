@@ -184,6 +184,20 @@ export function Landing() {
         </a>
       </section>
 
+      <section className="ht-story" aria-label="作り手より">
+        <p className="ht-story__eyebrow">作り手より</p>
+        <blockquote className="ht-story__quote">
+          妻は正社員の週3勤務で、副業もしていました。いわゆるダブルワークです。
+          いざ「育休給付金をもらえるのか」を調べても、当てはまる解説が見つからない。
+          しかも細かい条件は、<strong>ハローワークに申請するまで確定しない</strong>。
+          その心細さから、自分で一つずつ当てはめて見積もったのが、このツールの出発点です。
+          かつての私たちと同じように不安な方に、申請の前に使ってほしくて作りました。
+        </blockquote>
+        <a className="ht-story__link" href="/guide/naze-tsukutta/">
+          このツールを作った理由を読む →
+        </a>
+      </section>
+
       <AdSlot slot="6704104793" className="ht-ad" />
 
       <section className="ht-share">

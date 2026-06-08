@@ -565,6 +565,51 @@
   text-decoration: underline;
 }
 
+/* 作り手より（パーソナルメッセージ） */
+.ht-story {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: clamp(2rem, 4vw, 3rem) auto 0;
+  padding: clamp(1.6rem, 3vw, 2.2rem) clamp(1.3rem, 4vw, 2.2rem);
+  background: linear-gradient(180deg, #fff 0%, var(--bg-2) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-sm);
+}
+.ht-story__eyebrow {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pink-deep);
+}
+.ht-story__quote {
+  margin: 0;
+  padding: 0 0 0 1rem;
+  border-left: 4px solid var(--pink);
+  font-family: var(--font-h);
+  font-size: clamp(0.98rem, 2.4vw, 1.1rem);
+  line-height: 1.95;
+  color: var(--ink);
+}
+.ht-story__quote strong {
+  color: var(--pink-deep);
+}
+.ht-story__link {
+  display: inline-block;
+  margin: 1.1rem 0 0;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--pink-deep);
+  text-decoration: none;
+}
+.ht-story__link:hover {
+  text-decoration: underline;
+}
+
 .ht-foot {
   position: relative;
   z-index: 1;
