@@ -162,9 +162,9 @@ export function Landing() {
         <p className="ht-foot__sub">
           © 2026 {SERVICE_NAME} · ローカル動作 · 個人情報は送信しません
           {' · '}
-          <a className="ht-foot__link" href="/MaternityLeaveCalculator/privacy">プライバシーポリシー</a>
+          <a className="ht-foot__link" href="/privacy">プライバシーポリシー</a>
           {' · '}
-          <a className="ht-foot__link" href="/MaternityLeaveCalculator/content-policy">コンテンツポリシー</a>
+          <a className="ht-foot__link" href="/content-policy">コンテンツポリシー</a>
         </p>
       </footer>
     </div>

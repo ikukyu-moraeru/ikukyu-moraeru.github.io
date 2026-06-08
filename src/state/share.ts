@@ -112,7 +112,7 @@ export function deserializeInput(data: string): UserInput | null {
   }
 }
 
-const APP_BASE = '/MaternityLeaveCalculator'
+const APP_BASE = ''
 
 export function buildShareUrl(input: UserInput): string {
   if (typeof window === 'undefined') return ''
@@ -122,7 +122,7 @@ export function buildShareUrl(input: UserInput): string {
 
 export function readImportDataFromHash(): string | null {
   if (typeof window === 'undefined') return null
-  // pathname ベース: /MaternityLeaveCalculator/import?data=...
+  // pathname ベース: /import?data=...
   if (window.location.pathname.endsWith('/import')) {
     const params = new URLSearchParams(window.location.search)
     return params.get('data')

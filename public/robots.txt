@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nkjzm.github.io/MaternityLeaveCalculator/sitemap.xml
+Sitemap: https://ikukyu-moraeru.github.io/sitemap.xml

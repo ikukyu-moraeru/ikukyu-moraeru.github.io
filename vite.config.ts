@@ -7,7 +7,7 @@ const here = fileURLToPath(new URL('.', import.meta.url))
 
 // GitHub Pages 公開時のサブパスに合わせる
 export default defineConfig({
-  base: '/MaternityLeaveCalculator/',
+  base: '/',
   plugins: [react()],
   build: {
     rollupOptions: {

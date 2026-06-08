@@ -11,7 +11,7 @@ interface Props {
   onClose: () => void
 }
 
-const APP_URL = 'https://nkjzm.github.io/MaternityLeaveCalculator/'
+const APP_URL = 'https://ikukyu-moraeru.github.io/'
 
 export function ShareModal({ open, onClose }: Props) {
   const { state } = useAppState()

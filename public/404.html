@@ -6,7 +6,7 @@
     <script>
       // GitHub Pages SPA リダイレクト trick
       // 直接 URL アクセス時に pathname + search を sessionStorage に保存してトップへ転送する
-      var base = '/MaternityLeaveCalculator/';
+      var base = '/';
       var path = location.pathname.slice(base.length - 1); // 先頭の / を残す
       var query = location.search;
       sessionStorage.setItem('spa:redirect', path + query);

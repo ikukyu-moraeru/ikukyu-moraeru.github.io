@@ -8,7 +8,7 @@ import './SocialShare.css'
  * 個人入力データは載せず、サイト URL（GitHub Pages のトップ）を貼る。
  */
 
-const SITE_URL = 'https://nkjzm.github.io/MaternityLeaveCalculator/'
+const SITE_URL = 'https://ikukyu-moraeru.github.io/'
 
 export interface SocialShareProps {
   /** 投稿テキスト本文（ハッシュタグ含めても良い）。URL は別パラメータで付与される。 */

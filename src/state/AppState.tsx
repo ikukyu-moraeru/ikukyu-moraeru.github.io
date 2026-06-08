@@ -38,7 +38,7 @@ const clamp = (n: number) => Math.max(1, Math.min(5, n))
 
 /* ---------------- routing helpers (hash-based) ----------------------- */
 
-const BASE = '/MaternityLeaveCalculator'
+const BASE = ''
 
 function pathFromState(s: { screen: Screen; currentStep: number }): string {
   if (s.screen === 'landing') return `${BASE}/`
