@@ -160,6 +160,13 @@ export function Landing() {
           ※ 本ツールは参考用です。最終判定は管轄のハローワーク（公共職業安定所）で行われます。
         </p>
         <p className="ht-foot__sub">
+          <a className="ht-foot__link" href="/guide/">育休給付金ガイド</a>
+          {' · '}
+          <a className="ht-foot__link" href="/about/">運営者情報</a>
+          {' · '}
+          <a className="ht-foot__link" href="/contact/">お問い合わせ</a>
+        </p>
+        <p className="ht-foot__sub">
           © 2026 {SERVICE_NAME} · ローカル動作 · 個人情報は送信しません
           {' · '}
           <a className="ht-foot__link" href="/privacy">プライバシーポリシー</a>
