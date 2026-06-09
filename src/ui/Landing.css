@@ -471,8 +471,8 @@
   gap: 0.4rem;
 }
 .ht-card__detail-label::before {
-  content: "👆";
-  font-size: 0.95rem;
+  content: "🔍";
+  font-size: 0.9rem;
 }
 .ht-detail {
   border: 1px solid var(--line);

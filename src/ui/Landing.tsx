@@ -163,7 +163,7 @@ export function Landing() {
           </div>
 
           <p className="ht-card__detail-label">
-            日付をクリックすると、月ごとの内訳まで確認できます
+            実際のツールでは、日付ごとに月別の内訳まで確認できます
           </p>
           <div className="ht-detail" aria-hidden="true">
             <div className="ht-detail__head">
