@@ -1,7 +1,6 @@
 import { useAppState } from '../state/AppState'
 import { SAMPLE_HEATMAP } from '../preview/sample'
 import { SocialShare } from './components/SocialShare'
-import { AdSlot } from './components/AdSlot'
 import { formatMonths } from './shared/formatUtils'
 import './Landing.css'
 
@@ -211,8 +210,6 @@ export function Landing() {
           このサイトを作った理由を読む →
         </a>
       </section>
-
-      <AdSlot slot="6704104793" className="ht-ad" />
 
       <section className="ht-share">
         <h2 className="ht-share__title">妊娠中のお友だちにも、おしえる</h2>
