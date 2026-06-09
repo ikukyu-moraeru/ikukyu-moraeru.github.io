@@ -46,7 +46,6 @@ export function Landing() {
         <nav className="ht-nav__links">
           <a href="/guide/">ガイド</a>
           <a href="/about/">運営者情報</a>
-          <a href="/contact/">お問い合わせ</a>
         </nav>
       </header>
 
