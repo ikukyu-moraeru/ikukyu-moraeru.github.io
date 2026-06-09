@@ -463,6 +463,136 @@
   color: var(--pink-deep);
 }
 
+/* こんな結果が出ます：クリック後の詳細プレビュー（静的モック） */
+.ht-card__detail-label {
+  margin: 1.4rem 0 0.6rem;
+  font-size: 0.8rem;
+  color: var(--ink-mute);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.ht-card__detail-label::before {
+  content: "👆";
+  font-size: 0.95rem;
+}
+.ht-detail {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg);
+  padding: 0.9rem 1rem;
+}
+.ht-detail__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.ht-detail__date {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.ht-detail__date em {
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--mint-deep);
+  background: var(--bg-3);
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--r-full);
+  margin-left: 0.3rem;
+  vertical-align: 0.1em;
+}
+.ht-detail__badge {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--mint-deep);
+  background: var(--bg-3);
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--r-full);
+}
+.ht-detail__meta {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0.8rem 0 0;
+}
+.ht-detail__meta > div {
+  flex: 1;
+  background: var(--paper);
+  border-radius: var(--r-sm);
+  padding: 0.5rem 0.6rem;
+}
+.ht-detail__meta dt {
+  font-size: 0.66rem;
+  color: var(--ink-mute);
+  margin: 0 0 0.15rem;
+}
+.ht-detail__meta dd {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.ht-detail__subtitle {
+  display: block;
+  margin: 0.9rem 0 0.4rem;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+.ht-detail__months {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.ht-detail__month {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: var(--r-sm);
+  background: var(--paper);
+  font-size: 0.74rem;
+  border-left: 3px solid var(--mint);
+}
+.ht-detail__month--fail {
+  border-left-color: var(--pink);
+  opacity: 0.9;
+}
+.ht-detail__no {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+}
+.ht-detail__att {
+  color: var(--ink-soft);
+}
+.ht-detail__reason {
+  font-size: 0.7rem;
+  color: var(--ink-mute);
+}
+.ht-detail__cnt {
+  font-family: var(--font-h);
+  font-weight: 700;
+  color: var(--mint-deep);
+}
+.ht-detail__month--fail .ht-detail__cnt {
+  color: var(--pink-deep);
+}
+.ht-detail__note {
+  margin: 0.7rem 0 0;
+  font-size: 0.68rem;
+  color: var(--ink-mute);
+}
+
 .ht-share {
   position: relative;
   z-index: 1;

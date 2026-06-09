@@ -161,6 +161,50 @@ export function Landing() {
             <span className="ht-leg ht-leg--near">あと少し届かない</span>
             <span className="ht-leg ht-leg--fail">受け取れない</span>
           </div>
+
+          <p className="ht-card__detail-label">
+            日付をクリックすると、月ごとの内訳まで確認できます
+          </p>
+          <div className="ht-detail" aria-hidden="true">
+            <div className="ht-detail__head">
+              <span className="ht-detail__date">
+                9/15 <em>予定日</em>
+              </span>
+              <span className="ht-detail__badge">✓ 受け取れます</span>
+            </div>
+            <dl className="ht-detail__meta">
+              <div>
+                <dt>判定対象期間</dt>
+                <dd>休業開始前の2年間（＋緩和）</dd>
+              </div>
+              <div>
+                <dt>緩和加算</dt>
+                <dd>98 日</dd>
+              </div>
+            </dl>
+            <span className="ht-detail__subtitle">月別判定（一部）</span>
+            <ul className="ht-detail__months">
+              <li className="ht-detail__month ht-detail__month--pass">
+                <span className="ht-detail__no">01</span>
+                <span className="ht-detail__att">11.0 日 / 88 時間</span>
+                <span className="ht-detail__reason">11日以上</span>
+                <span className="ht-detail__cnt">+1</span>
+              </li>
+              <li className="ht-detail__month ht-detail__month--pass">
+                <span className="ht-detail__no">02</span>
+                <span className="ht-detail__att">9.0 日 / 84 時間</span>
+                <span className="ht-detail__reason">80時間以上</span>
+                <span className="ht-detail__cnt">+1</span>
+              </li>
+              <li className="ht-detail__month ht-detail__month--fail">
+                <span className="ht-detail__no">03</span>
+                <span className="ht-detail__att">9.0 日 / 58 時間</span>
+                <span className="ht-detail__reason">条件未達</span>
+                <span className="ht-detail__cnt">0</span>
+              </li>
+            </ul>
+            <p className="ht-detail__note">※ 表示はイメージです</p>
+          </div>
         </aside>
       </main>
 
