@@ -207,6 +207,51 @@
 .ht-prep__list strong {
   color: var(--ink);
 }
+
+/* ツールでやること（ステップ） */
+.ht-flow {
+  margin: 0 0 1rem;
+}
+.ht-flow__label {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--plum);
+}
+.ht-flow__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: flow;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.ht-flow__steps li {
+  counter-increment: flow;
+  position: relative;
+  padding-left: 2rem;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.ht-flow__steps li::before {
+  content: counter(flow);
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--bg-3);
+  color: var(--mint-deep);
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.78rem;
+}
 .ht-btn {
   display: inline-flex;
   align-items: center;

@@ -81,6 +81,17 @@ export function Landing() {
             </span>
           </div>
 
+          <div className="ht-flow">
+            <p className="ht-flow__label">ツールでやること</p>
+            <ol className="ht-flow__steps">
+              <li>出産予定日と、産休・育休・休職などの期間を入力</li>
+              <li>実際に働いた日を月ごとに入力していく</li>
+              <li>
+                月ごとに条件（11日／80時間）を満たすかが分かり、12か月に届くか・出産日が前後した場合まで判定できます
+              </li>
+            </ol>
+          </div>
+
           <div className="ht-prep">
             <p className="ht-prep__label">はじめる前に用意するとスムーズなもの</p>
             <ul className="ht-prep__list">
