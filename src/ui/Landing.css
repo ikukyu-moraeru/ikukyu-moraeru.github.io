@@ -597,9 +597,38 @@
 .ht-story__quote strong {
   color: var(--pink-deep);
 }
+.ht-story__sign {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 1.3rem 0 0;
+}
+.ht-story__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: var(--sh-sm);
+}
+.ht-story__who {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+.ht-story__name {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+.ht-story__handle {
+  font-size: 0.76rem;
+  color: var(--ink-mute);
+}
 .ht-story__link {
   display: inline-block;
-  margin: 1.1rem 0 0;
+  margin: 1rem 0 0;
   font-family: var(--font-h);
   font-weight: 700;
   font-size: 0.92rem;

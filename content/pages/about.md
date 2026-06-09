@@ -12,7 +12,7 @@ slug: "about"
 
 ## 運営者
 
-- 運営者：Nakaji Kohki
+- 運営者：なかじ
 - ウェブサイト：[nkjzm.jp](https://nkjzm.jp/)
 - 連絡先：[お問い合わせ](/contact/)
 

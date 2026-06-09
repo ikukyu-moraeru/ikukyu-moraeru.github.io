@@ -31,7 +31,7 @@ const root = join(here, '..')
 const DIST = join(root, 'dist')
 const SITE = 'https://ikukyu-moraeru.github.io'
 const OGP = `${SITE}/ogp.png`
-const AUTHOR = 'Nakaji Kohki'
+const AUTHOR = 'なかじ'
 const AUTHOR_URL = 'https://nkjzm.jp/'
 
 const CLIENT = process.env.VITE_ADSENSE_CLIENT || ''
@@ -216,7 +216,7 @@ function renderArticle(a) {
           <span class="tool-cta__btn">判定する →</span>
         </a>
         ${relatedBlock}
-        <div class="author"><strong>運営者</strong>：${AUTHOR}（<a href="${AUTHOR_URL}">nkjzm.jp</a>）。このツールは、妻の“週3＋副業”という働き方で育休給付金をもらえるか分からず悩んだ経験から作りました（<a href="/guide/naze-tsukutta/">作った理由</a>）。本サイトの解説は雇用保険法および厚生労働省の資料に基づいて作成しています。詳しくは<a href="/about/">運営者情報</a>をご覧ください。</div>
+        <div class="author"><strong>運営者</strong>：${AUTHOR}（<a href="${AUTHOR_URL}">nkjzm.jp</a>）。このサイトは、妻の“週3＋副業”という働き方で育休給付金をもらえるか分からず悩んだ経験から作りました（<a href="/guide/naze-tsukutta/">作った理由</a>）。本サイトの解説は雇用保険法および厚生労働省の資料に基づいて作成しています。詳しくは<a href="/about/">運営者情報</a>をご覧ください。</div>
         <p class="disclaimer">※ 本記事は参考情報です。個別の受給可否の最終判定は、管轄のハローワーク（公共職業安定所）で行われます。</p>
       </article>`
   return page({
