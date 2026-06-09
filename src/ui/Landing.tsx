@@ -184,8 +184,8 @@ export function Landing() {
         </a>
       </section>
 
-      <section className="ht-story" aria-label="作り手より">
-        <p className="ht-story__eyebrow">作り手より</p>
+      <section className="ht-story" aria-label="開発のきっかけ">
+        <p className="ht-story__eyebrow">開発のきっかけ</p>
         <blockquote className="ht-story__quote">
           妻は正社員の週3勤務で、副業もしていました。いわゆるダブルワークです。
           いざ「育休給付金をもらえるのか」を調べても、当てはまる解説が見つからない。
