@@ -145,7 +145,7 @@ export function Landing() {
               >
                 {c.isExpected && (
                   <span className="ht-bubble__pin" aria-label="出産予定日">
-                    予
+                    予定日
                   </span>
                 )}
                 <span className="ht-bubble__date">{c.label}</span>
@@ -185,22 +185,37 @@ export function Landing() {
             <span className="ht-detail__subtitle">月別判定（一部）</span>
             <ul className="ht-detail__months">
               <li className="ht-detail__month ht-detail__month--pass">
-                <span className="ht-detail__no">01</span>
-                <span className="ht-detail__att">11.0 日 / 88 時間</span>
-                <span className="ht-detail__reason">11日以上</span>
-                <span className="ht-detail__cnt">+1</span>
+                <div className="ht-detail__month-top">
+                  <span className="ht-detail__no">1か月目</span>
+                  <span className="ht-detail__range">2025-09-16 〜 10-15</span>
+                  <span className="ht-detail__cnt">+1</span>
+                </div>
+                <div className="ht-detail__month-bottom">
+                  <span className="ht-detail__att">11.0 日 / 88 時間</span>
+                  <span className="ht-detail__reason">11日以上</span>
+                </div>
               </li>
               <li className="ht-detail__month ht-detail__month--pass">
-                <span className="ht-detail__no">02</span>
-                <span className="ht-detail__att">9.0 日 / 84 時間</span>
-                <span className="ht-detail__reason">80時間以上</span>
-                <span className="ht-detail__cnt">+1</span>
+                <div className="ht-detail__month-top">
+                  <span className="ht-detail__no">2か月目</span>
+                  <span className="ht-detail__range">2025-08-16 〜 09-15</span>
+                  <span className="ht-detail__cnt">+1</span>
+                </div>
+                <div className="ht-detail__month-bottom">
+                  <span className="ht-detail__att">9.0 日 / 84 時間</span>
+                  <span className="ht-detail__reason">80時間以上</span>
+                </div>
               </li>
               <li className="ht-detail__month ht-detail__month--fail">
-                <span className="ht-detail__no">03</span>
-                <span className="ht-detail__att">9.0 日 / 58 時間</span>
-                <span className="ht-detail__reason">条件未達</span>
-                <span className="ht-detail__cnt">0</span>
+                <div className="ht-detail__month-top">
+                  <span className="ht-detail__no">3か月目</span>
+                  <span className="ht-detail__range">2025-07-16 〜 08-15</span>
+                  <span className="ht-detail__cnt">0</span>
+                </div>
+                <div className="ht-detail__month-bottom">
+                  <span className="ht-detail__att">9.0 日 / 58 時間</span>
+                  <span className="ht-detail__reason">条件未達</span>
+                </div>
               </li>
             </ul>
             <p className="ht-detail__note">※ 表示はイメージです</p>
