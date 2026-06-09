@@ -85,10 +85,11 @@ export function Landing() {
             <p className="ht-prep__label">はじめる前に用意するとスムーズなもの</p>
             <ul className="ht-prep__list">
               <li>
-                <strong>給与明細・シフト表など</strong>（実際の勤務日数や労働時間が分かるもの）
+                <strong>給与明細・シフト表など</strong>（実際の勤務日数や労働時間が分かるもの）。
+                <strong>休業開始前のおよそ2年分</strong>あると安心です（産休などで延びる場合はそれ以上）
               </li>
               <li>
-                <strong>出産予定日</strong>（候補の幅でもOK）
+                <strong>休職・休業した期間</strong>（産休・育休・病気休職・つわりでの休みなど）があればその時期
               </li>
               <li>
                 <strong>雇用保険の加入期間</strong>。転職した方は<strong>前職の在籍期間</strong>も
