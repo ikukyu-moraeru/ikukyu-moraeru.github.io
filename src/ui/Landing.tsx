@@ -92,7 +92,7 @@ export function Landing() {
                 <strong>休職・休業した期間</strong>（産休・育休・病気休職・つわりでの休みなど）があればその時期
               </li>
               <li>
-                <strong>雇用保険の加入期間</strong>。転職した方は<strong>前職の在籍期間</strong>も
+                <strong>雇用保険の加入期間</strong>（こちらも<strong>休業開始前のおよそ2年分</strong>。転職した方は<strong>前職の在籍期間</strong>も）
               </li>
             </ul>
           </div>
