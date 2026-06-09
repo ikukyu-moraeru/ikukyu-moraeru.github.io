@@ -17,7 +17,7 @@ slug: "about"
 - 所在地：〒160-0022 東京都新宿区新宿 1-36-2 新宿第七葉山ビル 3F
 - 電話番号：080-5858-9550
 - メールアドレス：contact@nkjzm.jp
-- ウェブサイト：[nkjzm.jp](https://nkjzm.jp/)
+- ウェブサイト：[nkjzm.jp/vfret-org](https://nkjzm.jp/vfret-org)
 - D-U-N-S Number：691158385
 
 ## 情報の根拠と運営方針
