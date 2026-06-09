@@ -168,9 +168,44 @@
 .ht-cta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.9rem;
-  margin-bottom: 2.4rem;
+  gap: 0.5rem 0.9rem;
+  margin-bottom: 1.4rem;
   justify-content: center;
+  align-items: center;
+}
+.ht-cta__note {
+  flex-basis: 100%;
+  text-align: center;
+  font-size: 0.74rem;
+  color: var(--ink-mute);
+  line-height: 1.6;
+}
+
+/* 判定前に用意するもの */
+.ht-prep {
+  margin: 0 0 2.4rem;
+  padding: 1rem 1.2rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
+}
+.ht-prep__label {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--plum);
+}
+.ht-prep__list {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: 0.85rem;
+  line-height: 1.8;
+  color: var(--ink-soft);
+}
+.ht-prep__list strong {
+  color: var(--ink);
 }
 .ht-btn {
   display: inline-flex;

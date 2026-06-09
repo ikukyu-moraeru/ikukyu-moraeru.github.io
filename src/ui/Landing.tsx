@@ -74,8 +74,26 @@ export function Landing() {
               onClick={() => dispatch({ type: 'GOTO_WIZARD' })}
             >
               <span>あなたの場合を判定する</span>
-              <span className="ht-btn__chip">3 分</span>
+              <span className="ht-btn__chip">約10分</span>
             </button>
+            <span className="ht-cta__note">
+              所要時間は勤務状況によって前後します（不規則な勤務だともう少しかかります）
+            </span>
+          </div>
+
+          <div className="ht-prep">
+            <p className="ht-prep__label">はじめる前に用意するとスムーズなもの</p>
+            <ul className="ht-prep__list">
+              <li>
+                <strong>給与明細・シフト表など</strong>（実際の勤務日数や労働時間が分かるもの）
+              </li>
+              <li>
+                <strong>出産予定日</strong>（候補の幅でもOK）
+              </li>
+              <li>
+                <strong>雇用保険の加入期間</strong>。転職した方は<strong>前職の在籍期間</strong>も
+              </li>
+            </ul>
           </div>
 
           <div className="ht-target">
