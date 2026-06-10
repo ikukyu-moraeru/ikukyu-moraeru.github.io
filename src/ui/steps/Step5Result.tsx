@@ -14,6 +14,8 @@ import { scanBirthDates } from '../../domain/birthDateScan'
 import { summarizeScan } from '../../domain/summary'
 import type { EligibilityResult, UserInput } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
+import { DateInput } from '../components/DateInput'
+import { computeMaternityTimeline } from '../../domain/maternityTimeline'
 import { isInputableDay } from '../shared/dayClassification'
 import { jpDate, formatMonths, deriveExpectedBirthDate } from '../shared/formatUtils'
 import './steps.css'
@@ -63,6 +65,28 @@ export function Step5Result() {
     )
   })
 
+  const expectedBirthDate = deriveExpectedBirthDate(
+    state.input.scanRange.start,
+    state.input.scanRange.end,
+  )
+
+  // customChildCareStart の入力範囲（産後56日終了翌日が最小、産後1年が最大）
+  const customCcsMin = useMemo(() => {
+    if (!expectedBirthDate) return undefined
+    const t = computeMaternityTimeline(
+      expectedBirthDate,
+      state.input.isMultipleBirth,
+    )
+    return t?.childCareStart
+  }, [expectedBirthDate, state.input.isMultipleBirth])
+
+  // 育休は子が 2 歳になるまで取得可能（Step1 の ChildCareStartField と同じ上限）
+  const customCcsMax = expectedBirthDate
+    ? format(addDays(parseISO(expectedBirthDate), 365 * 2), 'yyyy-MM-dd')
+    : undefined
+
+  const customChildCareStart = state.input.customChildCareStart
+
   if (!state.input.scanRange.start || !state.input.scanRange.end) {
     return (
       <div className="st-empty">
@@ -88,11 +112,6 @@ export function Step5Result() {
   const selectedResult = selected
     ? results.find((r) => r.birthDate === selected)
     : null
-
-  const expectedBirthDate = deriveExpectedBirthDate(
-    state.input.scanRange.start,
-    state.input.scanRange.end,
-  )
 
   // 予定日±何日を試算しているか（scanRange から逆算）
   const spreadDays = Math.round(
@@ -195,19 +214,55 @@ export function Step5Result() {
               ))}
             </select>
           </label>
+          {customChildCareStart && (
+            <div className="r5-ccs">
+              <span className="r5-ccs__label">育休開始日（指定中）</span>
+              <DateInput
+                className="r5-ccs__input"
+                value={customChildCareStart}
+                min={customCcsMin}
+                max={customCcsMax}
+                onChange={(v) =>
+                  dispatch({ type: 'PATCH_INPUT', patch: { customChildCareStart: v } })
+                }
+                aria-label="育休開始日を指定"
+              />
+              <button
+                type="button"
+                className="r5-ccs__reset"
+                onClick={() =>
+                  dispatch({
+                    type: 'PATCH_INPUT',
+                    patch: { customChildCareStart: undefined },
+                  })
+                }
+              >
+                自動（産後休業の翌日）に戻す
+              </button>
+            </div>
+          )}
         </header>
+        {customChildCareStart && (
+          <p className="r5-fixed-note">
+            📌 育休開始日を {jpDate(customChildCareStart)} に固定しています。判定対象期間（基準日から遡る2年）は出産日に関わらず一定ですが、出産日によって産休期間（賃金のない休業）が伸び縮みするため、緩和加算などで結果が変わることがあります。
+          </p>
+        )}
 
         <div className="r5-heat__grid">
           {results.map((r) => {
             const status = classify(r)
             const isSelected = r.birthDate === selected
             const isExpected = r.birthDate === expectedBirthDate
+            // customChildCareStart が産後56日終了日以前のセルは不整合
+            const postnatalEnd56 = format(addDays(parseISO(r.birthDate), POSTNATAL_DAYS), 'yyyy-MM-dd')
+            const isInvalid = !!customChildCareStart && customChildCareStart <= postnatalEnd56
             const [, mm, dd] = r.birthDate.split('-')
             const className = [
               'r5-cell',
               `r5-cell--${status}`,
               isSelected && 'is-selected',
               isExpected && 'is-expected',
+              isInvalid && 'r5-cell--invalid',
             ]
               .filter(Boolean)
               .join(' ')
@@ -216,6 +271,9 @@ export function Step5Result() {
               : isNearMiss(r)
                 ? 'あと少し届かない'
                 : '受け取れない'
+            const invalidNote = isInvalid
+              ? ` ⚠ 育休開始日が産後休業期間内（産後56日以内）のため不整合`
+              : ''
             return (
               <button
                 key={r.birthDate}
@@ -223,7 +281,7 @@ export function Step5Result() {
                 onClick={() =>
                   setSelected(r.birthDate === selected ? null : r.birthDate)
                 }
-                title={`${r.birthDate}${isExpected ? '（出産予定日）' : ''}: ${formatMonths(r.countedMonths)} か月（${verdictLabel}）`}
+                title={`${r.birthDate}${isExpected ? '（出産予定日）' : ''}: ${formatMonths(r.countedMonths)} か月（${verdictLabel}）${invalidNote}`}
               >
                 {isExpected && (
                   <span className="r5-cell__pin" aria-label="出産予定日">
@@ -259,6 +317,19 @@ export function Step5Result() {
 
       {selectedResult && (
         <section className="r5-detail">
+          {(() => {
+            const postnatalEnd56 = format(
+              addDays(parseISO(selectedResult.birthDate), POSTNATAL_DAYS),
+              'yyyy-MM-dd',
+            )
+            const isInvalid =
+              !!customChildCareStart && customChildCareStart <= postnatalEnd56
+            return isInvalid ? (
+              <p className="r5-detail__invalid-warn">
+                ⚠ 育休開始日（{jpDate(customChildCareStart!)}）が、この出産日の産後休業期間内（〜{jpDate(postnatalEnd56)}）です。育休は産後休業が終わってから開始できます。日付を修正してください。
+              </p>
+            ) : null
+          })()}
           <header>
             <span className="r5-detail__small">選択した出産日</span>
             <h3>{jpDate(selectedResult.birthDate)}</h3>

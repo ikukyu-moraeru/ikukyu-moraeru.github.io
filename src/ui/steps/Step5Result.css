@@ -925,3 +925,96 @@
   line-height: 1.65;
   color: var(--ink-soft);
 }
+
+/* 育休開始日コントロール（header 内） */
+.r5-ccs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(255, 245, 212, 0.7);
+  border: 1.5px solid var(--gold);
+  border-radius: var(--r-sm);
+  width: 100%;
+}
+.r5-ccs__label {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--gold-deep);
+  white-space: nowrap;
+}
+.r5-ccs__input {
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  min-height: 36px;
+  padding: 0.3rem 0.65rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+.r5-ccs__input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.r5-ccs__reset {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--gold-deep);
+  background: transparent;
+  border: 1.5px solid var(--gold);
+  border-radius: var(--r-full);
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+.r5-ccs__reset:hover {
+  background: var(--gold);
+  color: #fff;
+}
+
+/* 固定バナー */
+.r5-fixed-note {
+  margin: 0 0 0.85rem;
+  padding: 0.6rem 0.9rem;
+  background: rgba(255, 245, 212, 0.85);
+  border: 1px solid var(--gold);
+  border-radius: var(--r-sm);
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--gold-deep);
+}
+
+/* 不整合セル */
+.r5-cell--invalid {
+  position: relative;
+  filter: saturate(0.35);
+}
+.r5-cell--invalid::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    135deg,
+    transparent 0 6px,
+    rgba(0, 0, 0, 0.12) 6px 8px
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* 詳細パネル：不整合警告 */
+.r5-detail__invalid-warn {
+  margin: 0 0 0.9rem;
+  padding: 0.6rem 0.9rem;
+  background: rgba(253, 230, 223, 0.9);
+  border: 1.5px solid var(--pink);
+  border-radius: var(--r-sm);
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--pink-deep);
+}
