@@ -209,29 +209,17 @@ export function Step1BasicInfo() {
       </details>
 
       {expected && (
-        <>
-          <Timeline
-            expectedBirthDate={expected}
-            isMultipleBirth={state.input.isMultipleBirth}
-            suppressed={state.meta.suppressAutoMaternity}
-            onRestore={() =>
-              dispatch({
-                type: 'PATCH_META',
-                patch: { suppressAutoMaternity: false },
-              })
-            }
-          />
-          <div className="st-summary">
-            <span>
-              <strong>判定する範囲：</strong>
-              {state.input.scanRange.start} 〜 {state.input.scanRange.end}
-            </span>
-            <span>
-              <strong>候補日数：</strong>
-              {Math.max(0, spread * 2 + 1)} 日
-            </span>
-          </div>
-        </>
+        <Timeline
+          expectedBirthDate={expected}
+          isMultipleBirth={state.input.isMultipleBirth}
+          suppressed={state.meta.suppressAutoMaternity}
+          onRestore={() =>
+            dispatch({
+              type: 'PATCH_META',
+              patch: { suppressAutoMaternity: false },
+            })
+          }
+        />
       )}
     </div>
   )
@@ -291,29 +279,21 @@ function Timeline({
           産前 {t.prenatalDays} 日 ＋ 産後 56 日 → その翌日が「育休開始日」
         </span>
       </div>
-      <p className="st-timeline__seed">
-        {suppressed ? (
-          <>
-            <span>
-              「産前産後休業」の自動入力は止めています。Step 2
-              で個別に登録した内容が優先されます。
-            </span>
-            <button
-              type="button"
-              className="st-timeline__seed-restore"
-              onClick={onRestore}
-            >
-              自動入力を再開
-            </button>
-          </>
-        ) : (
-          <>
-            🍀 上の期間を <strong>Step 2「休職・休業」</strong>{' '}
-            に「産休（賃金なし）」として自動登録しました。Step 2
-            で削除すれば自動追加は止まります。
-          </>
-        )}
-      </p>
+      {suppressed && (
+        <p className="st-timeline__seed">
+          <span>
+            「産前産後休業」の自動入力は止めています。Step 2
+            で個別に登録した内容が優先されます。
+          </span>
+          <button
+            type="button"
+            className="st-timeline__seed-restore"
+            onClick={onRestore}
+          >
+            自動入力を再開
+          </button>
+        </p>
+      )}
       <ol className="st-timeline__list">
         {stops.map((s) => (
           <li
