@@ -1,5 +1,6 @@
 import {
   addDays,
+  differenceInCalendarDays,
   format,
   isAfter,
   isBefore,
@@ -18,6 +19,7 @@ import type {
   FragmentMonth,
   InsuredEmploymentSegment,
   JudgedAttendance,
+  LeavePeriod,
   MonthJudgment,
   UserInput,
 } from "./types";
@@ -47,8 +49,11 @@ export function judgeEligibility(
   const prenatalDays = input.isMultipleBirth
     ? PRENATAL_DAYS_MULTIPLE
     : PRENATAL_DAYS_SINGLE;
-  const leaveStartDate =
+  // 産前休業の開始（予定・指定）より早く生まれた場合、休業は実出産日から始まる
+  const plannedLeaveStart =
     input.customMaternityStart ?? fmt(subDays(birthDateD, prenatalDays));
+  const leaveStartDate =
+    plannedLeaveStart < birthDate ? plannedLeaveStart : birthDate;
   // 育休開始日の既定値:
   // 1. customChildCareStart（明示指定）が最優先
   // 2. customMaternityEnd（産後休業終了日）があればその翌日に追従
@@ -63,8 +68,12 @@ export function judgeEligibility(
   const baseWindowStart = fmt(subYears(childCareStartD, 2));
   const baseWindowEnd = fmt(subDays(childCareStartD, 1));
 
+  // 産休期間を当該出産日候補の実態（実出産日 + 56 日など）に合わせてシフトし、
+  // 緩和加算と出勤集計の両方に反映する
+  const adjusted = adjustMaternityForBirthDate(input, birthDate);
+
   const relaxationDays = computeRelaxationDays(
-    input.leavePeriods,
+    adjusted.leavePeriods,
     baseWindowStart,
     baseWindowEnd,
   );
@@ -79,7 +88,7 @@ export function judgeEligibility(
   );
 
   const monthBreakdown: MonthJudgment[] = completeMonths.map((m) =>
-    judgeCompleteMonth(m, input.attendances, mergedSegments),
+    judgeCompleteMonth(m, adjusted.attendances, mergedSegments),
   );
 
   let countedMonths = monthBreakdown.reduce((sum, j) => sum + j.counted, 0);
@@ -88,7 +97,7 @@ export function judgeEligibility(
   if (fragment) {
     fragmentJudgment = judgeFragment(
       fragment,
-      input.attendances,
+      adjusted.attendances,
       mergedSegments,
     );
     countedMonths += fragmentJudgment.counted;
@@ -107,6 +116,72 @@ export function judgeEligibility(
     monthBreakdown,
     fragmentJudgment,
   };
+}
+
+/**
+ * 産休（産前産後休業）期間を出産日候補の実態に合わせてシフトする。
+ *
+ * 産休の終了は法律上「実出産日 + 56 日」で決まるため、登録されている産休期間
+ * （出産予定日を前提に組まれた日付）は、候補の出産日が予定日からずれた分だけ
+ * 終端が前後する。開始も、予定より早く生まれた場合は実出産日からになる。
+ *
+ * - 終了: 予定日とのずれ（delta）だけシフト。ただし `customMaternityEnd` を
+ *   ユーザーが明示指定している場合は固定のまま（育休開始日の既定値も
+ *   その翌日に固定される設計のため）。
+ * - 開始: `min(登録上の開始日, 出産日)`。出産日以降に働き続けることはできない。
+ * - シフト後の産休期間に重なる出勤入力は「実際には働けなかった日」として
+ *   集計から除外する（予定より早い出産で、出勤予定だった日が消えるケース）。
+ *
+ * 産休以外の休業（病気休職など）は出産日と無関係なのでそのまま。
+ * 予定日は scanRange の中央日（UI の deriveExpectedBirthDate と同じ定義）。
+ */
+function adjustMaternityForBirthDate(
+  input: UserInput,
+  birthDate: DateISO,
+): { leavePeriods: LeavePeriod[]; attendances: DailyAttendance[] } {
+  const hasMaternity = input.leavePeriods.some(
+    (p) => p.type === "産休" && p.start && p.end,
+  );
+  if (!hasMaternity) {
+    return { leavePeriods: input.leavePeriods, attendances: input.attendances };
+  }
+
+  const expected = deriveExpectedFromScanRange(input);
+  const delta = expected
+    ? differenceInCalendarDays(parseISO(birthDate), parseISO(expected))
+    : 0;
+
+  const shiftedRanges: Array<{ start: DateISO; end: DateISO }> = [];
+  const leavePeriods = input.leavePeriods.map((p) => {
+    if (p.type !== "産休" || !p.start || !p.end) return p;
+    const start = p.start < birthDate ? p.start : birthDate;
+    const end = input.customMaternityEnd
+      ? p.end
+      : fmt(addDays(parseISO(p.end), delta));
+    if (end < start) return p; // 入力不整合（出産日が固定終了日より後など）は触らない
+    shiftedRanges.push({ start, end });
+    return { ...p, start, end };
+  });
+
+  const attendances =
+    shiftedRanges.length === 0
+      ? input.attendances
+      : input.attendances.filter(
+          (a) =>
+            !shiftedRanges.some((r) => a.date >= r.start && a.date <= r.end),
+        );
+
+  return { leavePeriods, attendances };
+}
+
+/** scanRange の中央日 = 出産予定日（UI 側 deriveExpectedBirthDate と同一定義）。 */
+function deriveExpectedFromScanRange(input: UserInput): DateISO | null {
+  const { start, end } = input.scanRange;
+  if (!start || !end) return null;
+  const s = parseISO(start).getTime();
+  const e = parseISO(end).getTime();
+  if (Number.isNaN(s) || Number.isNaN(e)) return null;
+  return fmt(new Date((s + e) / 2));
 }
 
 function judgeCompleteMonth(
