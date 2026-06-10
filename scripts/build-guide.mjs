@@ -184,13 +184,16 @@ function articleJsonLd({ title, description, canonical, date, updated }) {
   return `\n    <script type="application/ld+json">${JSON.stringify(data)}</script>`
 }
 
-/** 本文HTMLに広告枠を挿入（導入直後＝最初のH2前、と本文末） */
+/**
+ * 本文HTMLに広告枠を挿入（導入直後＝最初のH2前のみ）。
+ * 本文末は「ツール紹介文 → CTAボタン」の導線の間に広告が割り込んでしまうため
+ * ここでは入れず、renderArticle 側で CTA の後ろに置く。
+ */
 function injectAds(html) {
   const ad = adUnit()
   if (!ad) return html
   const i = html.indexOf('<h2')
-  const withMid = i > 0 ? html.slice(0, i) + ad + html.slice(i) : html
-  return withMid + ad
+  return i > 0 ? html.slice(0, i) + ad + html.slice(i) : html
 }
 
 function renderArticle(a) {
@@ -217,6 +220,7 @@ function renderArticle(a) {
           </span>
           <span class="tool-cta__btn">判定する →</span>
         </a>
+        ${adUnit()}
         ${relatedBlock}
         <div class="author"><strong>運営者</strong>：${AUTHOR}（<a href="${AUTHOR_URL}">nkjzm.jp</a>）。このサイトは、妻の“週3＋副業”という働き方で育休給付金をもらえるか分からず悩んだ経験から作りました（<a href="/guide/naze-tsukutta/">作った理由</a>）。本サイトの解説は雇用保険法および厚生労働省の資料に基づいて作成しています。詳しくは<a href="/about/">運営者情報</a>をご覧ください。</div>
         <p class="disclaimer">※ 本記事は参考情報です。個別の受給可否の最終判定は、管轄のハローワーク（公共職業安定所）で行われます。</p>
