@@ -51,6 +51,12 @@ export function Step1BasicInfo() {
   // 予定日前後の試算幅。Step5 のドロップダウンで変更でき、ここでは
   // 既存の scanRange から引き継ぐ（初回は DEFAULT_SPREAD）。
   const [spread] = useState<number>(initialSpread || DEFAULT_SPREAD)
+  // 詳細設定にデフォルト以外の値が入っているときは展開した状態で表示する
+  const [advancedOpen] = useState<boolean>(
+    () =>
+      state.input.isMultipleBirth ||
+      state.input.customChildCareStart !== undefined,
+  )
 
   // 入力変化を scanRange に反映
   useEffect(() => {
@@ -130,7 +136,7 @@ export function Step1BasicInfo() {
         />
       </div>
 
-      <details className="st-more">
+      <details className="st-more" open={advancedOpen}>
         <summary>
           ⚙️ 詳細設定 — 双子以上の妊娠・育休開始日を指定する場合
         </summary>
