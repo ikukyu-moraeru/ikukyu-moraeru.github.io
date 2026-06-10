@@ -305,9 +305,12 @@ main:has(.guide-index) { max-width: 900px; }
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 2.6rem;
+  min-width: 2.6rem;
   height: 2.6rem;
+  padding: 0 0.45rem;
   font-size: 1.35rem;
+  line-height: 1;
+  white-space: nowrap;
   background: linear-gradient(135deg, var(--bg-2) 0%, var(--bg-3) 100%);
   border-radius: var(--r-sm);
   transition: transform 0.15s;
@@ -336,7 +339,7 @@ main:has(.guide-index) { max-width: 900px; }
   border: 1px solid rgba(236, 138, 163, 0.45);
 }
 .guide-card--featured .guide-card__emoji {
-  width: 3.2rem;
+  min-width: 3.2rem;
   height: 3.2rem;
   font-size: 1.7rem;
   background: var(--paper);

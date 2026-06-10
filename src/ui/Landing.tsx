@@ -273,10 +273,13 @@ export function Landing() {
         <div className="ht-guide__grid">
           {FEATURED_GUIDES.map((g) => (
             <a key={g.href} className="ht-guide__card" href={g.href}>
-              <h3>
-                <span aria-hidden>{g.emoji}</span> {g.title}
-              </h3>
-              <p>{g.desc}</p>
+              <span className="ht-guide__emoji" aria-hidden>
+                {g.emoji}
+              </span>
+              <span className="ht-guide__body">
+                <h3>{g.title}</h3>
+                <p>{g.desc}</p>
+              </span>
             </a>
           ))}
         </div>

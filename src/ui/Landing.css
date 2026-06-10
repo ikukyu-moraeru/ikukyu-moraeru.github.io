@@ -752,19 +752,54 @@
   }
 }
 .ht-guide__card {
-  display: block;
-  padding: 1.1rem 1.3rem;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 1.1rem 1.3rem 2rem;
   background: var(--paper);
-  border: 1px solid var(--line);
+  border: 1px solid rgba(236, 138, 163, 0.45);
   border-radius: var(--r-md);
   box-shadow: var(--sh-sm);
   text-decoration: none;
   color: inherit;
   transition: transform 0.15s, box-shadow 0.15s;
 }
+.ht-guide__card::after {
+  content: '読む →';
+  position: absolute;
+  right: 1.2rem;
+  bottom: 0.75rem;
+  font-family: var(--font-h);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--pink-deep);
+  transition: transform 0.15s;
+}
 .ht-guide__card:hover {
   transform: translateY(-2px);
   box-shadow: var(--sh-md);
+}
+.ht-guide__card:hover::after {
+  transform: translateX(3px);
+}
+.ht-guide__card:hover .ht-guide__emoji {
+  transform: rotate(-6deg) scale(1.08);
+}
+.ht-guide__emoji {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  min-width: 2.6rem;
+  height: 2.6rem;
+  padding: 0 0.45rem;
+  font-size: 1.35rem;
+  background: linear-gradient(135deg, var(--bg-2) 0%, var(--bg-3) 100%);
+  border-radius: var(--r-sm);
+  transition: transform 0.15s;
+}
+.ht-guide__body {
+  min-width: 0;
 }
 .ht-guide__card h3 {
   font-family: var(--font-h);
@@ -772,6 +807,11 @@
   color: var(--plum);
   margin: 0 0 0.35rem;
   line-height: 1.5;
+}
+.ht-guide__card:hover h3 {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--pink);
 }
 .ht-guide__card p {
   margin: 0;
