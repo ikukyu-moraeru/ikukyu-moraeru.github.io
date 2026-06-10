@@ -57,7 +57,7 @@ description: Use when writing or rewriting a guide article for the ikukyu-moraer
 
 主な出典URL（Rule.md §8 より）:
 - 厚労省パンフ2025改訂版: `https://www.mhlw.go.jp/content/11600000/001461102.pdf`
-- 業務取扱要領59533: `https://www.mhlw.go.jp/seisakunitsuite/bunya/koyou_roudou/koyou/koyouhoken/data/dl/toriatsukai_youryou_q.pdf`
+- 業務取扱要領59523（育児休業給付・R8.4版。旧版番号59533）: `https://www.mhlw.go.jp/content/001684266.pdf`
 - 80時間ルール LL020615保01: `https://www.mhlw.go.jp/content/11600000/000642296.pdf`
 - 制度案内: `https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000135090_00001.html`
 
