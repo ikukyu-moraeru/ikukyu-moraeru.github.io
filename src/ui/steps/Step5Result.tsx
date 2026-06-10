@@ -636,18 +636,21 @@ function missingMonthsLabel(months: string[]): string {
 
 /**
  * 結果を良くするために試せるアクションの一覧。全候補が受給可でも常時表示する。
- * fail-all（全滅）と、届かない日がありかつ未入力月が残っている場合は
- * デフォルトで展開する。
+ * デフォルトは常に閉じ、未入力月が残っている場合は summary 行に
+ * 軽い警告バッジを出して気づけるようにする（展開すると先頭項目が重複するので隠す）。
  */
 function ActionSuggestions({ verdict, missingMonths }: ActionSuggestionsProps) {
   const { dispatch } = useAppState()
   const hasFail = verdict !== 'pass-all'
-  const defaultOpen =
-    verdict === 'fail-all' || (hasFail && missingMonths.length > 0)
   return (
-    <details className="r5-actions" open={defaultOpen}>
+    <details className="r5-actions">
       <summary className="r5-actions__summary">
         🌱 届かない日があるときに、できること
+        {missingMonths.length > 0 && (
+          <span className="r5-actions__badge">
+            ⏳ 未入力の月が {missingMonths.length} か月
+          </span>
+        )}
       </summary>
       <p className="r5-actions__intro">
         {hasFail

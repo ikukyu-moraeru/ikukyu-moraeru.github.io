@@ -820,6 +820,22 @@
   color: var(--plum);
   user-select: none;
 }
+.r5-actions__badge {
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.6rem;
+  background: #fff5d4;
+  border: 1px solid var(--gold);
+  border-radius: var(--r-full);
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--gold-deep);
+  white-space: nowrap;
+}
+/* 展開中は先頭項目「未入力の月を埋める」と重複するためバッジは隠す */
+.r5-actions[open] .r5-actions__badge {
+  display: none;
+}
 .r5-actions__intro {
   margin: 0.6rem 0 0.8rem;
   line-height: 1.7;
