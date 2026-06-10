@@ -414,7 +414,14 @@ function ChildCareStartField({
         </label>
       </div>
       {useCustom && (
-        <div style={{ marginTop: '0.7rem', display: 'grid', gap: '0.4rem' }}>
+        <div
+          style={{
+            marginTop: '0.7rem',
+            display: 'grid',
+            gap: '0.4rem',
+            minWidth: 0,
+          }}
+        >
           {/* min は付けない：産後休業より前を指定したら強制補正せず、下の警告で伝える */}
           <DateInput
             className="st-input"
@@ -519,8 +526,15 @@ function MaternityPeriodField({
         </label>
       </div>
       {useCustom && (
-        <div style={{ marginTop: '0.7rem', display: 'grid', gap: '0.6rem' }}>
-          <div style={{ display: 'grid', gap: '0.3rem' }}>
+        <div
+          style={{
+            marginTop: '0.7rem',
+            display: 'grid',
+            gap: '0.6rem',
+            minWidth: 0,
+          }}
+        >
+          <div style={{ display: 'grid', gap: '0.3rem', minWidth: 0 }}>
             <label className="st-field__label">産前休業の開始日</label>
             <DateInput
               className="st-input"
@@ -530,7 +544,7 @@ function MaternityPeriodField({
               onChange={(v) => onChange(v || autoStart, endValue)}
             />
           </div>
-          <div style={{ display: 'grid', gap: '0.3rem' }}>
+          <div style={{ display: 'grid', gap: '0.3rem', minWidth: 0 }}>
             <label className="st-field__label">産後休業の終了日</label>
             <DateInput
               className="st-input"

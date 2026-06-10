@@ -64,6 +64,9 @@ input[type="time"].st-input {
   -webkit-min-logical-width: 0;
   display: block;
   font-size: 16px;
+  /* 内在幅がどう振る舞っても自分の box から先には広がらせない最後の砦 */
+  max-width: 100%;
+  overflow: hidden;
 }
 .st-input::-webkit-date-and-time-value {
   min-width: 0;

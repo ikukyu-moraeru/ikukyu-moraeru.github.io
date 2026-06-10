@@ -83,6 +83,13 @@ body,
   min-height: 100%;
 }
 
+/* iOS Safari の <input type="date"> 内在幅などで横スクロールが発生するのを根本遮断する。
+   過去に html/body への overflow-x:hidden は副作用で revert したが（d823bbe）、
+   clip はスクロールコンテナを作らないため sticky 等に影響しない。 */
+#root {
+  overflow-x: clip;
+}
+
 a {
   color: inherit;
 }
