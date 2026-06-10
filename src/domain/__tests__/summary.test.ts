@@ -17,6 +17,7 @@ function fakeResult(
     isEligible: countedMonths >= 12,
     shortage: Math.max(0, 12 - countedMonths),
     monthBreakdown: [],
+    fragmentJudgments: [],
   };
 }
 

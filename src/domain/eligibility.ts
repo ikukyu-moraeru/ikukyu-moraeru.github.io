@@ -16,6 +16,7 @@ import type {
   DailyAttendance,
   DateISO,
   EligibilityResult,
+  FragmentJudgment,
   FragmentMonth,
   InsuredEmploymentSegment,
   JudgedAttendance,
@@ -28,6 +29,14 @@ import type {
  * Rule.md §2 / §3 の支給要件②（みなし被保険者期間 12 か月）判定。
  *
  * - 緩和（§3-4）と前職通算（§4-2）は relaxation.ts / carryOver.ts に委譲。
+ * - 完全月の区切りは **セグメント（被保険者資格）ごと** に行う：
+ *   在職中（育休開始時点まで継続）のセグメントは育休開始日（みなし喪失日）を、
+ *   それ以前に離職したセグメントは離職日の翌日をアンカーに、月単位で遡る
+ *   （法 61 条の 7 → 14 条適用、行政手引 50103 イ(イ)・50104、
+ *    東京ハローワーク「休業開始時賃金月額証明書 記入見本【例 3】」）。
+ *   転職をまたぐ完全月は作らず、賃金支払基礎日数を事業主間で合算しない。
+ * - 端数月（1 か月未満の先頭余り）はセグメントごとに最大 1 つ生じ、
+ *   それぞれ 0.5 か月判定して通算する。
  * - 完全月 / 端数月の出勤量は `DailyAttendance[]` を日付フィルタして集計（按分なし）。
  * - 80 時間ルールは 2020-08-01 以降の月にのみ適用（厚労省 LL020615 保 01）。
  */
@@ -82,26 +91,60 @@ export function judgeEligibility(
 
   const mergedSegments = mergeInsuredSegments(input.insuredSegments);
 
-  const { completeMonths, fragment } = buildCompleteMonths(
-    childCareStartDate,
-    windowStart,
-  );
+  const monthBreakdown: MonthJudgment[] = [];
+  const fragmentJudgments: FragmentJudgment[] = [];
 
-  const monthBreakdown: MonthJudgment[] = completeMonths.map((m) =>
-    judgeCompleteMonth(m, adjusted.attendances, mergedSegments),
-  );
+  if (mergedSegments.length === 0) {
+    // セグメント未入力: 窓全体を育休開始日アンカーで区切り、全月を未加入として表示する
+    const { completeMonths, fragment } = buildCompleteMonths(
+      childCareStartDate,
+      windowStart,
+    );
+    for (const m of completeMonths) {
+      monthBreakdown.push({ range: m, counted: 0, reason: "雇用保険未加入" });
+    }
+    if (fragment) {
+      fragmentJudgments.push({
+        range: fragment,
+        counted: 0,
+        reason: "雇用保険未加入",
+      });
+    }
+  } else {
+    // 新しいセグメントから順に、セグメントごとにアンカーを決めて区切る
+    const ordered = [...mergedSegments].sort((a, b) =>
+      a.start < b.start ? 1 : -1,
+    );
+    for (const seg of ordered) {
+      // アンカー = 「被保険者でなくなった日」:
+      // 育休開始時点まで在籍しているセグメントは育休開始日（みなし喪失日）、
+      // それ以前に離職したセグメントは離職日の翌日（喪失応当日の基準）
+      const lossD = seg.end === null ? childCareStartD : addDays(parseISO(seg.end), 1);
+      const anchorD = isBefore(lossD, childCareStartD) ? lossD : childCareStartD;
+      const anchor = fmt(anchorD);
+      const clip = seg.start > windowStart ? seg.start : windowStart;
+      if (clip >= anchor) continue; // 判定対象期間に重ならない
+
+      const { completeMonths, fragment } = buildCompleteMonths(anchor, clip);
+      for (const m of completeMonths) {
+        monthBreakdown.push(
+          judgeCompleteMonth(m, adjusted.attendances, mergedSegments),
+        );
+      }
+      if (fragment) {
+        fragmentJudgments.push(
+          judgeFragment(fragment, adjusted.attendances, mergedSegments),
+        );
+      }
+    }
+    // 表示用の通し番号を振り直す（セグメントごとに 1 から始まるため）
+    monthBreakdown.forEach((m, i) => {
+      m.range = { ...m.range, index: i + 1 };
+    });
+  }
 
   let countedMonths = monthBreakdown.reduce((sum, j) => sum + j.counted, 0);
-
-  let fragmentJudgment: EligibilityResult["fragmentJudgment"];
-  if (fragment) {
-    fragmentJudgment = judgeFragment(
-      fragment,
-      adjusted.attendances,
-      mergedSegments,
-    );
-    countedMonths += fragmentJudgment.counted;
-  }
+  countedMonths += fragmentJudgments.reduce((sum, f) => sum + f.counted, 0);
 
   return {
     birthDate,
@@ -114,7 +157,7 @@ export function judgeEligibility(
     isEligible: countedMonths >= 12,
     shortage: Math.max(0, 12 - countedMonths),
     monthBreakdown,
-    fragmentJudgment,
+    fragmentJudgments,
   };
 }
 
@@ -206,7 +249,7 @@ function judgeFragment(
   fragment: FragmentMonth,
   attendances: DailyAttendance[],
   segments: InsuredEmploymentSegment[],
-): NonNullable<EligibilityResult["fragmentJudgment"]> {
+): FragmentJudgment {
   if (!isFullyInsured(fragment.start, fragment.end, segments)) {
     return { range: fragment, counted: 0, reason: "雇用保険未加入" };
   }

@@ -140,6 +140,17 @@ export interface MonthJudgment {
 }
 
 /**
+ * 端数月（各セグメント先頭の 1 か月未満期間）の判定結果。
+ * セグメント（被保険者資格）ごとに最大 1 つ生じる（行政手引 50103/50104）。
+ */
+export interface FragmentJudgment {
+  range: FragmentMonth;
+  counted: 0 | 0.5;
+  reason: "11日以上" | "80時間以上" | "条件未達" | "15日未満" | "雇用保険未加入";
+  attendance?: JudgedAttendance;
+}
+
+/**
  * 1 つの「実際の出産日」候補に対する判定結果。
  */
 export interface EligibilityResult {
@@ -153,10 +164,6 @@ export interface EligibilityResult {
   isEligible: boolean;
   shortage: number; // 12 - countedMonths（不足月数。0 以上）
   monthBreakdown: MonthJudgment[];
-  fragmentJudgment?: {
-    range: FragmentMonth;
-    counted: 0 | 0.5;
-    reason: "11日以上" | "80時間以上" | "条件未達" | "15日未満" | "雇用保険未加入";
-    attendance?: JudgedAttendance;
-  };
+  /** 端数月の判定（セグメントごとに最大 1 つ。新しいセグメント順） */
+  fragmentJudgments: FragmentJudgment[];
 }

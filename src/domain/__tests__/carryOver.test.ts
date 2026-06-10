@@ -32,16 +32,14 @@ describe("mergeInsuredSegments (Rule §4-2)", () => {
     expect(mergeInsuredSegments([s])).toEqual([s]);
   });
 
-  it("離職翌日に再就職（ギャップ 0 日）→ 前後を 1 セグメントに連結", () => {
+  it("離職翌日に再就職（ギャップ 0 日）→ 連結せず両セグメント残す（区切りは資格ごと・50103/50104）", () => {
     const segments = [
       seg("a", "2023-01-01", "2024-06-30", { employerName: "Co A" }),
       seg("b", "2024-07-01", null, { employerName: "Co B" }),
     ];
     const result = mergeInsuredSegments(segments);
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe("a");
-    expect(result[0].start).toBe("2023-01-01");
-    expect(result[0].end).toBeNull();
+    expect(result).toHaveLength(2);
+    expect(result.map((s) => s.id)).toEqual(["a", "b"]);
   });
 
   it("30 日空白・基本手当受給なし → 前職と通算（両セグメント残る）", () => {

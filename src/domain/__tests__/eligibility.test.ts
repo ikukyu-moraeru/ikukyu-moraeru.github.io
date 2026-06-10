@@ -64,7 +64,7 @@ describe("judgeEligibility", () => {
     });
     expect(result.relaxationDays).toBe(0);
     expect(result.monthBreakdown).toHaveLength(24);
-    expect(result.fragmentJudgment).toBeUndefined();
+    expect(result.fragmentJudgments).toEqual([]);
     expect(result.countedMonths).toBe(24);
     expect(result.isEligible).toBe(true);
     expect(result.shortage).toBe(0);
@@ -184,11 +184,12 @@ describe("judgeEligibility", () => {
     const result = judgeEligibility(input, "2026-02-17");
     expect(result.relaxationDays).toBe(50);
     expect(result.scanWindow.start).toBe("2024-02-25");
-    expect(result.fragmentJudgment?.range.days).toBe(19);
-    expect(result.fragmentJudgment?.attendance?.basicWageDays).toBe(10);
-    expect(result.fragmentJudgment?.attendance?.basicWageHours).toBe(80);
-    expect(result.fragmentJudgment?.counted).toBe(0.5);
-    expect(result.fragmentJudgment?.reason).toBe("80時間以上");
+    expect(result.fragmentJudgments).toHaveLength(1);
+    expect(result.fragmentJudgments[0].range.days).toBe(19);
+    expect(result.fragmentJudgments[0].attendance?.basicWageDays).toBe(10);
+    expect(result.fragmentJudgments[0].attendance?.basicWageHours).toBe(80);
+    expect(result.fragmentJudgments[0].counted).toBe(0.5);
+    expect(result.fragmentJudgments[0].reason).toBe("80時間以上");
   });
 
   it("在籍したままの休職では完全月の区切りは動かない（区切りが動くのは被保険者でなくなった場合のみ）", () => {
@@ -279,22 +280,22 @@ describe("judgeEligibility", () => {
     expect(m2.reason).toBe("条件未達");
   });
 
-  it("雇用保険セグメントが部分的にしかカバーしない場合、未加入の月は 0 カウント", () => {
+  it("雇用保険セグメントが部分的にしかカバーしない場合、セグメント内の完全月だけが対象になる", () => {
     const input = makeInput({
       insuredSegments: [{ id: "s1", start: "2025-05-01", end: null }],
     });
     const result = judgeEligibility(input, "2026-02-17");
 
+    // 完全月は入社日（2025-05-01）で打ち切られ、11 か月。
+    // 頭の 2025-05-01〜05-14（14 日）は 15 日未満の端数で 0。
+    expect(result.monthBreakdown).toHaveLength(11);
+    expect(result.monthBreakdown.every((m) => m.counted === 1)).toBe(true);
+    expect(result.fragmentJudgments).toHaveLength(1);
+    expect(result.fragmentJudgments[0].range.days).toBe(14);
+    expect(result.fragmentJudgments[0].reason).toBe("15日未満");
     expect(result.countedMonths).toBe(11);
     expect(result.isEligible).toBe(false);
     expect(result.shortage).toBe(1);
-
-    const insured = result.monthBreakdown.filter((m) => m.counted === 1);
-    const uninsured = result.monthBreakdown.filter(
-      (m) => m.reason === "雇用保険未加入",
-    );
-    expect(insured).toHaveLength(11);
-    expect(uninsured).toHaveLength(13);
   });
 
   it("入力が空の場合は countedMonths=0", () => {
@@ -308,7 +309,7 @@ describe("judgeEligibility", () => {
     ).toBe(true);
   });
 
-  it("前職通算: 30 日空白で前後セグメントが連結", () => {
+  it("前職通算: 前職はその離職日の翌日をアンカーに区切る（50103 イ(イ)・50104）", () => {
     const input = makeInput({
       insuredSegments: [
         { id: "prev", start: "2024-04-01", end: "2025-04-15" },
@@ -316,14 +317,78 @@ describe("judgeEligibility", () => {
       ],
     });
     const result = judgeEligibility(input, "2026-02-17");
-    const uninsured = result.monthBreakdown.filter(
-      (m) => m.reason === "雇用保険未加入",
+    const ranges = result.monthBreakdown.map(
+      (m) => `${m.range.start}/${m.range.end}`,
     );
-    expect(uninsured.length).toBeGreaterThan(0);
-    expect(uninsured.length).toBeLessThan(24);
-    const earliest = result.monthBreakdown[result.monthBreakdown.length - 1];
-    expect(earliest.range.start).toBe("2024-04-15");
-    expect(earliest.counted).toBe(1);
+
+    // 現職: 育休開始日（2026-04-15）アンカー → 入社日ちょうどまで 11 か月、端数なし
+    expect(ranges).toContain("2025-05-15/2025-06-14");
+    // 前職: 離職日の翌日（2025-04-16）アンカー → 16 日区切りに変わる
+    expect(ranges).toContain("2025-03-16/2025-04-15");
+    expect(ranges).toContain("2024-04-16/2024-05-15");
+    // 旧実装のような「育休開始日アンカーのままギャップをまたぐ月」は作らない
+    expect(ranges).not.toContain("2025-04-15/2025-05-14");
+    expect(
+      result.monthBreakdown.some((m) => m.reason === "雇用保険未加入"),
+    ).toBe(false);
+
+    // 現職 11 + 前職 12 = 23 か月（前職頭の 2024-04-15 の 1 日は 15 日未満で 0）
+    expect(result.monthBreakdown).toHaveLength(23);
+    expect(result.countedMonths).toBe(23);
+    expect(result.fragmentJudgments).toHaveLength(1);
+    expect(result.fragmentJudgments[0].range.days).toBe(1);
+    expect(result.fragmentJudgments[0].reason).toBe("15日未満");
+  });
+
+  it("連続転職（ギャップ 0 日）でも 1 つの期間に連結せず、転職をまたぐ完全月を作らない", () => {
+    // A 社 2024-01-01〜2025-09-30 → B 社 2025-10-01〜（離職翌日に再就職）
+    // 東京ハローワーク記入見本【例3】: 現職の区切りは休業開始日アンカーで入社日打ち切り、
+    // 前職は離職票（離職日アンカー）で数えて通算する。
+    const input = makeInput({
+      insuredSegments: [
+        { id: "a", start: "2024-01-01", end: "2025-09-30" },
+        { id: "b", start: "2025-10-01", end: null },
+      ],
+    });
+    const result = judgeEligibility(input, "2026-02-17");
+    const ranges = result.monthBreakdown.map(
+      (m) => `${m.range.start}/${m.range.end}`,
+    );
+
+    // B 社（現職）: 育休開始日（2026-04-15）アンカー → 15 日区切り、入社日打ち切り
+    expect(ranges).toContain("2025-10-15/2025-11-14");
+    // A 社（前職）: 離職日の翌日（2025-10-01）アンカー → 暦月区切りに変わる
+    expect(ranges).toContain("2025-09-01/2025-09-30");
+    // 転職をまたぐ月（旧実装の連結で生じていた区切り）は存在しない
+    expect(ranges).not.toContain("2025-09-15/2025-10-14");
+
+    // B: 6 完全月 + 頭 14 日（15 日未満→0）/ A: 17 完全月 + 頭 16 日（11 日以上→0.5）
+    expect(result.monthBreakdown).toHaveLength(23);
+    expect(result.fragmentJudgments).toHaveLength(2);
+    expect(result.fragmentJudgments[0].range.days).toBe(14);
+    expect(result.fragmentJudgments[0].counted).toBe(0);
+    expect(result.fragmentJudgments[1].range.days).toBe(16);
+    expect(result.fragmentJudgments[1].counted).toBe(0.5);
+    expect(result.countedMonths).toBe(23.5);
+  });
+
+  it("転職で端数 0.5 が 2 つ積み上がり、12 か月の境界を越えるケース", () => {
+    // 完全月 11（B 社 7 + A 社 4）+ 端数 0.5 × 2 = 12.0 → 受給資格あり
+    const input = makeInput({
+      insuredSegments: [
+        { id: "a", start: "2025-03-25", end: "2025-08-19" },
+        { id: "b", start: "2025-08-20", end: null },
+      ],
+      attendances: fillWorkDays("2025-03-25", "2026-04-14"),
+    });
+    const result = judgeEligibility(input, "2026-02-17");
+
+    expect(result.monthBreakdown).toHaveLength(11);
+    expect(result.monthBreakdown.every((m) => m.counted === 1)).toBe(true);
+    expect(result.fragmentJudgments).toHaveLength(2);
+    expect(result.fragmentJudgments.every((f) => f.counted === 0.5)).toBe(true);
+    expect(result.countedMonths).toBe(12);
+    expect(result.isEligible).toBe(true);
   });
 
   it("前職通算リセット: 失業給付受給資格決定済みなら前職セグメントは判定対象外", () => {

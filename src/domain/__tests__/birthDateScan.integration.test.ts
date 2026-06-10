@@ -134,18 +134,19 @@ describe("自動モードの出産日スキャン（結合）", () => {
     const results = scanBirthDates(input);
     expect(results).toHaveLength(5);
 
-    // 期待値（手計算・Node 検証済み）:
-    //   2026-03-13 / 03-14 / 03-15: idx24.start ≤ 2024-05-11 < seg.start → 未加入
-    //     → counted = 11（idx1..11 のみ）→ not eligible
-    //   2026-03-16 / 03-17: idx24.start ≥ 2024-05-12 = seg.start → 加入
+    // 期待値（手計算）:
+    //   2026-03-13 / 03-14 / 03-15: idx24.start < seg.start → 完全月は seg.start で
+    //     打ち切られ 23 か月。idx24 の出勤 11 日は先頭の端数（15 日以上）に入り +0.5。
+    //     → counted = 11.5（idx1..11 の 11 か月 + 端数 0.5）→ not eligible
+    //   2026-03-16 / 03-17: idx24.start ≥ seg.start → idx24 が完全月として成立
     //     → counted = 12 → eligible
     const byBirth = Object.fromEntries(results.map((r) => [r.birthDate, r]));
 
-    expect(byBirth["2026-03-13"].countedMonths).toBe(11);
+    expect(byBirth["2026-03-13"].countedMonths).toBe(11.5);
     expect(byBirth["2026-03-13"].isEligible).toBe(false);
-    expect(byBirth["2026-03-14"].countedMonths).toBe(11);
+    expect(byBirth["2026-03-14"].countedMonths).toBe(11.5);
     expect(byBirth["2026-03-14"].isEligible).toBe(false);
-    expect(byBirth["2026-03-15"].countedMonths).toBe(11);
+    expect(byBirth["2026-03-15"].countedMonths).toBe(11.5);
     expect(byBirth["2026-03-15"].isEligible).toBe(false);
     expect(byBirth["2026-03-16"].countedMonths).toBe(12);
     expect(byBirth["2026-03-16"].isEligible).toBe(true);

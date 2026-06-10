@@ -14,8 +14,11 @@ import type { InsuredEmploymentSegment } from "./types";
  * （Rule §4-1 (イ) の趣旨：基本手当受給資格決定以前の被保険者期間は全除外）し、
  * 当該セグメント以降のみを通算対象として再スタートする。
  *
- * - 重複セグメントは end を伸ばして 1 つに集約。
- * - ギャップ 0 日（離職翌日に再就職）は 1 セグメントに連結（雇用保険的に連続のため）。
+ * - 重複セグメント（同一期間の二重入力）は end を伸ばして 1 つに集約。
+ * - **ギャップ 0 日（離職翌日に再就職）でも連結しない**。転職では被保険者資格の
+ *   喪失・取得が起きるため、完全月の区切りはセグメント（資格）ごとに行う必要がある
+ *   （行政手引 50103 イ(イ)・50104：離職票ごとに喪失応当日で区切って通算）。
+ *   同一事業主で資格が継続している期間は 1 セグメントとして入力される前提。
  */
 export function mergeInsuredSegments(
   segments: InsuredEmploymentSegment[],
@@ -45,16 +48,6 @@ export function mergeInsuredSegments(
     const gapDays = differenceInCalendarDays(nextStart, prevEnd) - 1;
 
     if (gapDays < 0) {
-      if (seg.end === null) {
-        kept[kept.length - 1] = { ...prev, end: null };
-      } else if (isAfter(parseISO(seg.end), prevEnd)) {
-        kept[kept.length - 1] = { ...prev, end: seg.end };
-      }
-      continue;
-    }
-
-    if (gapDays === 0) {
-      // 離職翌日に再就職（ギャップなし）→ 1 セグメントに連結。
       if (seg.end === null) {
         kept[kept.length - 1] = { ...prev, end: null };
       } else if (isAfter(parseISO(seg.end), prevEnd)) {
