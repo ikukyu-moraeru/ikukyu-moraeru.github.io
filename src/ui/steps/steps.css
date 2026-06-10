@@ -422,3 +422,32 @@ input[type="time"].st-input {
   transform: translateY(1px);
   box-shadow: 0 3px 8px rgba(108, 190, 154, 0.3);
 }
+
+/* 補足テキストの折りたたみ（各ステップ共通） */
+.st-more {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  padding: 0.7rem 1rem;
+}
+.st-more > summary {
+  cursor: pointer;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.st-more > summary:hover {
+  color: var(--plum);
+}
+.st-more__body {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.7rem;
+}
+.st-more__body p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}

@@ -61,14 +61,21 @@ export function Step3Segments() {
       <IssueBanner scopeIds={ids} />
       <p className="st-field__hint">
         雇用保険に加入していた期間（在職した会社）を新しい順に登録してください。
-        会社の間に空白期間（無職・短時間労働で未加入など）があった場合も、
-        <strong>会社ごとに 1 件ずつ</strong>登録すれば自動で空白として扱われます。
-        <br />
-        <span className="lp-note">
-          ※ 判定上、会社名は不要です。<strong>「現職」「前職」</strong>のままで OK。
-          結果を共有するときに個人情報が漏れないよう、実名は入れないことをおすすめします。
-        </span>
       </p>
+
+      <details className="st-more">
+        <summary>💡 空白期間の扱い・会社名について</summary>
+        <div className="st-more__body">
+          <p>
+            会社の間に空白期間（無職・短時間労働で未加入など）があった場合も、
+            <strong>会社ごとに 1 件ずつ</strong>登録すれば自動で空白として扱われます。
+          </p>
+          <p>
+            ※ 判定上、会社名は不要です。<strong>「現職」「前職」</strong>のままで OK。
+            結果を共有するときに個人情報が漏れないよう、実名は入れないことをおすすめします。
+          </p>
+        </div>
+      </details>
 
       <section className="sg-section">
         <header className="sg-section__head">

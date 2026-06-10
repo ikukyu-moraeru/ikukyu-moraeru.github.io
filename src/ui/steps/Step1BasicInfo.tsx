@@ -114,6 +114,28 @@ export function Step1BasicInfo() {
     <div className="st-section">
       <IssueBanner />
       <div className="st-field">
+        <label className="st-field__label" htmlFor="expectedDate">
+          <span>📅</span> 出産予定日
+        </label>
+        <p className="st-field__hint">
+          母子手帳に書かれている予定日を入力してください。
+        </p>
+        <DateInput
+          id="expectedDate"
+          className="st-input"
+          value={expected}
+          onChange={setExpected}
+          min={expectedBirthDateBounds().min}
+          max={expectedBirthDateBounds().max}
+        />
+      </div>
+
+      <details className="st-more">
+        <summary>
+          ⚙️ 詳細設定 — 双子以上の妊娠・育休開始日を指定する場合
+        </summary>
+        <div className="st-more__body">
+      <div className="st-field">
         <label className="st-field__label">
           <span>👶</span> 妊娠の人数
         </label>
@@ -170,23 +192,6 @@ export function Step1BasicInfo() {
         </div>
       </div>
 
-      <div className="st-field">
-        <label className="st-field__label" htmlFor="expectedDate">
-          <span>📅</span> 出産予定日
-        </label>
-        <p className="st-field__hint">
-          母子手帳に書かれている予定日を入力してください。
-        </p>
-        <DateInput
-          id="expectedDate"
-          className="st-input"
-          value={expected}
-          onChange={setExpected}
-          min={expectedBirthDateBounds().min}
-          max={expectedBirthDateBounds().max}
-        />
-      </div>
-
       {expected && (
         <ChildCareStartField
           expectedBirthDate={expected}
@@ -200,6 +205,8 @@ export function Step1BasicInfo() {
           }
         />
       )}
+        </div>
+      </details>
 
       {expected && (
         <>

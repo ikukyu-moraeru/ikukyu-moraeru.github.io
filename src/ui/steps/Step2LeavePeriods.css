@@ -311,3 +311,17 @@
     gap: 0.65rem;
   }
 }
+
+/* 自動登録済み・このまま進める案内 */
+.lp-skip-ok {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  background: var(--bg-3);
+  border-radius: 14px;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--mint-deep);
+}
+.lp-skip-ok strong {
+  font-family: var(--font-h);
+}
