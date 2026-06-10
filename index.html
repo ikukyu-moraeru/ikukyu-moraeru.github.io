@@ -12,12 +12,12 @@
     <!-- Google AdSense（所有権確認・広告配信用ローダ） -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8797133798967198" crossorigin="anonymous"></script>
     <title>育休もらえる？ — 育児休業給付金の受給判定</title>
-    <meta name="description" content="転職・休職・シフト制などで「育休給付金を受け取れるか微妙」な方向けのセルフ判定ツール。予定日が前後してもどの日に生まれたら受け取れるかを 1 日ずつ判定します。すべてブラウザで完結。" />
+    <meta name="description" content="転職・休職・シフト制などで「育休給付金を受け取れるか微妙」な方へ。受給判定は実際の出産日に連動するため、生まれる日しだいで結果が変わることも。どの日に生まれたら受け取れるかを 1 日ずつ判定するセルフ診断ツール。すべてブラウザで完結。" />
     <link rel="canonical" href="https://ikukyu-moraeru.github.io/" />
     <!-- OGP -->
     <meta property="og:site_name" content="育休もらえる？" />
     <meta property="og:title" content="育休もらえる？ — 育児休業給付金の受給判定" />
-    <meta property="og:description" content="転職・休職・シフト制でぎりぎりかも、な方へ。出産日のぶれや産休・転職・シフトを全部考慮して、あなたの場合に受け取れるかを 1 日ずつ判定します。" />
+    <meta property="og:description" content="転職・休職・シフト制でぎりぎりかも、な方へ。育休給付金がもらえるかは、生まれた日しだいで変わることがあります。産休・転職・シフトも考慮して、どの日に生まれたら受け取れるかを 1 日ずつ判定します。" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://ikukyu-moraeru.github.io/" />
     <meta property="og:image" content="https://ikukyu-moraeru.github.io/ogp.png" />
@@ -26,7 +26,7 @@
     <meta property="og:locale" content="ja_JP" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="育休もらえる？ — 育児休業給付金の受給判定" />
-    <meta name="twitter:description" content="転職・休職・シフト制でぎりぎりかも、な方へ。出産日のぶれや産休・転職・シフトを全部考慮して、あなたの場合に受け取れるかを 1 日ずつ判定します。" />
+    <meta name="twitter:description" content="転職・休職・シフト制でぎりぎりかも、な方へ。育休給付金がもらえるかは、生まれた日しだいで変わることがあります。産休・転職・シフトも考慮して、どの日に生まれたら受け取れるかを 1 日ずつ判定します。" />
     <meta name="twitter:image" content="https://ikukyu-moraeru.github.io/ogp.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -57,7 +57,7 @@
             "@id": "https://ikukyu-moraeru.github.io/#webapp",
             "name": "育休もらえる？ — 育児休業給付金の受給判定",
             "url": "https://ikukyu-moraeru.github.io/",
-            "description": "転職・休職・シフト制で「育休給付金を受け取れるか微妙」な方向けのセルフ判定ツール。出産日のぶれや産休・転職・シフトを全部考慮し、出産予定日の前後を1日ずつ判定します。すべてブラウザで完結し、入力データは外部送信されません。",
+            "description": "転職・休職・シフト制で「育休給付金を受け取れるか微妙」な方向けのセルフ判定ツール。受給判定の「2年間」と月の区切りは実際の出産日に連動するため、生まれる日しだいで結果が変わることがあります。産休・転職・シフトを考慮し、出産予定日の前後を1日ずつ判定します。すべてブラウザで完結し、入力データは外部送信されません。",
             "applicationCategory": "FinanceApplication",
             "operatingSystem": "Any (Web Browser)",
             "browserRequirements": "Requires JavaScript",
@@ -100,7 +100,7 @@
                 "name": "出産予定日が変わったらどうなりますか？",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "本ツールは予定日の前後（±任意日数）を1日ずつ判定し、どの日に生まれたら受け取れる／受け取れないかを可視化します。ぎりぎりのケースでも自分の状況を確認できます。"
+                  "text": "受給要件を判定する「2年間」や「1か月」の区切りは、育児休業開始日（実際の出産日に連動）から遡って決まります。そのため出産日が予定日からずれると、カウントされる月が変わり、判定結果が変わることがあります。本ツールは予定日の前後（±任意日数）を1日ずつ判定し、どの日に生まれたら受け取れる／受け取れないかを可視化します。"
                 }
               },
               {
@@ -131,8 +131,8 @@
       <div style="max-width:720px;margin:0 auto;padding:32px 20px;font-family:'Noto Sans JP',sans-serif;color:#2a2a2a;line-height:1.7;">
         <p style="font-size:13px;color:#6b6b6b;margin:0 0 8px;">転職・休職・シフト制で、ぎりぎりかもしれない方へ</p>
         <h1 style="font-size:28px;margin:0 0 16px;font-weight:700;">育休もらえる？ — 育児休業給付金の受給判定</h1>
-        <p style="margin:0 0 16px;">雇用保険の<strong>育児休業給付金</strong>は、休業前2年で<strong>「11日以上 働いた月」が12か月以上</strong>必要です。微妙な人ほど、自分の場合に当てはめないと判断できません。</p>
-        <p style="margin:0 0 16px;">このツールは、<strong>出産日のぶれ・産休・育休・転職・シフト</strong>を全部考慮して、出産予定日の前後を1日ずつ判定し、あなたの場合に受け取れるかを可視化します。すべてブラウザで完結し、入力データは外部送信されません。</p>
+        <p style="margin:0 0 16px;">雇用保険の<strong>育児休業給付金</strong>は、休業前2年で<strong>「11日以上 働いた月」が12か月以上</strong>必要です。この「2年」の起点も「月」の区切りも<strong>実際に生まれた日</strong>に合わせて動くため、出産が予定日から数日ずれるだけで、もらえる／もらえないが入れ替わることがあります。</p>
+        <p style="margin:0 0 16px;">このツールは、<strong>産休・育休・転職・シフト</strong>も考慮したうえで出産予定日の前後を1日ずつ判定し、<strong>どの日に生まれたら受け取れるか</strong>を可視化します。すべてブラウザで完結し、入力データは外部送信されません。</p>
         <h2 style="font-size:18px;margin:24px 0 8px;">こんな方の自己診断に</h2>
         <ul style="margin:0 0 16px;padding-left:20px;">
           <li>出産前に<strong>転職</strong>を経験した（前職と通算できる？）</li>
