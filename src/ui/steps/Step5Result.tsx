@@ -326,10 +326,10 @@ export function Step5Result() {
               会社と合意した別の日から育休を取る場合に指定してください。指定すると、その日を基準に判定し直します。
             </p>
             <div className="r5-ccs-quiet__row">
+              {/* min は付けない：自動値より前を指定したら強制補正せず、下の警告で伝える */}
               <DateInput
                 className="st-input"
                 value={customChildCareStart ?? ccsAutoDefault ?? ''}
-                min={ccsAutoDefault}
                 max={customCcsMax}
                 onChange={(v) =>
                   dispatch({
@@ -354,6 +354,24 @@ export function Step5Result() {
                 </button>
               )}
             </div>
+            {customChildCareStart &&
+              ccsAutoDefault &&
+              customChildCareStart < ccsAutoDefault && (
+                <p className="r5-ccs-quiet__warn">
+                  ⚠ 予定日どおりに生まれた場合、産後休業は{' '}
+                  {jpDate(format(subDays(parseISO(ccsAutoDefault), 1), 'yyyy-MM-dd'))}{' '}
+                  まで続くため、この開始日では育休を取れません（上の一覧で、どの出産日なら取れるかを ⚠
+                  の有無で確認できます）。産前産後休業のタイミング自体を変えたい場合は{' '}
+                  <button
+                    type="button"
+                    className="r5-ccs-quiet__link"
+                    onClick={() => dispatch({ type: 'SET_STEP', step: 1 })}
+                  >
+                    Step 1 の詳細設定
+                  </button>{' '}
+                  で調整してください。
+                </p>
+              )}
           </div>
         </details>
       </section>

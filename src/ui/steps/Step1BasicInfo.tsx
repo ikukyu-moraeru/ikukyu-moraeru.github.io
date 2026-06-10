@@ -415,10 +415,10 @@ function ChildCareStartField({
       </div>
       {useCustom && (
         <div style={{ marginTop: '0.7rem', display: 'grid', gap: '0.4rem' }}>
+          {/* min は付けない：産後休業より前を指定したら強制補正せず、下の警告で伝える */}
           <DateInput
             className="st-input"
             value={customStart ?? ''}
-            min={earliestPostnatalEnd}
             max={latestChildCareStart}
             onChange={(v) => onChange(v || defaultDate)}
           />

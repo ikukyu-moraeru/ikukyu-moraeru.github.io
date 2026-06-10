@@ -1035,3 +1035,29 @@
   line-height: 1.65;
   color: var(--pink-deep);
 }
+
+/* 育休開始日が産後休業（予定日基準）と重なるときの警告 */
+.r5-ccs-quiet__warn {
+  margin: 0.6rem 0 0;
+  padding: 0.6rem 0.85rem;
+  background: #fff5d4;
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--gold-deep);
+}
+.r5-ccs-quiet__link {
+  display: inline;
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  font-weight: 700;
+  color: var(--plum);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.r5-ccs-quiet__link:hover {
+  color: var(--pink-deep);
+}
