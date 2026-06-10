@@ -171,8 +171,9 @@ export function Step5Result() {
           : 'いまの入力では、条件を満たしていないようです'
         : '出産日によって、結果が変わります'
 
-  // mixed の Step5 ヒント文言：不足候補のうち最小 shortage で「あと少し」かどうか判定。
-  const mixedNear = summary.shortfallMin <= NEAR_THRESHOLD_MONTHS
+  // 凡例ヒント用：「あと少し届かない」(金色) と「受け取れない」(ピンク) のセルがそれぞれ存在するか
+  const nearDays = results.filter(isNearMiss).length
+  const hardFailDays = summary.failDays - nearDays
 
   // 網掛け（指定した育休開始日が産後休業と重なる）セルが 1 つでもあるか。凡例の出し分けに使う
   const hasInvalidCells =
@@ -207,11 +208,13 @@ export function Step5Result() {
         </div>
       </div>
 
-      {summary.failStreaks.length > 0 && (
+      {summary.failDays > 0 && (
         <p className="r5-hint">
-          🌱 下の一覧で紫の日が「
-          {mixedNear ? 'あと少し届かない日' : '受け取れない日'}
-          」です。
+          🌱 下の一覧で
+          {nearDays > 0 && '金色の日が「あと少し届かない日」'}
+          {nearDays > 0 && hardFailDays > 0 && '、'}
+          {hardFailDays > 0 && 'ピンクの日が「受け取れない日」'}
+          です。
         </p>
       )}
 
@@ -568,6 +571,8 @@ interface ActionItem {
   desc: string
   href: string
   linkLabel: string
+  /** 入力を見直す Step 番号。指定すると「Step n を開く」ボタンを表示する */
+  step?: number
 }
 
 const ACTION_ITEMS: ActionItem[] = [
@@ -577,6 +582,7 @@ const ACTION_ITEMS: ActionItem[] = [
     desc: '月11日に届かなくても80時間以上働いた月はカウントされます（2020年8月以降）。Step 4 で月ごとの入力を見直してください。',
     href: '/guide/80jikan-rule/',
     linkLabel: '80時間ルールの解説',
+    step: 4,
   },
   {
     icon: '🛌',
@@ -584,6 +590,7 @@ const ACTION_ITEMS: ActionItem[] = [
     desc: '病気や前の子の産休育休などで連続30日以上無給だった期間があれば、判定対象が最長4年まで広がります。Step 2 に登録してください。',
     href: '/guide/kanwa-saichou-4nen/',
     linkLabel: '2年→最長4年に延びる仕組み',
+    step: 2,
   },
   {
     icon: '💼',
@@ -591,11 +598,12 @@ const ACTION_ITEMS: ActionItem[] = [
     desc: '離職から1年以内の転職で、失業給付の手続きをしていなければ前職分も足せます。Step 3 に登録してください。',
     href: '/guide/tenshoku-tsuusan/',
     linkLabel: '前職通算の条件と落とし穴',
+    step: 3,
   },
   {
     icon: '🍼',
     title: '育休開始日をずらして試す',
-    desc: '開始日を動かすと判定対象の2年間が丸ごと動き、結果が変わることがあります。',
+    desc: '開始日を動かすと判定対象の2年間が丸ごと動き、結果が変わることがあります。このページ下部の「⚙️ 育休開始日」から変更できます。',
     href: '/guide/ikukyuu-kaishi-zure/',
     linkLabel: '開始日で判定が変わる仕組み',
   },
@@ -605,6 +613,7 @@ const ACTION_ITEMS: ActionItem[] = [
     desc: '出産直前まで働くと、働いた月が積み増せることがあります。Step 1 の詳細設定で試算できます。',
     href: '/guide/sanzen-kyuugyou-mijikaku/',
     linkLabel: '直前まで働く損得の解説',
+    step: 1,
   },
   {
     icon: '🏥',
@@ -631,6 +640,7 @@ interface ActionSuggestionsProps {
  * fail-all（全滅）の場合はデフォルトで展開し、mixed の場合は折りたたんで表示する。
  */
 function ActionSuggestions({ verdict }: ActionSuggestionsProps) {
+  const { dispatch } = useAppState()
   return (
     <details className="r5-actions" open={verdict === 'fail-all'}>
       <summary className="r5-actions__summary">
@@ -647,9 +657,22 @@ function ActionSuggestions({ verdict }: ActionSuggestionsProps) {
             </span>
             <span className="r5-actions__title">{item.title}</span>
             <span className="r5-actions__desc">{item.desc}</span>
-            <a className="r5-actions__link" href={item.href}>
-              {item.linkLabel}
-            </a>
+            <span className="r5-actions__links">
+              {item.step !== undefined && (
+                <button
+                  type="button"
+                  className="r5-actions__step"
+                  onClick={() =>
+                    dispatch({ type: 'SET_STEP', step: item.step! })
+                  }
+                >
+                  ✏️ Step {item.step} を開く
+                </button>
+              )}
+              <a className="r5-actions__link" href={item.href}>
+                📖 解説記事: {item.linkLabel}
+              </a>
+            </span>
           </li>
         ))}
       </ul>
