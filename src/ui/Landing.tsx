@@ -40,7 +40,7 @@ export function Landing() {
 
       <header className="ht-nav">
         <a className="ht-logo" href="/">
-          <span className="ht-logo__mark">？</span>
+          <img className="ht-logo__mark" src="/icon.png" alt="" width={32} height={32} />
           <span>{SERVICE_NAME}</span>
         </a>
         <nav className="ht-nav__links">

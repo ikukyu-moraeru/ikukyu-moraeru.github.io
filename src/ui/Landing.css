@@ -54,15 +54,9 @@
   font-size: 1.05rem;
 }
 .ht-logo__mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  background: var(--plum);
-  color: var(--bg);
-  font-size: 0.95rem;
 }
 .ht-nav__sub {
   font-family: var(--font-mono);
