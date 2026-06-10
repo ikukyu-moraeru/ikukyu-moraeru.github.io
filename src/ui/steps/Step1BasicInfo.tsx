@@ -212,6 +212,7 @@ export function Step1BasicInfo() {
         <Timeline
           expectedBirthDate={expected}
           isMultipleBirth={state.input.isMultipleBirth}
+          customChildCareStart={state.input.customChildCareStart}
           suppressed={state.meta.suppressAutoMaternity}
           onRestore={() =>
             dispatch({
@@ -228,6 +229,7 @@ export function Step1BasicInfo() {
 interface TimelineProps {
   expectedBirthDate: string
   isMultipleBirth: boolean
+  customChildCareStart: string | undefined
   suppressed: boolean
   onRestore: () => void
 }
@@ -235,11 +237,13 @@ interface TimelineProps {
 function Timeline({
   expectedBirthDate,
   isMultipleBirth,
+  customChildCareStart,
   suppressed,
   onRestore,
 }: TimelineProps) {
   const t = computeMaternityTimeline(expectedBirthDate, isMultipleBirth)
   if (!t) return null
+  const isCustomStart = customChildCareStart !== undefined
   const stops = [
     {
       key: 'prenatal',
@@ -266,8 +270,10 @@ function Timeline({
       key: 'childcare',
       ic: '🍼',
       label: '育休開始 ＝ 判定基準日',
-      sub: 'この日の前 2 年（緩和で最長 4 年）が判定対象',
-      date: t.childCareStart,
+      sub: isCustomStart
+        ? '手動で指定した育休開始日。この日の前 2 年（緩和で最長 4 年）が判定対象'
+        : 'この日の前 2 年（緩和で最長 4 年）が判定対象',
+      date: customChildCareStart ?? t.childCareStart,
       highlight: true as const,
     },
   ]
@@ -276,7 +282,9 @@ function Timeline({
       <div className="st-timeline__head">
         <span className="st-timeline__title">📐 出産予定日から決まる日付</span>
         <span className="st-timeline__hint">
-          産前 {t.prenatalDays} 日 ＋ 産後 56 日 → その翌日が「育休開始日」
+          {isCustomStart
+            ? '育休開始日は「詳細設定」で指定した日付です'
+            : `産前 ${t.prenatalDays} 日 ＋ 産後 56 日 → その翌日が「育休開始日」`}
         </span>
       </div>
       {suppressed && (
