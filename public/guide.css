@@ -78,15 +78,9 @@ a { color: var(--pink-deep); }
   text-decoration: none;
 }
 .gnav__brand .mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  background: var(--plum);
-  color: var(--bg);
-  font-size: 0.95rem;
 }
 .gnav__links { margin-left: auto; display: flex; gap: 1.1rem; flex-wrap: wrap; }
 .gnav__links a {

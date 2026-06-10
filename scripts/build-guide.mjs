@@ -115,7 +115,7 @@ const FONTS =
   '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">'
 
 const GNAV = `<header class="gnav"><div class="gnav__inner">
-      <a class="gnav__brand" href="/"><span class="mark">？</span> 育休もらえる？</a>
+      <a class="gnav__brand" href="/"><img class="mark" src="/icon.png" alt="" width="32" height="32" /> 育休もらえる？</a>
       <nav class="gnav__links">
         <a href="/">判定ツール</a>
         <a href="/guide/">ガイド</a>
