@@ -926,55 +926,72 @@
   color: var(--ink-soft);
 }
 
-/* 育休開始日コントロール（header 内） */
-.r5-ccs {
+/* 育休開始日コントロール（controls を details で折りたたむ控えめな表示） */
+.r5-ccs-quiet {
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.5rem;
+}
+.r5-ccs-quiet__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.r5-ccs-quiet__summary::-webkit-details-marker {
+  display: none;
+}
+.r5-ccs-quiet__label {
+  font-size: 0.78rem;
+  color: var(--ink-mute);
+}
+.r5-ccs-quiet__change {
+  font-size: 0.72rem;
+  color: var(--ink-mute);
+  white-space: nowrap;
+  opacity: 0.7;
+}
+.r5-ccs-quiet__summary:hover .r5-ccs-quiet__label,
+.r5-ccs-quiet__summary:hover .r5-ccs-quiet__change {
+  color: var(--plum);
+  opacity: 1;
+}
+.r5-ccs-quiet__body {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.r5-ccs-quiet__hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-mute);
+  line-height: 1.65;
+}
+.r5-ccs-quiet__row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.75rem;
-  padding: 0.55rem 0.85rem;
-  background: rgba(255, 245, 212, 0.7);
-  border: 1.5px solid var(--gold);
-  border-radius: var(--r-sm);
-  width: 100%;
 }
-.r5-ccs__label {
+.r5-ccs-quiet__reset {
   font-family: var(--font-h);
   font-weight: 700;
   font-size: 0.78rem;
-  color: var(--gold-deep);
-  white-space: nowrap;
-}
-.r5-ccs__input {
-  background: var(--bg);
-  border: 1.5px solid var(--line);
-  border-radius: var(--r-sm);
-  min-height: 36px;
-  padding: 0.3rem 0.65rem;
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  color: var(--ink);
-}
-.r5-ccs__input:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 1px;
-}
-.r5-ccs__reset {
-  font-family: var(--font-h);
-  font-weight: 700;
-  font-size: 0.78rem;
-  color: var(--gold-deep);
+  color: var(--ink-mute);
   background: transparent;
-  border: 1.5px solid var(--gold);
+  border: 1.5px solid var(--line);
   border-radius: var(--r-full);
   padding: 0.3rem 0.75rem;
   cursor: pointer;
   transition: all 0.18s ease;
   white-space: nowrap;
 }
-.r5-ccs__reset:hover {
-  background: var(--gold);
-  color: #fff;
+.r5-ccs-quiet__reset:hover {
+  border-color: var(--plum);
+  color: var(--plum);
 }
 
 /* 固定バナー */

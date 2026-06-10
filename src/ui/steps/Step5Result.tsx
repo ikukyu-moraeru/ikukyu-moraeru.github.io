@@ -70,15 +70,24 @@ export function Step5Result() {
     state.input.scanRange.end,
   )
 
-  // customChildCareStart の入力範囲（産後56日終了翌日が最小、産後1年が最大）
-  const customCcsMin = useMemo(() => {
+  // 育休開始日の自動既定値（産後休業翌日。手動指定された産休期間がある場合はその翌日）
+  const ccsAutoDefault = useMemo(() => {
     if (!expectedBirthDate) return undefined
     const t = computeMaternityTimeline(
       expectedBirthDate,
       state.input.isMultipleBirth,
+      {
+        maternityStart: state.input.customMaternityStart,
+        maternityEnd: state.input.customMaternityEnd,
+      },
     )
     return t?.childCareStart
-  }, [expectedBirthDate, state.input.isMultipleBirth])
+  }, [
+    expectedBirthDate,
+    state.input.isMultipleBirth,
+    state.input.customMaternityStart,
+    state.input.customMaternityEnd,
+  ])
 
   // 育休は子が 2 歳になるまで取得可能（Step1 の ChildCareStartField と同じ上限）
   const customCcsMax = expectedBirthDate
@@ -86,6 +95,11 @@ export function Step5Result() {
     : undefined
 
   const customChildCareStart = state.input.customChildCareStart
+
+  // マウント時に一度だけ評価：customChildCareStart が設定済みなら詳細を開いた状態にする
+  const [ccsDetailsOpen] = useState<boolean>(
+    () => customChildCareStart !== undefined,
+  )
 
   if (!state.input.scanRange.start || !state.input.scanRange.end) {
     return (
@@ -214,33 +228,6 @@ export function Step5Result() {
               ))}
             </select>
           </label>
-          {customChildCareStart && (
-            <div className="r5-ccs">
-              <span className="r5-ccs__label">育休開始日（指定中）</span>
-              <DateInput
-                className="r5-ccs__input"
-                value={customChildCareStart}
-                min={customCcsMin}
-                max={customCcsMax}
-                onChange={(v) =>
-                  dispatch({ type: 'PATCH_INPUT', patch: { customChildCareStart: v } })
-                }
-                aria-label="育休開始日を指定"
-              />
-              <button
-                type="button"
-                className="r5-ccs__reset"
-                onClick={() =>
-                  dispatch({
-                    type: 'PATCH_INPUT',
-                    patch: { customChildCareStart: undefined },
-                  })
-                }
-              >
-                自動（産後休業の翌日）に戻す
-              </button>
-            </div>
-          )}
         </header>
         {customChildCareStart && (
           <p className="r5-fixed-note">
@@ -313,6 +300,52 @@ export function Step5Result() {
             <span className="r5-leg__sub">11 か月未満</span>
           </span>
         </footer>
+
+        <details className="r5-ccs-quiet" open={ccsDetailsOpen || undefined}>
+          <summary className="r5-ccs-quiet__summary">
+            <span className="r5-ccs-quiet__label">
+              ⚙️ 育休開始日:{' '}
+              {customChildCareStart
+                ? `${jpDate(customChildCareStart)}（指定中）`
+                : '自動（産後休業の翌日）'}
+            </span>
+            <span className="r5-ccs-quiet__change">変更する</span>
+          </summary>
+          <div className="r5-ccs-quiet__body">
+            <p className="r5-ccs-quiet__hint">
+              会社と合意した別の日から育休を取る場合に指定してください。指定すると、その日を基準に判定し直します。
+            </p>
+            <div className="r5-ccs-quiet__row">
+              <DateInput
+                className="st-input"
+                value={customChildCareStart ?? ccsAutoDefault ?? ''}
+                min={ccsAutoDefault}
+                max={customCcsMax}
+                onChange={(v) =>
+                  dispatch({
+                    type: 'PATCH_INPUT',
+                    patch: { customChildCareStart: v || undefined },
+                  })
+                }
+                aria-label="育休開始日を指定"
+              />
+              {customChildCareStart && (
+                <button
+                  type="button"
+                  className="r5-ccs-quiet__reset"
+                  onClick={() =>
+                    dispatch({
+                      type: 'PATCH_INPUT',
+                      patch: { customChildCareStart: undefined },
+                    })
+                  }
+                >
+                  自動（産後休業の翌日）に戻す
+                </button>
+              )}
+            </div>
+          </div>
+        </details>
       </section>
 
       {selectedResult && (
