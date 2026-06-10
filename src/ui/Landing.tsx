@@ -6,25 +6,31 @@ import './Landing.css'
 
 const SERVICE_NAME = '育休もらえる？'
 
-// トップに出す注目記事。記事を増やしたらここに追記する（一覧は /guide/）。
+// トップに出す注目記事。
+// 選定基準: ヒーローで名指しする読者層（転職・休職/つわり・シフト）の入口記事を1本ずつ＋全体像のピラー。
+// 各テーマの深掘り記事（80時間・緩和・端数月・区切りなど）へは入口記事の本文から辿れるため、ここには置かない。
 const FEATURED_GUIDES = [
   {
     href: '/guide/jukyu-youken/',
+    emoji: '📘',
     title: '育児休業給付金は誰がもらえる？受給要件をやさしく全部',
     desc: 'みなし被保険者期間12か月・最長4年の緩和・前職通算まで、受給要件の全体像をまとめて整理します。',
   },
   {
+    href: '/guide/tenshoku-tsuusan/',
+    emoji: '🔗',
+    title: '転職しても前職の雇用保険は通算できる',
+    desc: '前職分は条件を満たせば足せます。ただし失業給付の手続きをすると、1円も受け取っていなくてもリセット。',
+  },
+  {
     href: '/guide/part-time-shift-jitan/',
+    emoji: '🕒',
     title: '週5正社員じゃなくても育休手当はもらえる？',
     desc: 'パート・週3・時短・契約社員でも対象に。「出勤日数」でなく賃金支払基礎日数と80時間ルールで判定します。',
   },
   {
-    href: '/guide/kanwa-saichou-4nen/',
-    title: '「2年→最長4年」延長の正確な仕組み',
-    desc: '「出産前まで一律に遡れる」は誤解。無給で連続30日以上休んだ日数のぶんだけ判定期間が過去へ延びます。',
-  },
-  {
     href: '/guide/tsuwari-kyuushoku-otoshiana/',
+    emoji: '🛌',
     title: 'つわり・妊娠中の休みが条件を崩す“落とし穴”',
     desc: '無給欠勤は基礎日数に入らず条件を崩すことも。有給の活用や連続30日で味方にする方法を解説します。',
   },
@@ -267,7 +273,9 @@ export function Landing() {
         <div className="ht-guide__grid">
           {FEATURED_GUIDES.map((g) => (
             <a key={g.href} className="ht-guide__card" href={g.href}>
-              <h3>{g.title}</h3>
+              <h3>
+                <span aria-hidden>{g.emoji}</span> {g.title}
+              </h3>
               <p>{g.desc}</p>
             </a>
           ))}
