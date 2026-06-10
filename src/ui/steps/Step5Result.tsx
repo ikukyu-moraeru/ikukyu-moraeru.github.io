@@ -628,12 +628,8 @@ interface ActionSuggestionsProps {
   missingMonths: string[]
 }
 
-/** 未入力月の先頭数件を「2026年5月・2026年6月 他3か月」形式に圧縮する */
-function missingMonthsLabel(months: string[]): string {
-  const head = months.slice(0, 3).map(jpMonth).join('・')
-  const rest = months.length - 3
-  return rest > 0 ? `${head} 他${rest}か月` : head
-}
+/** 未入力月チップの最大表示数。超過分は「他 N か月」にまとめる */
+const MISSING_CHIP_MAX = 6
 
 /**
  * 結果を良くするために試せるアクションの一覧。全候補が受給可でも常時表示する。
@@ -665,9 +661,20 @@ function ActionSuggestions({ verdict, missingMonths }: ActionSuggestionsProps) {
               ⏳
             </span>
             <span className="r5-actions__title">未入力の月を埋める</span>
+            <span className="r5-actions__months">
+              {missingMonths.slice(0, MISSING_CHIP_MAX).map((m) => (
+                <span key={m} className="r5-actions__month">
+                  {jpMonth(m)}
+                </span>
+              ))}
+              {missingMonths.length > MISSING_CHIP_MAX && (
+                <span className="r5-actions__month r5-actions__month--more">
+                  他 {missingMonths.length - MISSING_CHIP_MAX} か月
+                </span>
+              )}
+            </span>
             <span className="r5-actions__desc">
-              {missingMonthsLabel(missingMonths)}
-              の出勤情報がまだ入っていないようです。入力した月はカウントに加わるため、結果が変わる可能性が高いです。
+              出勤情報がまだ入っていない月です。入力した月はカウントに加わるため、結果が変わる可能性が高いです。
             </span>
             <span className="r5-actions__links">
               <button

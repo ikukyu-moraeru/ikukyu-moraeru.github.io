@@ -856,9 +856,31 @@
   border-radius: var(--r-sm);
 }
 .r5-actions__icon {
-  grid-row: 1 / 4;
+  grid-row: 1 / -1;
   font-size: 1.1rem;
   line-height: 1.4;
+}
+/* 未入力月のチップ列（summary のバッジと同系の金色トーン） */
+.r5-actions__months {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.4rem;
+  margin: 0.15rem 0;
+}
+.r5-actions__month {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--gold-deep);
+  background: #fff5d4;
+  padding: 0.18rem 0.6rem;
+  border-radius: var(--r-full);
+  border: 1px solid var(--gold);
+}
+.r5-actions__month--more {
+  font-family: var(--font-h);
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold-deep);
 }
 .r5-actions__title {
   font-family: var(--font-h);
