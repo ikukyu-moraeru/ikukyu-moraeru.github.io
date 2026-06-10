@@ -496,7 +496,7 @@ export function Step5Result() {
                 勤務先が 1 つの場合、この 0.5 が「12 か月以上」の合否を変えることはありません。
                 <br />
                 <a className="r5-actions__link" href="/guide/hasuu-tsuki-15nichi/">
-                  📖 解説記事: 端数月「+0.5か月」の正体と例外
+                  📖 解説記事: 端数月「0.5か月」の条件と、効く人・効かない人
                 </a>
               </p>
             </>
