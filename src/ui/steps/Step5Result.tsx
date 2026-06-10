@@ -171,10 +171,6 @@ export function Step5Result() {
           : 'いまの入力では、条件を満たしていないようです'
         : '出産日によって、結果が変わります'
 
-  // 凡例ヒント用：「あと少し届かない」(金色) と「受け取れない」(ピンク) のセルがそれぞれ存在するか
-  const nearDays = results.filter(isNearMiss).length
-  const hardFailDays = summary.failDays - nearDays
-
   // 網掛け（指定した育休開始日が産後休業と重なる）セルが 1 つでもあるか。凡例の出し分けに使う
   const hasInvalidCells =
     !!customChildCareStart &&
@@ -207,16 +203,6 @@ export function Step5Result() {
           <span className="r5-stats__lab">届かない日</span>
         </div>
       </div>
-
-      {summary.failDays > 0 && (
-        <p className="r5-hint">
-          🌱 下の一覧で
-          {nearDays > 0 && '金色の日が「あと少し届かない日」'}
-          {nearDays > 0 && hardFailDays > 0 && '、'}
-          {hardFailDays > 0 && 'ピンクの日が「受け取れない日」'}
-          です。
-        </p>
-      )}
 
       {summary.failDays > 0 && <ActionSuggestions verdict={verdict} />}
 
