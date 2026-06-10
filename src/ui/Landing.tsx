@@ -144,12 +144,12 @@ export function Landing() {
             <li>
               <span className="ht-points__ic">📅</span>
               <strong>出産日のぶれを考慮</strong>
-              予定日 ± 任意日数を 1 日ずつ判定
+              結果は生まれた日で変わるから、予定日 ± 任意日数を 1 日ずつ判定
             </li>
             <li>
               <span className="ht-points__ic">📒</span>
               <strong>制度をまるごと反映</strong>
-              緩和（最長 4 年）／前職通算／80 時間ルールも自動計算
+              2026 年 4 月時点。緩和（最長 4 年）／前職通算／80 時間ルールも自動計算
             </li>
             <li>
               <span className="ht-points__ic">🔒</span>
