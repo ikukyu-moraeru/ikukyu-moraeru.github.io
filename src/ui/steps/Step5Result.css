@@ -814,6 +814,70 @@
   color: var(--ink-soft);
 }
 
+/* できるアクション一覧（届かない日があるときの提案） */
+.r5-actions {
+  padding: 0.7rem 1rem;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-md);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.r5-actions__summary {
+  cursor: pointer;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--plum);
+  user-select: none;
+}
+.r5-actions__intro {
+  margin: 0.6rem 0 0.8rem;
+  line-height: 1.7;
+}
+.r5-actions__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+.r5-actions__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.55rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: var(--r-sm);
+}
+.r5-actions__icon {
+  grid-row: 1 / 4;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+.r5-actions__title {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--plum);
+}
+.r5-actions__desc {
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+.r5-actions__link {
+  font-size: 0.8rem;
+  color: var(--pink-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  justify-self: start;
+}
+.r5-actions__link:hover {
+  color: var(--plum);
+}
+
 /* missing months hint */
 .r5-missing {
   background: linear-gradient(135deg, #fff5d4 0%, #fff 100%);
@@ -1060,4 +1124,14 @@
 }
 .r5-ccs-quiet__link:hover {
   color: var(--pink-deep);
+}
+
+/* 凡例: 網掛け（指定した育休開始日が産後休業と重なる）セルの説明 */
+.r5-leg--invalid {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--bg-2) 0 6px,
+    rgba(0, 0, 0, 0.1) 6px 8px
+  );
+  color: var(--ink-soft);
 }

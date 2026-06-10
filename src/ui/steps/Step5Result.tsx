@@ -174,6 +174,15 @@ export function Step5Result() {
   // mixed の Step5 ヒント文言：不足候補のうち最小 shortage で「あと少し」かどうか判定。
   const mixedNear = summary.shortfallMin <= NEAR_THRESHOLD_MONTHS
 
+  // 網掛け（指定した育休開始日が産後休業と重なる）セルが 1 つでもあるか。凡例の出し分けに使う
+  const hasInvalidCells =
+    !!customChildCareStart &&
+    results.some(
+      (r) =>
+        customChildCareStart <=
+        format(addDays(parseISO(r.birthDate), POSTNATAL_DAYS), 'yyyy-MM-dd'),
+    )
+
   return (
     <div className="st-section">
       <IssueBanner scope="all" />
@@ -202,19 +211,11 @@ export function Step5Result() {
         <p className="r5-hint">
           🌱 下の一覧で紫の日が「
           {mixedNear ? 'あと少し届かない日' : '受け取れない日'}
-          」です。Step 4 で「11 日以上 働いた月」「80 時間以上 働いた月」をもう一度見直してみると、結果が変わるかもしれません。
+          」です。
         </p>
       )}
 
-      {summary.failDays > 0 && (
-        <p className="r5-hint">
-          📖 つわりなどの欠勤・休職が原因で届いていない場合、休み方しだいで結果が変わることがあります。詳しくは「
-          <a href="/guide/tsuwari-kyuushoku-otoshiana/">
-            妊娠中の「休み方」が受給を左右する
-          </a>
-          」を参照してください。
-        </p>
-      )}
+      {summary.failDays > 0 && <ActionSuggestions verdict={verdict} />}
 
       <MissingMonthsHint input={state.input} results={results} />
 
@@ -309,6 +310,12 @@ export function Step5Result() {
             受け取れない
             <span className="r5-leg__sub">11 か月未満</span>
           </span>
+          {hasInvalidCells && (
+            <span className="r5-leg r5-leg--invalid">
+              指定日から育休を取れない
+              <span className="r5-leg__sub">産後休業と重なる</span>
+            </span>
+          )}
         </footer>
 
         <details className="r5-ccs-quiet" open={ccsDetailsOpen || undefined}>
@@ -551,6 +558,102 @@ function DetailTimeline({ result, isMultipleBirth }: DetailTimelineProps) {
         </li>
       ))}
     </ol>
+  )
+}
+
+/** 届かない日があるときに試せるアクション。上から順に確認を促す。 */
+interface ActionItem {
+  icon: string
+  title: string
+  desc: string
+  href: string
+  linkLabel: string
+}
+
+const ACTION_ITEMS: ActionItem[] = [
+  {
+    icon: '✏️',
+    title: '働いた月の入力を見直す',
+    desc: '月11日に届かなくても80時間以上働いた月はカウントされます（2020年8月以降）。Step 4 で月ごとの入力を見直してください。',
+    href: '/guide/80jikan-rule/',
+    linkLabel: '80時間ルールの解説',
+  },
+  {
+    icon: '🛌',
+    title: '過去の休業の入力漏れを確認する',
+    desc: '病気や前の子の産休育休などで連続30日以上無給だった期間があれば、判定対象が最長4年まで広がります。Step 2 に登録してください。',
+    href: '/guide/kanwa-saichou-4nen/',
+    linkLabel: '2年→最長4年に延びる仕組み',
+  },
+  {
+    icon: '💼',
+    title: '前職の雇用保険を通算する',
+    desc: '離職から1年以内の転職で、失業給付の手続きをしていなければ前職分も足せます。Step 3 に登録してください。',
+    href: '/guide/tenshoku-tsuusan/',
+    linkLabel: '前職通算の条件と落とし穴',
+  },
+  {
+    icon: '🍼',
+    title: '育休開始日をずらして試す',
+    desc: '開始日を動かすと判定対象の2年間が丸ごと動き、結果が変わることがあります。',
+    href: '/guide/ikukyuu-kaishi-zure/',
+    linkLabel: '開始日で判定が変わる仕組み',
+  },
+  {
+    icon: '🌸',
+    title: '産前休業を短くして働く',
+    desc: '出産直前まで働くと、働いた月が積み増せることがあります。Step 1 の詳細設定で試算できます。',
+    href: '/guide/sanzen-kyuugyou-mijikaku/',
+    linkLabel: '直前まで働く損得の解説',
+  },
+  {
+    icon: '🏥',
+    title: 'つわりの休みを連続の休職に整える',
+    desc: 'とびとびの無給欠勤がいちばん不利です。医師の診断のもと連続30日以上の休職にすれば緩和の対象になります。',
+    href: '/guide/tsuwari-kyuushoku-otoshiana/',
+    linkLabel: '妊娠中の休み方の解説',
+  },
+  {
+    icon: '🤝',
+    title: 'それでも届かないとき',
+    desc: '給付金がなくても育休自体は取得でき、社会保険料免除や出産育児一時金は別に受けられます。',
+    href: '/guide/moraenai-baai/',
+    linkLabel: 'もらえない場合にできること',
+  },
+]
+
+interface ActionSuggestionsProps {
+  verdict: 'pass-all' | 'fail-all' | 'mixed'
+}
+
+/**
+ * 届かない日があるときに試せるアクションの一覧。
+ * fail-all（全滅）の場合はデフォルトで展開し、mixed の場合は折りたたんで表示する。
+ */
+function ActionSuggestions({ verdict }: ActionSuggestionsProps) {
+  return (
+    <details className="r5-actions" open={verdict === 'fail-all'}>
+      <summary className="r5-actions__summary">
+        🌱 届かない日があるときに、できること
+      </summary>
+      <p className="r5-actions__intro">
+        あきらめる前に、次の順で確認してみてください。入力の見直しで結果が変わることもあります。
+      </p>
+      <ul className="r5-actions__list">
+        {ACTION_ITEMS.map((item) => (
+          <li key={item.href} className="r5-actions__item">
+            <span className="r5-actions__icon" aria-hidden>
+              {item.icon}
+            </span>
+            <span className="r5-actions__title">{item.title}</span>
+            <span className="r5-actions__desc">{item.desc}</span>
+            <a className="r5-actions__link" href={item.href}>
+              {item.linkLabel}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </details>
   )
 }
 
