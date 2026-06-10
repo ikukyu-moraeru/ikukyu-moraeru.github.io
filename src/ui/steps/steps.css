@@ -51,39 +51,41 @@
     padding: 0.65rem 0.85rem;
   }
 }
-/* iOS WebKit (Safari/Chrome 両方) の <input type="date"> 描画はみ出し対策。
-   iOS Chrome は Apple のネイティブ date picker を使うため appearance:none では shadow DOM の余分 padding が残る。
-   - -webkit-appearance: textfield（textfield 化でネイティブ widget の自然幅をリセット、Chrome iOS でも効く）
-   - display: block（iOS の inline-flex デフォルトを上書きして width: 100% を効かせる）
-   - shadow DOM 子要素 (::-webkit-datetime-edit*, ::-webkit-calendar-picker-indicator) の padding/margin を 0 化
-   - font-size 16px で iOS 自動 zoom を防止 */
-input[type="date"].st-input,
-input[type="time"].st-input {
-  -webkit-appearance: textfield;
-  appearance: textfield;
-  -webkit-min-logical-width: 0;
+/* DateInput コンポーネント: ネイティブ <input type="date"> は iOS WebKit で
+   ウィジェットの内在幅がレイアウトを押し広げる既知問題（過去3回 CSS で対症療法済み）
+   があるため、見た目は .date-shell__value の自前テキストで完全制御し、
+   ネイティブ input は透明で全面に重ねる。タップでネイティブピッカーは従来どおり開く。 */
+.date-shell {
+  position: relative;
   display: block;
+}
+.date-shell__value {
+  display: block;
+  pointer-events: none;
+}
+.date-shell__value[data-empty] {
+  color: var(--ink-mute);
+}
+.date-shell__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  /* iOS の自動ズーム（16px 未満の input にフォーカスすると発動）を防止 */
   font-size: 16px;
-  /* 内在幅がどう振る舞っても自分の box から先には広がらせない最後の砦 */
-  max-width: 100%;
-  overflow: hidden;
+  cursor: pointer;
 }
-.st-input::-webkit-date-and-time-value {
-  min-width: 0;
-  text-align: left;
+.date-shell__input:disabled {
+  cursor: default;
 }
-.st-input::-webkit-datetime-edit,
-.st-input::-webkit-datetime-edit-fields-wrapper,
-.st-input::-webkit-datetime-edit-text,
-.st-input::-webkit-datetime-edit-month-field,
-.st-input::-webkit-datetime-edit-day-field,
-.st-input::-webkit-datetime-edit-year-field {
-  padding: 0;
-  margin: 0;
-}
-.st-input::-webkit-calendar-picker-indicator {
-  padding: 0;
-  margin: 0;
+/* フォーカスリングはラッパー側で表現する（input 本体は透明のため） */
+.st-input.date-shell:focus-within {
+  border-color: var(--pink-deep);
+  box-shadow: 0 0 0 4px rgba(196, 92, 122, 0.28);
 }
 .st-input::placeholder {
   color: var(--ink-mute);

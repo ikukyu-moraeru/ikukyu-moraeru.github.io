@@ -57,34 +57,46 @@ export function DateInput({
     if (clamped !== value) onChange(clamped)
   }
 
+  // ネイティブの <input type="date"> は iOS WebKit でウィジェットの内在幅が
+  // レイアウトを押し広げる既知問題があるため、見た目は自前の表示テキストで
+  // 完全に制御し、その上に透明なネイティブ input を重ねる（タップすると
+  // 従来どおりネイティブの日付ピッカーが開く）。
   return (
-    <input
-      id={id}
-      className={className}
-      type="date"
-      value={draft}
-      min={min}
-      max={max ?? hardMax ?? DEFAULT_HARD_MAX}
-      disabled={disabled}
-      aria-label={ariaLabel}
-      onFocus={() => {
-        focused.current = true
-      }}
-      onChange={(e) => {
-        const v = e.target.value
-        setDraft(v)
-        // 完全な YYYY-MM-DD（10 文字）になったら即 commit、それ以外は blur まで保留
-        if (v === '' || /^\d{4}-\d{2}-\d{2}$/.test(v)) {
-          if (v === '' || (v >= '0001-01-01' && v <= (hardMax ?? DEFAULT_HARD_MAX))) {
-            const clamped = clamp(v, min, max, hardMax)
-            if (clamped !== value) onChange(clamped)
+    <span
+      className={`date-shell${className ? ` ${className}` : ''}`}
+      data-disabled={disabled || undefined}
+    >
+      <span className="date-shell__value" data-empty={!draft || undefined}>
+        {draft ? draft.replaceAll('-', '/') : '日付を選択'}
+      </span>
+      <input
+        id={id}
+        className="date-shell__input"
+        type="date"
+        value={draft}
+        min={min}
+        max={max ?? hardMax ?? DEFAULT_HARD_MAX}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        onFocus={() => {
+          focused.current = true
+        }}
+        onChange={(e) => {
+          const v = e.target.value
+          setDraft(v)
+          // 完全な YYYY-MM-DD（10 文字）になったら即 commit、それ以外は blur まで保留
+          if (v === '' || /^\d{4}-\d{2}-\d{2}$/.test(v)) {
+            if (v === '' || (v >= '0001-01-01' && v <= (hardMax ?? DEFAULT_HARD_MAX))) {
+              const clamped = clamp(v, min, max, hardMax)
+              if (clamped !== value) onChange(clamped)
+            }
           }
-        }
-      }}
-      onBlur={() => {
-        focused.current = false
-        commit(draft)
-      }}
-    />
+        }}
+        onBlur={() => {
+          focused.current = false
+          commit(draft)
+        }}
+      />
+    </span>
   )
 }
