@@ -1051,14 +1051,28 @@
 }
 
 @media (max-width: 540px) {
+  /* 狭幅では「年 月 … 日数」を1行に寄せ、ステータスを2行目全幅に置く */
   .ac-month button {
     grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: baseline;
+    column-gap: 0.3rem;
+    text-align: left;
+  }
+  .ac-month__no {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .ac-month__range {
+    grid-column: 2;
+    grid-row: 1;
   }
   .ac-month__counter {
     grid-column: 3;
     grid-row: 1;
+    justify-content: flex-end;
   }
-  .ac-month__badges {
+  .ac-month__statusrow {
     grid-column: 1 / -1;
     grid-row: 2;
     justify-content: flex-start;
