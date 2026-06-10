@@ -191,6 +191,56 @@ describe("judgeEligibility", () => {
     expect(result.fragmentJudgment?.reason).toBe("80時間以上");
   });
 
+  it("在籍したままの休職では完全月の区切りは動かない（区切りが動くのは被保険者でなくなった場合のみ）", () => {
+    // 育休開始 2026-04-15。休職 2025-05-01〜2025-06-15（46 日・無給）を挟んでも、
+    // 被保険者資格は継続しているため応当日（15 日）区切りはそのまま。
+    // 休職がかかる完全月は賃金支払基礎日数不足で 0 になるだけで、
+    // 「4/1〜4/30, 6/15〜7/15」のような区切り直しは起きない（行政手引 50103 例示 2）。
+    const leaveStart = "2025-05-01";
+    const leaveEnd = "2025-06-15";
+    const input = makeInput({
+      leavePeriods: [
+        {
+          id: "sick1",
+          type: "病気休職",
+          start: leaveStart,
+          end: leaveEnd,
+          hasWageDuringLeave: false,
+        },
+      ],
+      attendances: fillWorkDays("2024-01-01", "2026-04-14").filter(
+        (a) => a.date < leaveStart || a.date > leaveEnd,
+      ),
+    });
+    const result = judgeEligibility(input, "2026-02-17");
+
+    // 無給 46 日 → 緩和で窓が 46 日延びる
+    expect(result.relaxationDays).toBe(46);
+    expect(result.scanWindow.start).toBe("2024-02-29");
+
+    // 区切りは応当日（毎月 15 日）のまま。休職開始/終了日では切れない
+    const ranges = result.monthBreakdown.map((m) => `${m.range.start}/${m.range.end}`);
+    expect(ranges).toContain("2025-04-15/2025-05-14");
+    expect(ranges).toContain("2025-05-15/2025-06-14");
+    expect(ranges).toContain("2025-06-15/2025-07-14");
+    expect(ranges.some((r) => r.includes("2025-06-16"))).toBe(false);
+
+    // 休職に完全に覆われた月だけが 0 になる
+    const may = result.monthBreakdown.find(
+      (m) => m.range.start === "2025-05-15",
+    );
+    expect(may?.counted).toBe(0);
+    expect(may?.reason).toBe("条件未達");
+    const apr = result.monthBreakdown.find(
+      (m) => m.range.start === "2025-04-15",
+    );
+    expect(apr?.counted).toBe(1);
+    const jun = result.monthBreakdown.find(
+      (m) => m.range.start === "2025-06-15",
+    );
+    expect(jun?.counted).toBe(1);
+  });
+
   it("80 時間ルールは 2020-08-01 以降の月にしか適用されない", () => {
     // 育休開始 2020-08-15 → 完全月 1: 2020-07-15..2020-08-14（80h ルール非適用）
     //                    完全月 2: 2020-06-15..2020-07-14（同非適用）
