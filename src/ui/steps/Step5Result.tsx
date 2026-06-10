@@ -660,30 +660,32 @@ function ActionSuggestions({ verdict, missingMonths }: ActionSuggestionsProps) {
             <span className="r5-actions__icon" aria-hidden>
               ⏳
             </span>
-            <span className="r5-actions__title">未入力の月を埋める</span>
-            <span className="r5-actions__months">
-              {missingMonths.slice(0, MISSING_CHIP_MAX).map((m) => (
-                <span key={m} className="r5-actions__month">
-                  {jpMonth(m)}
-                </span>
-              ))}
-              {missingMonths.length > MISSING_CHIP_MAX && (
-                <span className="r5-actions__month r5-actions__month--more">
-                  他 {missingMonths.length - MISSING_CHIP_MAX} か月
-                </span>
-              )}
-            </span>
-            <span className="r5-actions__desc">
-              出勤情報がまだ入っていない月です。入力した月はカウントに加わるため、結果が変わる可能性が高いです。
-            </span>
-            <span className="r5-actions__links">
-              <button
-                type="button"
-                className="r5-actions__step"
-                onClick={() => dispatch({ type: 'SET_STEP', step: 4 })}
-              >
-                ✏️ Step 4 を開く
-              </button>
+            <span className="r5-actions__body">
+              <span className="r5-actions__title">未入力の月を埋める</span>
+              <span className="r5-actions__months">
+                {missingMonths.slice(0, MISSING_CHIP_MAX).map((m) => (
+                  <span key={m} className="r5-actions__month">
+                    {jpMonth(m)}
+                  </span>
+                ))}
+                {missingMonths.length > MISSING_CHIP_MAX && (
+                  <span className="r5-actions__month r5-actions__month--more">
+                    他 {missingMonths.length - MISSING_CHIP_MAX} か月
+                  </span>
+                )}
+              </span>
+              <span className="r5-actions__desc">
+                出勤情報がまだ入っていない月です。入力した月はカウントに加わるため、結果が変わる可能性が高いです。
+              </span>
+              <span className="r5-actions__links">
+                <button
+                  type="button"
+                  className="r5-actions__step"
+                  onClick={() => dispatch({ type: 'SET_STEP', step: 4 })}
+                >
+                  ✏️ Step 4 を開く
+                </button>
+              </span>
             </span>
           </li>
         )}
@@ -692,23 +694,25 @@ function ActionSuggestions({ verdict, missingMonths }: ActionSuggestionsProps) {
             <span className="r5-actions__icon" aria-hidden>
               {item.icon}
             </span>
-            <span className="r5-actions__title">{item.title}</span>
-            <span className="r5-actions__desc">{item.desc}</span>
-            <span className="r5-actions__links">
-              {item.step !== undefined && (
-                <button
-                  type="button"
-                  className="r5-actions__step"
-                  onClick={() =>
-                    dispatch({ type: 'SET_STEP', step: item.step! })
-                  }
-                >
-                  ✏️ Step {item.step} を開く
-                </button>
-              )}
-              <a className="r5-actions__link" href={item.href}>
-                📖 解説記事: {item.linkLabel}
-              </a>
+            <span className="r5-actions__body">
+              <span className="r5-actions__title">{item.title}</span>
+              <span className="r5-actions__desc">{item.desc}</span>
+              <span className="r5-actions__links">
+                {item.step !== undefined && (
+                  <button
+                    type="button"
+                    className="r5-actions__step"
+                    onClick={() =>
+                      dispatch({ type: 'SET_STEP', step: item.step! })
+                    }
+                  >
+                    ✏️ Step {item.step} を開く
+                  </button>
+                )}
+                <a className="r5-actions__link" href={item.href}>
+                  📖 解説記事: {item.linkLabel}
+                </a>
+              </span>
             </span>
           </li>
         ))}

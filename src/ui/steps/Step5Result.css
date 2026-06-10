@@ -848,17 +848,21 @@
   gap: 0.7rem;
 }
 .r5-actions__item {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.15rem 0.55rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
   padding: 0.6rem 0.75rem;
   background: rgba(255, 255, 255, 0.65);
   border-radius: var(--r-sm);
 }
 .r5-actions__icon {
-  grid-row: 1 / -1;
   font-size: 1.1rem;
   line-height: 1.4;
+}
+.r5-actions__body {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
 }
 /* 未入力月のチップ列（summary のバッジと同系の金色トーン） */
 .r5-actions__months {
