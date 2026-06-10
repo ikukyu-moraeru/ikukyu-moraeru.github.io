@@ -380,6 +380,13 @@
 .ht-points__ic {
   font-size: 1.35rem;
 }
+.ht-points__note {
+  display: block;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--ink-mute);
+  margin-top: 0.1rem;
+}
 
 /* card / heatmap (sample on landing) */
 .ht-card {
