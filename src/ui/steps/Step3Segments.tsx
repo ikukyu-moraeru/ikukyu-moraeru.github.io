@@ -84,11 +84,29 @@ export function Step3Segments() {
         </header>
 
         {segments.length === 0 ? (
-          <div className="st-empty lp-empty">
-            <span className="st-empty__emoji" aria-hidden>
-              📭
-            </span>
-            まだ登録された加入期間はありません。
+          <div className="sg-starter">
+            <label className="sg-starter__q" htmlFor="sg-starter-date">
+              <span aria-hidden>🗓</span>{' '}
+              今の会社で働き始めた日（入社日）はいつですか？
+            </label>
+            <DateInput
+              id="sg-starter-date"
+              className="st-input"
+              value=""
+              min={SEGMENT_MIN}
+              max={segMax}
+              onChange={(v) => {
+                if (v) {
+                  updateSegments([
+                    { id: uid('seg'), start: v, end: null, employerName: '' },
+                  ])
+                }
+              }}
+            />
+            <p className="sg-starter__note">
+              入社日を入れるだけで「現職・在職中」として登録されます。
+              転職した方・退職済みの方は、登録後に内容を直したり下のボタンから前職を追加できます。
+            </p>
           </div>
         ) : (
           <ul className="lp-list">

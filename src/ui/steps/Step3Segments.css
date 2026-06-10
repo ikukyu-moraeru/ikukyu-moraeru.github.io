@@ -118,3 +118,25 @@
 .sg-why__note strong {
   color: var(--gold-deep) !important;
 }
+
+/* 加入期間が未登録のときのスターター（入社日 1 問で現職を自動登録） */
+.sg-starter {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1rem 1.1rem;
+  background: var(--bg);
+  border: 1.5px dashed var(--mint);
+  border-radius: var(--r-md);
+}
+.sg-starter__q {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--plum);
+}
+.sg-starter__note {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--ink-mute);
+}
