@@ -476,8 +476,8 @@ function MaternityPeriodField({
         <span>🌸</span> 産前産後休業の期間
       </label>
       <p className="st-field__hint">
-        法定どおり（産前 {auto?.prenatalDays ?? 42} 日・産後 56
-        日）取るなら、自動でかまいません。
+        産前 {auto?.prenatalDays ?? 42} 日・産後 56
+        日をフルに取るなら、自動でかまいません。
         <strong>出産直前まで働く</strong>など、別の期間で取る場合のみ指定してください。
       </p>
       <div className="st-radio-group">
@@ -492,7 +492,7 @@ function MaternityPeriodField({
             🌸
           </span>
           <span>
-            法定どおり取得（自動）
+            法定の最長で取得（自動）
             <span className="st-radio-card__sub">
               {autoStart && autoEnd
                 ? `${jpDate(autoStart)} 〜 ${jpDate(autoEnd)}`
