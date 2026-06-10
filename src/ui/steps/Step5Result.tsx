@@ -481,9 +481,10 @@ export function Step5Result() {
               <p className="r5-detail__caveat">
                 ※ 端数月（1 か月未満の余り期間）の <strong>+0.5 か月</strong> は法令どおり計算していますが、
                 完全月が 0 / 1 の整数で数えられるため、本ツールの「12 か月以上」判定の合否を変えることはありません。
+                転職で雇用保険期間が複数に分かれる場合は、端数が合否に影響する例外があり得ます。
                 <br />
                 <a className="r5-actions__link" href="/guide/hasuu-tsuki-15nichi/">
-                  📖 解説記事: 端数月の「+0.5か月」が合否を変えない理由
+                  📖 解説記事: 端数月「+0.5か月」の正体と例外
                 </a>
               </p>
             </>
