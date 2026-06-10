@@ -47,6 +47,13 @@ function failVerdictLabel(r: EligibilityResult): string {
   return isNearMiss(r) ? 'あと少し届きません' : '受け取れません'
 }
 
+/** 端数月の 0.5 が合否を分けているか（完全月だけでは 12 に届かず、端数込みで届く） */
+function isFragmentDecisive(r: EligibilityResult): boolean {
+  if (!r.isEligible) return false
+  const fragmentSum = r.fragmentJudgments.reduce((s, f) => s + f.counted, 0)
+  return r.countedMonths - fragmentSum < 12
+}
+
 
 /** 予定日前後の表示日数（試算幅）のドロップダウン候補 */
 const SPREAD_CHOICES = [7, 14, 21, 30, 60, 90]
@@ -446,42 +453,47 @@ export function Step5Result() {
             ))}
           </ul>
 
-          {selectedResult.fragmentJudgment && (
+          {selectedResult.fragmentJudgments.length > 0 && (
             <>
               <h4 className="r5-detail__subtitle">
-                端数月（先頭）
+                端数月（各勤務期間の先頭）
                 <span className="r5-detail__inline-note">参考表示</span>
               </h4>
               <ul className="r5-months">
-                <li
-                  className={`r5-month r5-month--${selectedResult.fragmentJudgment.counted === 0.5 ? 'pass' : 'fail'}`}
-                >
-                  <span className="r5-month__no">FR</span>
-                  <span className="r5-month__range">
-                    {selectedResult.fragmentJudgment.range.start} 〜{' '}
-                    {selectedResult.fragmentJudgment.range.end}
-                    {' '}
-                    （{selectedResult.fragmentJudgment.range.days} 日）
-                  </span>
-                  <span className="r5-month__att">
-                    {selectedResult.fragmentJudgment.attendance
-                      ? `${selectedResult.fragmentJudgment.attendance.basicWageDays.toFixed(1)} 日 / ${selectedResult.fragmentJudgment.attendance.basicWageHours.toFixed(0)} 時間`
-                      : '—'}
-                  </span>
-                  <span className="r5-month__reason">
-                    {selectedResult.fragmentJudgment.reason}
-                  </span>
-                  <span className="r5-month__counted">
-                    {selectedResult.fragmentJudgment.counted === 0.5
-                      ? '+0.5'
-                      : '0'}
-                  </span>
-                </li>
+                {selectedResult.fragmentJudgments.map((f) => (
+                  <li
+                    key={f.range.start}
+                    className={`r5-month r5-month--${f.counted === 0.5 ? 'pass' : 'fail'}`}
+                  >
+                    <span className="r5-month__no">FR</span>
+                    <span className="r5-month__range">
+                      {f.range.start} 〜 {f.range.end}
+                      {' '}
+                      （{f.range.days} 日）
+                    </span>
+                    <span className="r5-month__att">
+                      {f.attendance
+                        ? `${f.attendance.basicWageDays.toFixed(1)} 日 / ${f.attendance.basicWageHours.toFixed(0)} 時間`
+                        : '—'}
+                    </span>
+                    <span className="r5-month__reason">{f.reason}</span>
+                    <span className="r5-month__counted">
+                      {f.counted === 0.5 ? '+0.5' : '0'}
+                    </span>
+                  </li>
+                ))}
               </ul>
+              {isFragmentDecisive(selectedResult) && (
+                <p className="r5-detail__caveat">
+                  ⚠️ この結果は端数月の <strong>+0.5 か月</strong> を含めてぎりぎり 12 か月に達しています。
+                  端数の取扱いは窓口の運用で差が出やすいため、この判定だけで結論を出さず、
+                  必ずハローワークで確認してください。
+                </p>
+              )}
               <p className="r5-detail__caveat">
-                ※ 端数月（1 か月未満の余り期間）の <strong>+0.5 か月</strong> は法令どおり計算していますが、
-                完全月が 0 / 1 の整数で数えられるため、本ツールの「12 か月以上」判定の合否を変えることはありません。
-                転職で雇用保険期間が複数に分かれる場合は、端数が合否に影響する例外があり得ます。
+                ※ 端数月（各勤務期間の先頭に生じる 1 か月未満の余り）は、15 日以上かつ
+                賃金支払基礎日数 11 日以上（または 80 時間以上）のとき <strong>+0.5 か月</strong> として通算に含めています。
+                勤務先が 1 つの場合、この 0.5 が「12 か月以上」の合否を変えることはありません。
                 <br />
                 <a className="r5-actions__link" href="/guide/hasuu-tsuki-15nichi/">
                   📖 解説記事: 端数月「+0.5か月」の正体と例外
