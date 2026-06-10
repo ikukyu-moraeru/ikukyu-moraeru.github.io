@@ -166,23 +166,6 @@ input[type="time"].st-input {
   }
 }
 
-.st-summary {
-  background: var(--bg-2);
-  border-radius: var(--r-md);
-  padding: var(--sp-4) 1.25rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.6rem;
-  font-family: var(--font-body);
-  color: var(--plum);
-  font-size: 0.92rem;
-  line-height: 1.7;
-}
-.st-summary strong {
-  font-family: var(--font-h);
-  font-weight: 700;
-}
-
 .st-empty {
   position: relative;
   text-align: center;
@@ -233,35 +216,44 @@ input[type="time"].st-input {
 }
 
 /* maternity timeline (Step1) */
-.st-timeline {
+/* 判定の基準日（育休開始）カード */
+.st-pivot {
   background: linear-gradient(135deg, var(--bg-2) 0%, #fff 60%, var(--bg-3) 100%);
-  border: 1px solid var(--line);
+  border: 1.5px solid var(--mint);
   border-radius: var(--r-lg);
-  padding: 1.1rem 1.25rem 1.25rem;
+  padding: 1.1rem 1.25rem 1.15rem;
   display: grid;
-  gap: 0.9rem;
+  gap: 0.3rem;
 }
-.st-timeline__head {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1rem;
-  align-items: baseline;
-  justify-content: space-between;
-}
-.st-timeline__title {
+.st-pivot__label {
   font-family: var(--font-h);
   font-weight: 900;
-  font-size: 1rem;
+  font-size: 0.92rem;
+  color: var(--mint-deep);
+}
+.st-pivot__date {
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 1.7rem;
   color: var(--plum);
+  letter-spacing: 0.02em;
 }
-.st-timeline__hint {
-  font-family: var(--font-body);
-  font-size: 0.78rem;
-  color: var(--ink-soft);
-  line-height: 1.5;
-}
-.st-timeline__seed {
+.st-pivot__note {
   margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.st-pivot__basis {
+  margin: 0.5rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--line);
+  font-size: 0.78rem;
+  line-height: 1.8;
+  color: var(--ink-mute);
+}
+.st-pivot__seed {
+  margin: 0.5rem 0 0;
   font-size: 0.78rem;
   line-height: 1.6;
   color: var(--ink-soft);
@@ -273,11 +265,7 @@ input[type="time"].st-input {
   align-items: baseline;
   gap: 0.4rem 0.6rem;
 }
-.st-timeline__seed strong {
-  font-family: var(--font-h);
-  color: var(--mint-deep);
-}
-.st-timeline__seed-restore {
+.st-pivot__seed-restore {
   font-family: var(--font-h);
   font-weight: 700;
   font-size: 0.78rem;
@@ -289,112 +277,10 @@ input[type="time"].st-input {
   cursor: pointer;
   transition: background 0.18s ease, transform 0.18s var(--ease-pop);
 }
-.st-timeline__seed-restore:hover {
+.st-pivot__seed-restore:hover {
   background: var(--mint);
   color: #fff;
   transform: translateY(-1px);
-}
-.st-timeline__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.6rem;
-  position: relative;
-}
-.st-timeline__list::before {
-  content: "";
-  position: absolute;
-  left: 12%;
-  right: 12%;
-  top: 22px;
-  height: 2px;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--ink-mute) 0 6px,
-    transparent 6px 12px
-  );
-  opacity: 0.45;
-  z-index: 0;
-}
-.st-timeline__stop {
-  position: relative;
-  z-index: 1;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: var(--r-md);
-  border: 1px solid var(--line);
-  padding: 0.7rem 0.65rem 0.75rem;
-  display: grid;
-  justify-items: center;
-  gap: 0.25rem;
-  text-align: center;
-}
-.st-timeline__stop.is-pivot {
-  background: linear-gradient(160deg, #fff 0%, var(--bg-3) 100%);
-  border-color: var(--mint);
-  box-shadow: 0 6px 14px rgba(63, 142, 108, 0.18);
-}
-.st-timeline__ic {
-  font-size: 1.6rem;
-  line-height: 1;
-  filter: drop-shadow(0 3px 0 rgba(58, 46, 79, 0.12));
-}
-.st-timeline__body {
-  display: grid;
-  gap: 0.15rem;
-  justify-items: center;
-}
-.st-timeline__label {
-  font-family: var(--font-h);
-  font-weight: 700;
-  font-size: 0.82rem;
-  color: var(--plum);
-  line-height: 1.35;
-}
-.st-timeline__stop.is-pivot .st-timeline__label {
-  color: var(--mint-deep);
-}
-.st-timeline__date {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--ink);
-  letter-spacing: 0.02em;
-}
-.st-timeline__sub {
-  font-size: 0.7rem;
-  color: var(--ink-mute);
-  line-height: 1.4;
-}
-@media (max-width: 640px) {
-  .st-timeline__list {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-  .st-timeline__list::before {
-    left: 28px;
-    right: auto;
-    top: 12%;
-    bottom: 12%;
-    width: 2px;
-    height: auto;
-    background: repeating-linear-gradient(
-      180deg,
-      var(--ink-mute) 0 6px,
-      transparent 6px 12px
-    );
-  }
-  .st-timeline__stop {
-    grid-template-columns: auto 1fr;
-    text-align: left;
-    justify-items: start;
-    align-items: center;
-    gap: 0.55rem 0.85rem;
-    padding: 0.65rem 0.85rem;
-  }
-  .st-timeline__body {
-    justify-items: start;
-  }
 }
 
 /* pill button (for adding rows etc.) */

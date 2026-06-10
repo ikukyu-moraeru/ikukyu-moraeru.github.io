@@ -244,81 +244,45 @@ function Timeline({
   const t = computeMaternityTimeline(expectedBirthDate, isMultipleBirth)
   if (!t) return null
   const isCustomStart = customChildCareStart !== undefined
-  const stops = [
-    {
-      key: 'prenatal',
-      ic: '🌸',
-      label: '産前休業 開始',
-      sub: `予定日 ${t.prenatalDays} 日前（最長）`,
-      date: t.prenatalLeaveStart,
-    },
-    {
-      key: 'birth',
-      ic: '👶',
-      label: '出産（予定日）',
-      sub: '実出産日が前後すると以降の日付も自動でずれます',
-      date: t.expectedBirthDate,
-    },
-    {
-      key: 'postnatal',
-      ic: '🌿',
-      label: '産後休業 終了',
-      sub: '出産日 + 56 日（労基法 65 条）',
-      date: t.postnatalLeaveEnd,
-    },
-    {
-      key: 'childcare',
-      ic: '🍼',
-      label: '育休開始 ＝ 判定基準日',
-      sub: isCustomStart
-        ? '手動で指定した育休開始日。この日の前 2 年（緩和で最長 4 年）が判定対象'
-        : 'この日の前 2 年（緩和で最長 4 年）が判定対象',
-      date: customChildCareStart ?? t.childCareStart,
-      highlight: true as const,
-    },
-  ]
+  const pivotDate = customChildCareStart ?? t.childCareStart
+  const md = (iso: string) =>
+    `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`
   return (
-    <div className="st-timeline" aria-label="産休・育休スケジュール">
-      <div className="st-timeline__head">
-        <span className="st-timeline__title">📐 出産予定日から決まる日付</span>
-        <span className="st-timeline__hint">
-          {isCustomStart
-            ? '育休開始日は「詳細設定」で指定した日付です'
-            : `産前 ${t.prenatalDays} 日 ＋ 産後 56 日 → その翌日が「育休開始日」`}
-        </span>
-      </div>
+    <div className="st-pivot" aria-label="判定の基準日">
+      <span className="st-pivot__label">
+        <span aria-hidden>🍼</span> 判定の基準日（育休開始）
+      </span>
+      <strong className="st-pivot__date">{jpDate(pivotDate)}</strong>
+      <p className="st-pivot__note">
+        この日の前 2 年（緩和で最長 4 年）の働き方を判定します。
+        {!isCustomStart && '実際の出産日がずれると、自動で追従します。'}
+      </p>
+      <p className="st-pivot__basis">
+        {isCustomStart ? (
+          <>根拠: 「詳細設定」で指定した育休開始日</>
+        ) : (
+          <>
+            根拠: 🌸 {md(t.prenatalLeaveStart)} 産前休業（予定日{' '}
+            {t.prenatalDays} 日前）→ 👶 {md(t.expectedBirthDate)} 出産 → 🌿{' '}
+            {md(t.postnatalLeaveEnd)} 産後休業 終了（出産 + 56 日）→ その翌日
+          </>
+        )}
+      </p>
       {suppressed && (
-        <p className="st-timeline__seed">
+        <p className="st-pivot__seed">
           <span>
             「産前産後休業」の自動入力は止めています。Step 2
             で個別に登録した内容が優先されます。
           </span>
           <button
             type="button"
-            className="st-timeline__seed-restore"
+            className="st-pivot__seed-restore"
             onClick={onRestore}
           >
             自動入力を再開
           </button>
         </p>
       )}
-      <ol className="st-timeline__list">
-        {stops.map((s) => (
-          <li
-            key={s.key}
-            className={`st-timeline__stop${s.highlight ? ' is-pivot' : ''}`}
-          >
-            <span className="st-timeline__ic" aria-hidden>
-              {s.ic}
-            </span>
-            <div className="st-timeline__body">
-              <span className="st-timeline__label">{s.label}</span>
-              <span className="st-timeline__date">{jpDate(s.date)}</span>
-              <span className="st-timeline__sub">{s.sub}</span>
-            </div>
-          </li>
-        ))}
-      </ol>
     </div>
   )
 }
