@@ -886,58 +886,6 @@
   color: var(--plum);
 }
 
-/* missing months hint */
-.r5-missing {
-  background: linear-gradient(135deg, #fff5d4 0%, #fff 100%);
-  border: 1px solid var(--gold);
-  border-radius: var(--r-md);
-  padding: var(--sp-4) 1.1rem;
-  display: grid;
-  gap: 0.55rem;
-}
-.r5-missing__label {
-  font-family: var(--font-h);
-  font-weight: 900;
-  font-size: 0.92rem;
-  color: var(--gold-deep);
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.r5-missing__label::before {
-  content: "💡";
-  font-size: 1rem;
-}
-.r5-missing ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.5rem;
-}
-.r5-missing li {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: var(--gold-deep);
-  background: rgba(255, 255, 255, 0.7);
-  padding: 0.25rem 0.7rem;
-  border-radius: var(--r-full);
-  border: 1px solid rgba(243, 207, 118, 0.6);
-}
-.r5-missing__more {
-  font-family: var(--font-h) !important;
-  background: var(--gold) !important;
-  color: #fff !important;
-  border-color: var(--gold-deep) !important;
-}
-.r5-missing__hint {
-  margin: 0.2rem 0 0;
-  font-size: 0.82rem;
-  line-height: 1.65;
-  color: var(--ink-soft);
-}
-
 /* fail streaks（あと少し届かない日の区間表示） */
 .r5-fails {
   background: linear-gradient(135deg, var(--bg-2) 0%, #fff 100%);

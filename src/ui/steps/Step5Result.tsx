@@ -55,6 +55,11 @@ export function Step5Result() {
   const { state, dispatch } = useAppState()
   const results = useMemo(() => scanBirthDates(state.input), [state.input])
   const summary = useMemo(() => summarizeScan(results), [results])
+  // 判定対象期間内で Step4 が未入力のままの月（アクション一覧の最優先項目に使う）
+  const missingMonths = useMemo(
+    () => detectMissingMonths(state.input, results),
+    [state.input, results],
+  )
   const [selected, setSelected] = useState<string | null>(() => {
     // 初期表示で出産予定日のセルを選択状態にする
     return (
@@ -204,9 +209,7 @@ export function Step5Result() {
         </div>
       </div>
 
-      {summary.failDays > 0 && <ActionSuggestions verdict={verdict} />}
-
-      <MissingMonthsHint input={state.input} results={results} />
+      <ActionSuggestions verdict={verdict} missingMonths={missingMonths} />
 
       <section className="r5-heat">
         <header>
@@ -462,7 +465,7 @@ export function Step5Result() {
                   </span>
                   <span className="r5-month__att">
                     {selectedResult.fragmentJudgment.attendance
-                      ? `${selectedResult.fragmentJudgment.attendance.basicWageDays.toFixed(1)} 日`
+                      ? `${selectedResult.fragmentJudgment.attendance.basicWageDays.toFixed(1)} 日 / ${selectedResult.fragmentJudgment.attendance.basicWageHours.toFixed(0)} 時間`
                       : '—'}
                   </span>
                   <span className="r5-month__reason">
@@ -476,11 +479,12 @@ export function Step5Result() {
                 </li>
               </ul>
               <p className="r5-detail__caveat">
-                ※ 端数月（1 か月未満の余り期間）の <strong>+0.5 か月</strong> は法令（業務取扱要領 59533）に定義されていますが、
-                完全月のカウント（0 / 1 整数）と合算したとき、{' '}
-                <strong>育児休業給付金の「12 か月以上」判定では結果に影響しません</strong>
-                （N + 0.5 で 12 の境界を跨ぐケースが構造上存在しないため）。
-                基本手当（50103）など <strong>「6 か月以上」</strong> の閾値を持つ給付の計算式を準用しているため記録としてだけ残しています。
+                ※ 端数月（1 か月未満の余り期間）の <strong>+0.5 か月</strong> は法令どおり計算していますが、
+                完全月が 0 / 1 の整数で数えられるため、本ツールの「12 か月以上」判定の合否を変えることはありません。
+                <br />
+                <a className="r5-actions__link" href="/guide/hasuu-tsuki-15nichi/">
+                  📖 解説記事: 端数月の「+0.5か月」が合否を変えない理由
+                </a>
               </p>
             </>
           )}
@@ -619,23 +623,59 @@ const ACTION_ITEMS: ActionItem[] = [
 
 interface ActionSuggestionsProps {
   verdict: 'pass-all' | 'fail-all' | 'mixed'
+  /** Step4 が未入力のままの月（yyyy-MM）。あれば最優先アクションとして表示する */
+  missingMonths: string[]
+}
+
+/** 未入力月の先頭数件を「2026年5月・2026年6月 他3か月」形式に圧縮する */
+function missingMonthsLabel(months: string[]): string {
+  const head = months.slice(0, 3).map(jpMonth).join('・')
+  const rest = months.length - 3
+  return rest > 0 ? `${head} 他${rest}か月` : head
 }
 
 /**
- * 届かない日があるときに試せるアクションの一覧。
- * fail-all（全滅）の場合はデフォルトで展開し、mixed の場合は折りたたんで表示する。
+ * 結果を良くするために試せるアクションの一覧。全候補が受給可でも常時表示する。
+ * fail-all（全滅）と、届かない日がありかつ未入力月が残っている場合は
+ * デフォルトで展開する。
  */
-function ActionSuggestions({ verdict }: ActionSuggestionsProps) {
+function ActionSuggestions({ verdict, missingMonths }: ActionSuggestionsProps) {
   const { dispatch } = useAppState()
+  const hasFail = verdict !== 'pass-all'
+  const defaultOpen =
+    verdict === 'fail-all' || (hasFail && missingMonths.length > 0)
   return (
-    <details className="r5-actions" open={verdict === 'fail-all'}>
+    <details className="r5-actions" open={defaultOpen}>
       <summary className="r5-actions__summary">
         🌱 届かない日があるときに、できること
       </summary>
       <p className="r5-actions__intro">
-        あきらめる前に、次の順で確認してみてください。入力の見直しで結果が変わることもあります。
+        {hasFail
+          ? 'あきらめる前に、次の順で確認してみてください。入力の見直しで結果が変わることもあります。'
+          : 'いまは全候補で受け取れる見込みです。入力や予定が変わったときの見直しに使ってください。'}
       </p>
       <ul className="r5-actions__list">
+        {missingMonths.length > 0 && (
+          <li className="r5-actions__item">
+            <span className="r5-actions__icon" aria-hidden>
+              ⏳
+            </span>
+            <span className="r5-actions__title">未入力の月を埋める</span>
+            <span className="r5-actions__desc">
+              {missingMonthsLabel(missingMonths)}
+              の出勤情報がまだ入っていないようです。入力した月はカウントに加わるため、結果が変わる可能性が高いです。
+            </span>
+            <span className="r5-actions__links">
+              <button
+                type="button"
+                className="r5-actions__step"
+                onClick={() => dispatch({ type: 'SET_STEP', step: 4 })}
+              >
+                ✏️ Step 4 を開く
+              </button>
+            </span>
+          </li>
+        )}
         {ACTION_ITEMS.map((item) => (
           <li key={item.href} className="r5-actions__item">
             <span className="r5-actions__icon" aria-hidden>
@@ -663,39 +703,6 @@ function ActionSuggestions({ verdict }: ActionSuggestionsProps) {
         ))}
       </ul>
     </details>
-  )
-}
-
-interface MissingMonthsHintProps {
-  input: UserInput
-  results: EligibilityResult[]
-}
-
-const MAX_MISSING_DISPLAY = 6
-
-function MissingMonthsHint({ input, results }: MissingMonthsHintProps) {
-  const missing = useMemo(
-    () => detectMissingMonths(input, results),
-    [input, results],
-  )
-  if (missing.length === 0) return null
-  const head = missing.slice(0, MAX_MISSING_DISPLAY)
-  const restCount = missing.length - head.length
-  return (
-    <div className="r5-missing">
-      <span className="r5-missing__label">
-        まだ出勤情報が入っていなさそうな月
-      </span>
-      <ul>
-        {head.map((m) => (
-          <li key={m}>{jpMonth(m)}</li>
-        ))}
-        {restCount > 0 && <li className="r5-missing__more">他 {restCount} か月</li>}
-      </ul>
-      <p className="r5-missing__hint">
-        判定対象期間に含まれているのに、Step 4 でまだ何も入力していない月のようです。これらの月の出勤情報を入れると、結果がより正確になります。
-      </p>
-    </div>
   )
 }
 
