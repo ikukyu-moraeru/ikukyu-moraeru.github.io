@@ -81,6 +81,16 @@ export interface UserInput {
    * 「産後復職→数か月後に育休」のように会社と確定日が決まっているケース用。
    */
   customChildCareStart?: DateISO;
+  /**
+   * 産前休業の開始日のカスタム指定。undefined = 自動（予定日 - 42/98 日）。
+   * 出産直前まで働いた場合など、法定最長より短く取るケース用。
+   */
+  customMaternityStart?: DateISO;
+  /**
+   * 産後休業の終了日のカスタム指定。undefined = 自動（予定日 + 56 日）。
+   * これを指定すると育休開始日の自動既定値もこの翌日に追従する。
+   */
+  customMaternityEnd?: DateISO;
   insuredSegments: InsuredEmploymentSegment[];
   leavePeriods: LeavePeriod[];
   attendances: DailyAttendance[];

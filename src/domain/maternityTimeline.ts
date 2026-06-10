@@ -13,6 +13,12 @@ import type { DateISO } from "./types";
  *
  * `judgeEligibility` 内部の計算と整合する。Step1 の入力フィードバックと
  * Step5 の詳細表示で同じ値を見せるためにここを単一の真実の源とする。
+ *
+ * `overrides` で産休期間を手動指定できる:
+ * - `maternityStart` 指定時は `prenatalLeaveStart` をそれで上書き。
+ * - `maternityEnd` 指定時は `postnatalLeaveEnd` をそれで上書きし、
+ *   `childCareStart` はその翌日に追従する（カスタム終了日 + 1 日）。
+ * - 各 override は undefined なら従来どおり自動（法定最長）で算出する。
  */
 export interface MaternityTimeline {
   expectedBirthDate: DateISO;
@@ -33,6 +39,7 @@ const fmt = (d: Date): DateISO => format(d, "yyyy-MM-dd");
 export function computeMaternityTimeline(
   expectedBirthDate: DateISO,
   isMultipleBirth: boolean,
+  overrides?: { maternityStart?: DateISO; maternityEnd?: DateISO },
 ): MaternityTimeline | null {
   if (!expectedBirthDate) return null;
   let exp: Date;
@@ -45,13 +52,18 @@ export function computeMaternityTimeline(
   const prenatalDays = isMultipleBirth
     ? PRENATAL_DAYS_MULTIPLE
     : PRENATAL_DAYS_SINGLE;
+  const prenatalLeaveStart =
+    overrides?.maternityStart ?? fmt(subDays(exp, prenatalDays));
+  const postnatalLeaveEnd =
+    overrides?.maternityEnd ?? fmt(addDays(exp, POSTNATAL_DAYS));
   return {
     expectedBirthDate,
     isMultipleBirth,
     prenatalDays,
-    prenatalLeaveStart: fmt(subDays(exp, prenatalDays)),
+    prenatalLeaveStart,
     postnatalDays: POSTNATAL_DAYS,
-    postnatalLeaveEnd: fmt(addDays(exp, POSTNATAL_DAYS)),
-    childCareStart: fmt(addDays(exp, POSTNATAL_DAYS + 1)),
+    postnatalLeaveEnd,
+    // 育休開始日は産後休業終了日の翌日（カスタム終了日に追従）。
+    childCareStart: fmt(addDays(parseISO(postnatalLeaveEnd), 1)),
   };
 }

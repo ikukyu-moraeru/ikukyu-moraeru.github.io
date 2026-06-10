@@ -55,7 +55,9 @@ export function Step1BasicInfo() {
   const [advancedOpen] = useState<boolean>(
     () =>
       state.input.isMultipleBirth ||
-      state.input.customChildCareStart !== undefined,
+      state.input.customChildCareStart !== undefined ||
+      state.input.customMaternityStart !== undefined ||
+      state.input.customMaternityEnd !== undefined,
   )
 
   // 入力変化を scanRange に反映
@@ -85,7 +87,10 @@ export function Step1BasicInfo() {
   useEffect(() => {
     if (!expected) return
     if (state.meta.suppressAutoMaternity) return
-    const t = computeMaternityTimeline(expected, state.input.isMultipleBirth)
+    const t = computeMaternityTimeline(expected, state.input.isMultipleBirth, {
+      maternityStart: state.input.customMaternityStart,
+      maternityEnd: state.input.customMaternityEnd,
+    })
     if (!t) return
     const desired: LeavePeriod = {
       id: AUTO_MATERNITY_ID,
@@ -114,7 +119,13 @@ export function Step1BasicInfo() {
       patch: { leavePeriods: [desired, ...others] },
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expected, state.input.isMultipleBirth, state.meta.suppressAutoMaternity])
+  }, [
+    expected,
+    state.input.isMultipleBirth,
+    state.input.customMaternityStart,
+    state.input.customMaternityEnd,
+    state.meta.suppressAutoMaternity,
+  ])
 
   return (
     <div className="st-section">
@@ -138,7 +149,7 @@ export function Step1BasicInfo() {
 
       <details className="st-more" open={advancedOpen}>
         <summary>
-          ⚙️ 詳細設定 — 双子以上の妊娠・育休開始日を指定する場合
+          ⚙️ 詳細設定 — 双子以上の妊娠・産休/育休の日付を指定する場合
         </summary>
         <div className="st-more__body">
       <div className="st-field">
@@ -199,9 +210,29 @@ export function Step1BasicInfo() {
       </div>
 
       {expected && (
+        <MaternityPeriodField
+          expectedBirthDate={expected}
+          isMultipleBirth={state.input.isMultipleBirth}
+          customStart={state.input.customMaternityStart}
+          customEnd={state.input.customMaternityEnd}
+          onChange={(maternityStart, maternityEnd) =>
+            dispatch({
+              type: 'PATCH_INPUT',
+              patch: {
+                customMaternityStart: maternityStart,
+                customMaternityEnd: maternityEnd,
+              },
+            })
+          }
+        />
+      )}
+
+      {expected && (
         <ChildCareStartField
           expectedBirthDate={expected}
           isMultipleBirth={state.input.isMultipleBirth}
+          customMaternityStart={state.input.customMaternityStart}
+          customMaternityEnd={state.input.customMaternityEnd}
           customStart={state.input.customChildCareStart}
           onChange={(value) =>
             dispatch({
@@ -218,6 +249,8 @@ export function Step1BasicInfo() {
         <Timeline
           expectedBirthDate={expected}
           isMultipleBirth={state.input.isMultipleBirth}
+          customMaternityStart={state.input.customMaternityStart}
+          customMaternityEnd={state.input.customMaternityEnd}
           customChildCareStart={state.input.customChildCareStart}
           suppressed={state.meta.suppressAutoMaternity}
           onRestore={() =>
@@ -235,6 +268,8 @@ export function Step1BasicInfo() {
 interface TimelineProps {
   expectedBirthDate: string
   isMultipleBirth: boolean
+  customMaternityStart: string | undefined
+  customMaternityEnd: string | undefined
   customChildCareStart: string | undefined
   suppressed: boolean
   onRestore: () => void
@@ -243,13 +278,20 @@ interface TimelineProps {
 function Timeline({
   expectedBirthDate,
   isMultipleBirth,
+  customMaternityStart,
+  customMaternityEnd,
   customChildCareStart,
   suppressed,
   onRestore,
 }: TimelineProps) {
-  const t = computeMaternityTimeline(expectedBirthDate, isMultipleBirth)
+  const t = computeMaternityTimeline(expectedBirthDate, isMultipleBirth, {
+    maternityStart: customMaternityStart,
+    maternityEnd: customMaternityEnd,
+  })
   if (!t) return null
   const isCustomStart = customChildCareStart !== undefined
+  const isCustomPrenatal = customMaternityStart !== undefined
+  const isCustomPostnatal = customMaternityEnd !== undefined
   const pivotDate = customChildCareStart ?? t.childCareStart
   const md = (iso: string) =>
     `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`
@@ -268,9 +310,11 @@ function Timeline({
           <>根拠: 「詳細設定」で指定した育休開始日</>
         ) : (
           <>
-            根拠: 🌸 {md(t.prenatalLeaveStart)} 産前休業（予定日{' '}
-            {t.prenatalDays} 日前）→ 👶 {md(t.expectedBirthDate)} 出産 → 🌿{' '}
-            {md(t.postnatalLeaveEnd)} 産後休業 終了（出産 + 56 日）→ その翌日
+            根拠: 🌸 {md(t.prenatalLeaveStart)} 産前休業
+            {isCustomPrenatal ? '（手動指定）' : `（予定日 ${t.prenatalDays} 日前）`}
+            → 👶 {md(t.expectedBirthDate)} 出産 → 🌿 {md(t.postnatalLeaveEnd)}{' '}
+            産後休業 終了{isCustomPostnatal ? '（手動指定）' : '（出産 + 56 日）'}→
+            その翌日
           </>
         )}
       </p>
@@ -296,6 +340,8 @@ function Timeline({
 interface ChildCareStartFieldProps {
   expectedBirthDate: string
   isMultipleBirth: boolean
+  customMaternityStart: string | undefined
+  customMaternityEnd: string | undefined
   customStart: string | undefined
   onChange: (value: string | undefined) => void
 }
@@ -303,10 +349,15 @@ interface ChildCareStartFieldProps {
 function ChildCareStartField({
   expectedBirthDate,
   isMultipleBirth,
+  customMaternityStart,
+  customMaternityEnd,
   customStart,
   onChange,
 }: ChildCareStartFieldProps) {
-  const t = computeMaternityTimeline(expectedBirthDate, isMultipleBirth)
+  const t = computeMaternityTimeline(expectedBirthDate, isMultipleBirth, {
+    maternityStart: customMaternityStart,
+    maternityEnd: customMaternityEnd,
+  })
   const defaultDate = t?.childCareStart ?? ''
   const useCustom = customStart !== undefined
   const earliestPostnatalEnd = t?.postnatalLeaveEnd
@@ -374,6 +425,131 @@ function ChildCareStartField({
           {customStart && earliestPostnatalEnd && customStart < earliestPostnatalEnd && (
             <div className="lp-warn">
               ⚠ 産後休業（出産日 + 56 日）の翌日より前です。出産日次第では育休開始日が産後休業中になり、整合しません。
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface MaternityPeriodFieldProps {
+  expectedBirthDate: string
+  isMultipleBirth: boolean
+  customStart: string | undefined
+  customEnd: string | undefined
+  onChange: (
+    maternityStart: string | undefined,
+    maternityEnd: string | undefined,
+  ) => void
+}
+
+function MaternityPeriodField({
+  expectedBirthDate,
+  isMultipleBirth,
+  customStart,
+  customEnd,
+  onChange,
+}: MaternityPeriodFieldProps) {
+  // 法定最長（オーバーライドなし）の自動値。min/max とラジオの自動サブテキストに使う。
+  const auto = computeMaternityTimeline(expectedBirthDate, isMultipleBirth)
+  const autoStart = auto?.prenatalLeaveStart ?? ''
+  const autoEnd = auto?.postnatalLeaveEnd ?? ''
+  const useCustom = customStart !== undefined || customEnd !== undefined
+
+  // 現在の指定値（手動時）。自動値で初期化されているので fallback も自動値。
+  const startValue = customStart ?? autoStart
+  const endValue = customEnd ?? autoEnd
+
+  // 産後 6 週（出産日 + 42 日）。終了日が早すぎる警告の閾値。
+  const sixWeeksEnd =
+    expectedBirthDate &&
+    format(addDays(parseISO(expectedBirthDate), 42), 'yyyy-MM-dd')
+  // 出産予定日の翌日。開始日が後ろすぎる警告の閾値。
+  const dayAfterBirth =
+    expectedBirthDate &&
+    format(addDays(parseISO(expectedBirthDate), 1), 'yyyy-MM-dd')
+
+  return (
+    <div className="st-field">
+      <label className="st-field__label">
+        <span>🌸</span> 産前産後休業の期間
+      </label>
+      <p className="st-field__hint">
+        法定どおり（産前 {auto?.prenatalDays ?? 42} 日・産後 56
+        日）取るなら、自動でかまいません。
+        <strong>出産直前まで働く</strong>など、別の期間で取る場合のみ指定してください。
+      </p>
+      <div className="st-radio-group">
+        <label className="st-radio-card" data-selected={!useCustom}>
+          <input
+            type="radio"
+            name="mat"
+            checked={!useCustom}
+            onChange={() => onChange(undefined, undefined)}
+          />
+          <span className="st-radio-card__ic" aria-hidden>
+            🌸
+          </span>
+          <span>
+            法定どおり取得（自動）
+            <span className="st-radio-card__sub">
+              {autoStart && autoEnd
+                ? `${jpDate(autoStart)} 〜 ${jpDate(autoEnd)}`
+                : ''}
+            </span>
+          </span>
+        </label>
+        <label className="st-radio-card" data-selected={useCustom}>
+          <input
+            type="radio"
+            name="mat"
+            checked={useCustom}
+            onChange={() => onChange(autoStart, autoEnd)}
+          />
+          <span className="st-radio-card__ic" aria-hidden>
+            📌
+          </span>
+          <span>
+            期間を指定する
+            <span className="st-radio-card__sub">
+              出産直前まで働いた場合など
+            </span>
+          </span>
+        </label>
+      </div>
+      {useCustom && (
+        <div style={{ marginTop: '0.7rem', display: 'grid', gap: '0.6rem' }}>
+          <div style={{ display: 'grid', gap: '0.3rem' }}>
+            <label className="st-field__label">産前休業の開始日</label>
+            <DateInput
+              className="st-input"
+              value={startValue}
+              min={autoStart || undefined}
+              max={endValue || undefined}
+              onChange={(v) => onChange(v || autoStart, endValue)}
+            />
+          </div>
+          <div style={{ display: 'grid', gap: '0.3rem' }}>
+            <label className="st-field__label">産後休業の終了日</label>
+            <DateInput
+              className="st-input"
+              value={endValue}
+              min={startValue || undefined}
+              max={autoEnd || undefined}
+              onChange={(v) => onChange(startValue, v || autoEnd)}
+            />
+          </div>
+          {endValue && sixWeeksEnd && endValue < sixWeeksEnd && (
+            <div className="lp-warn">
+              ⚠ 産後 6 週間（出産日 + 42
+              日）は法律上就業できません。終了日が早すぎる可能性があります。
+            </div>
+          )}
+          {startValue && dayAfterBirth && startValue > dayAfterBirth && (
+            <div className="lp-warn">
+              ⚠
+              開始日が出産予定日の翌日より後です。産後休業（出産日の翌日から）と整合しません。
             </div>
           )}
         </div>

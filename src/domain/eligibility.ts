@@ -47,10 +47,17 @@ export function judgeEligibility(
   const prenatalDays = input.isMultipleBirth
     ? PRENATAL_DAYS_MULTIPLE
     : PRENATAL_DAYS_SINGLE;
-  const leaveStartDate = fmt(subDays(birthDateD, prenatalDays));
+  const leaveStartDate =
+    input.customMaternityStart ?? fmt(subDays(birthDateD, prenatalDays));
+  // 育休開始日の既定値:
+  // 1. customChildCareStart（明示指定）が最優先
+  // 2. customMaternityEnd（産後休業終了日）があればその翌日に追従
+  // 3. いずれも無ければ自動（出産日 + 産後 56 日 + 1 日）
   const childCareStartD = input.customChildCareStart
     ? parseISO(input.customChildCareStart)
-    : addDays(birthDateD, POSTNATAL_DAYS + 1);
+    : input.customMaternityEnd
+      ? addDays(parseISO(input.customMaternityEnd), 1)
+      : addDays(birthDateD, POSTNATAL_DAYS + 1);
   const childCareStartDate = fmt(childCareStartD);
 
   const baseWindowStart = fmt(subYears(childCareStartD, 2));

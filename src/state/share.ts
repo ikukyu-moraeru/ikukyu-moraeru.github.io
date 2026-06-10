@@ -24,6 +24,8 @@ interface CompactInput {
   m: 0 | 1 // isMultipleBirth
   s: [DateISO, DateISO] // scanRange
   c?: DateISO // customChildCareStart
+  ms?: DateISO // customMaternityStart
+  me?: DateISO // customMaternityEnd
   g: Array<[DateISO, DateISO | null, string, 0 | 1]> // [start, end, employerName, claimedBasicAllowanceAfterEnd]
   l: Array<[LeaveType, DateISO, DateISO, 0 | 1]> // [type, start, end, hasWageDuringLeave]
   a: Array<[DateISO, AttendanceStatus] | [DateISO, AttendanceStatus, number]> // [date, status, hours?]
@@ -35,6 +37,12 @@ function toCompact(input: UserInput): CompactInput {
     s: [input.scanRange.start, input.scanRange.end],
     ...(input.customChildCareStart
       ? { c: input.customChildCareStart }
+      : {}),
+    ...(input.customMaternityStart
+      ? { ms: input.customMaternityStart }
+      : {}),
+    ...(input.customMaternityEnd
+      ? { me: input.customMaternityEnd }
       : {}),
     g: input.insuredSegments.map(
       (seg) =>
@@ -67,6 +75,8 @@ function fromCompact(c: CompactInput): UserInput {
     isMultipleBirth: c.m === 1,
     scanRange: { start: c.s[0], end: c.s[1] },
     ...(c.c ? { customChildCareStart: c.c } : {}),
+    ...(c.ms ? { customMaternityStart: c.ms } : {}),
+    ...(c.me ? { customMaternityEnd: c.me } : {}),
     insuredSegments: c.g.map(
       ([start, end, employerName, claimed], i): InsuredEmploymentSegment => ({
         id: `seg-${i}`,

@@ -84,6 +84,14 @@ function ImportPreview({ input }: { input: UserInput }) {
   return (
     <dl className="import-modal__summary">
       <div>
+        <dt>産前休業 開始日</dt>
+        <dd>{input.customMaternityStart ?? '自動'}</dd>
+      </div>
+      <div>
+        <dt>産後休業 終了日</dt>
+        <dd>{input.customMaternityEnd ?? '自動'}</dd>
+      </div>
+      <div>
         <dt>育休開始日</dt>
         <dd>{input.customChildCareStart ?? '自動'}</dd>
       </div>

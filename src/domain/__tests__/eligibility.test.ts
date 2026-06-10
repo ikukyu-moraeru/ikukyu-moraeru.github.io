@@ -273,4 +273,29 @@ describe("judgeEligibility", () => {
     expect(result.scanWindow.start).toBe("2024-01-08");
     expect(result.scanWindow.end).toBe("2026-04-14");
   });
+
+  it("customMaternityStart が leaveStartDate に反映される", () => {
+    // 自動なら 2026-01-06（出産日 - 42 日）。手動指定で上書きされる。
+    const input = makeInput({ customMaternityStart: "2026-01-20" });
+    const result = judgeEligibility(input, "2026-02-17");
+    expect(result.leaveStartDate).toBe("2026-01-20");
+    // 育休開始日（基準日）は自動のまま
+    expect(result.childCareStartDate).toBe("2026-04-15");
+  });
+
+  it("customMaternityEnd を指定すると childCareStartDate が end+1 になる", () => {
+    // 自動なら 2026-04-15（出産日 + 56 日 + 1）。終了日を早めると追従。
+    const input = makeInput({ customMaternityEnd: "2026-03-31" });
+    const result = judgeEligibility(input, "2026-02-17");
+    expect(result.childCareStartDate).toBe("2026-04-01");
+  });
+
+  it("customChildCareStart は customMaternityEnd より優先される", () => {
+    const input = makeInput({
+      customMaternityEnd: "2026-03-31",
+      customChildCareStart: "2026-06-01",
+    });
+    const result = judgeEligibility(input, "2026-02-17");
+    expect(result.childCareStartDate).toBe("2026-06-01");
+  });
 });
