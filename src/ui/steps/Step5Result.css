@@ -131,6 +131,34 @@
 }
 .r5-heat header {
   margin-bottom: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+}
+
+/* 予定日±何日まで表示するかのドロップダウン */
+.r5-spread {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink-mute);
+}
+.r5-spread__select {
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-sm);
+  min-height: 40px;
+  padding: 0.4rem 0.8rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+.r5-spread__select:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 1px;
 }
 .r5-heat header h3 {
   font-family: var(--font-h);

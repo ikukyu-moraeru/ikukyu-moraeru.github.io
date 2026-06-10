@@ -48,11 +48,9 @@ export function Step1BasicInfo() {
   )
 
   const [expected, setExpected] = useState<string>(initialExpected)
-  const [spread, setSpread] = useState<number>(initialSpread || DEFAULT_SPREAD)
-  // spread の入力中は文字列で保持し、blur 確定時に clamp する。
-  // 入力途中で空欄になった瞬間に DEFAULT_SPREAD へ戻ってしまう違和感を防ぐ。
-  const [spreadDraft, setSpreadDraft] = useState<string>(String(spread))
-  useEffect(() => setSpreadDraft(String(spread)), [spread])
+  // 予定日前後の試算幅。Step5 のドロップダウンで変更でき、ここでは
+  // 既存の scanRange から引き継ぐ（初回は DEFAULT_SPREAD）。
+  const [spread] = useState<number>(initialSpread || DEFAULT_SPREAD)
 
   // 入力変化を scanRange に反映
   useEffect(() => {
@@ -202,37 +200,6 @@ export function Step1BasicInfo() {
           }
         />
       )}
-
-      <div className="st-field">
-        <label className="st-field__label" htmlFor="spread">
-          <span>🔍</span> 予定日からのずれ幅（前後 何日まで試算する？）
-        </label>
-        <p className="st-field__hint">
-          実際の出産日は予定日通りとは限らないので、前後何日分まで一緒に試算するかを指定します。
-          デフォルトは ± 14 日（前 2 週間〜後 2 週間）。
-        </p>
-        <input
-          id="spread"
-          className="st-input"
-          type="number"
-          min={1}
-          max={120}
-          value={spreadDraft}
-          onChange={(e) => {
-            setSpreadDraft(e.target.value)
-            const n = Number(e.target.value)
-            if (Number.isFinite(n) && n >= 1 && n <= 120) {
-              setSpread(n)
-            }
-          }}
-          onBlur={() => {
-            const n = Number(spreadDraft)
-            if (!Number.isFinite(n) || n < 1) setSpread(DEFAULT_SPREAD)
-            else if (n > 120) setSpread(120)
-            else setSpread(n)
-          }}
-        />
-      </div>
 
       {expected && (
         <>

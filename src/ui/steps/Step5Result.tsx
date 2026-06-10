@@ -7,6 +7,7 @@ import {
   isAfter,
   parseISO,
   startOfMonth,
+  subDays,
 } from 'date-fns'
 import { useAppState } from '../../state/AppState'
 import { scanBirthDates } from '../../domain/birthDateScan'
@@ -45,8 +46,11 @@ function failVerdictLabel(r: EligibilityResult): string {
 }
 
 
+/** 予定日前後の表示日数（試算幅）のドロップダウン候補 */
+const SPREAD_CHOICES = [7, 14, 21, 30, 60, 90]
+
 export function Step5Result() {
-  const { state } = useAppState()
+  const { state, dispatch } = useAppState()
   const results = useMemo(() => scanBirthDates(state.input), [state.input])
   const summary = useMemo(() => summarizeScan(results), [results])
   const [selected, setSelected] = useState<string | null>(() => {
@@ -89,6 +93,31 @@ export function Step5Result() {
     state.input.scanRange.start,
     state.input.scanRange.end,
   )
+
+  // 予定日±何日を試算しているか（scanRange から逆算）
+  const spreadDays = Math.round(
+    (parseISO(state.input.scanRange.end).getTime() -
+      parseISO(state.input.scanRange.start).getTime()) /
+      (2 * 24 * 60 * 60 * 1000),
+  )
+  // 旧入力などで候補にない幅が設定されていても選択肢として表示する
+  const spreadChoices = SPREAD_CHOICES.includes(spreadDays)
+    ? SPREAD_CHOICES
+    : [...SPREAD_CHOICES, spreadDays].sort((a, b) => a - b)
+
+  const changeSpread = (n: number) => {
+    if (!expectedBirthDate) return
+    const exp = parseISO(expectedBirthDate)
+    dispatch({
+      type: 'PATCH_INPUT',
+      patch: {
+        scanRange: {
+          start: format(subDays(exp, n), 'yyyy-MM-dd'),
+          end: format(addDays(exp, n), 'yyyy-MM-dd'),
+        },
+      },
+    })
+  }
 
   const verdict =
     summary.passDays === summary.totalDays
@@ -148,8 +177,24 @@ export function Step5Result() {
 
       <section className="r5-heat">
         <header>
-          <h3>出産日ごとの結果</h3>
-          <p>各セルをタップすると、その日の判定根拠が下に表示されます。</p>
+          <div>
+            <h3>出産日ごとの結果</h3>
+            <p>各セルをタップすると、その日の判定根拠が下に表示されます。</p>
+          </div>
+          <label className="r5-spread">
+            表示する範囲
+            <select
+              className="r5-spread__select"
+              value={spreadDays}
+              onChange={(e) => changeSpread(Number(e.target.value))}
+            >
+              {spreadChoices.map((n) => (
+                <option key={n} value={n}>
+                  予定日 ± {n} 日
+                </option>
+              ))}
+            </select>
+          </label>
         </header>
 
         <div className="r5-heat__grid">
