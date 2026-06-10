@@ -267,11 +267,30 @@ blockquote {
 .related ul { list-style: none; padding: 0; }
 .related li { margin: 0.4rem 0; }
 
-/* ガイド一覧カード */
-.guide-list { list-style: none; padding: 0; margin: 1.2rem 0 0; display: grid; gap: 0.9rem; }
+/* ガイド一覧（テーマ別セクション＋絵文字カード） */
+main:has(.guide-index) { max-width: 900px; }
+.guide-section { margin: 2.2rem 0 0; }
+.guide-section > h2 {
+  border-left: 0;
+  padding: 0;
+  margin: 0 0 0.8rem;
+  font-size: clamp(1.1rem, 3vw, 1.25rem);
+}
+.guide-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+.guide-list--featured { grid-template-columns: 1fr; }
 .guide-card {
-  display: block;
-  padding: 1.1rem 1.2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  height: 100%;
+  padding: 1.05rem 1.15rem;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
@@ -281,14 +300,49 @@ blockquote {
   transition: transform 0.15s, box-shadow 0.15s;
 }
 .guide-card:hover { transform: translateY(-2px); box-shadow: var(--sh-md); }
-.guide-card h2 {
+.guide-card:hover .guide-card__emoji { transform: rotate(-6deg) scale(1.08); }
+.guide-card__emoji {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  font-size: 1.35rem;
+  background: linear-gradient(135deg, var(--bg-2) 0%, var(--bg-3) 100%);
+  border-radius: var(--r-sm);
+  transition: transform 0.15s;
+}
+.guide-card__body { min-width: 0; }
+.guide-card h3 {
   border: 0;
   padding: 0;
   margin: 0 0 0.3rem;
-  font-size: 1.08rem;
+  font-size: 1.02rem;
+  line-height: 1.5;
   color: var(--plum);
 }
-.guide-card p { margin: 0; font-size: 0.9rem; color: var(--ink-soft); }
+.guide-card p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.guide-card--featured {
+  background: linear-gradient(135deg, #fff 0%, var(--bg-2) 100%);
+  border: 1px solid rgba(236, 138, 163, 0.45);
+}
+.guide-card--featured .guide-card__emoji {
+  width: 3.2rem;
+  height: 3.2rem;
+  font-size: 1.7rem;
+  background: var(--paper);
+}
+.guide-card--featured h3 { font-size: 1.15rem; }
+.guide-card--featured p { -webkit-line-clamp: unset; }
 
 /* フッター */
 .gfoot { border-top: 1px solid var(--line); margin-top: 3.5rem; background: rgba(255,255,255,0.4); }

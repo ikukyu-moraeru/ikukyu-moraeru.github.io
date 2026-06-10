@@ -312,12 +312,53 @@ for (const a of articles) write(`guide/${a.fm.slug}`, renderArticle(a))
 for (const p of pages) write(p.fm.slug, renderPage(p))
 
 // ガイド一覧（広告なし）
-const listItems = articles
-  .map(
-    (a) =>
-      `        <li><a class="guide-card" href="/guide/${a.fm.slug}/"><h2>${esc(a.fm.title)}</h2><p>${esc(a.fm.description)}</p></a></li>`,
-  )
-  .join('\n')
+// テーマ別セクション。どこにも属さない新規記事は自動で「もっと知る」に入る。
+const GUIDE_SECTIONS = [
+  { title: '🌱 まずはここから', slugs: ['jukyu-youken'], featured: true },
+  {
+    title: '🕒 働き方がフルタイムじゃない人へ',
+    slugs: ['part-time-shift-jitan', '80jikan-rule', 'chingin-shiharai-kiso-nissu'],
+  },
+  {
+    title: '🌸 妊娠中の休み・休職がある人へ',
+    slugs: ['tsuwari-kyuushoku-otoshiana', 'kanwa-saichou-4nen', 'sankyuu-ikukyuu-kanwa'],
+  },
+  {
+    title: '💼 転職した人へ',
+    slugs: ['tenshoku-tsuusan', 'tenshoku-kanzengetsu-kugiri', 'hasuu-tsuki-15nichi'],
+  },
+  {
+    title: '📅 出産日・育休開始日まわり',
+    slugs: ['yoteibi-bure', 'ikukyuu-kaishi-zure', 'sanzen-kyuugyou-mijikaku', 'tatai'],
+  },
+  { title: '☕ もっと知る', slugs: ['moraenai-baai', 'naze-tsukutta'] },
+]
+
+function guideCard(a, featured = false) {
+  const emoji = a.fm.emoji || '📄'
+  return `        <li><a class="guide-card${featured ? ' guide-card--featured' : ''}" href="/guide/${a.fm.slug}/"><span class="guide-card__emoji" aria-hidden="true">${emoji}</span><span class="guide-card__body"><h3>${esc(a.fm.title)}</h3><p>${esc(a.fm.description)}</p></span></a></li>`
+}
+
+const bySlug = Object.fromEntries(articles.map((a) => [a.fm.slug, a]))
+const placed = new Set(GUIDE_SECTIONS.flatMap((s) => s.slugs))
+const rest = articles.filter((a) => !placed.has(a.fm.slug)).map((a) => a.fm.slug)
+if (rest.length) GUIDE_SECTIONS[GUIDE_SECTIONS.length - 1].slugs.push(...rest)
+
+const sectionsHtml = GUIDE_SECTIONS.map((sec) => {
+  const items = sec.slugs
+    .map((s) => bySlug[s])
+    .filter(Boolean)
+    .map((a) => guideCard(a, sec.featured))
+    .join('\n')
+  if (!items) return ''
+  return `      <section class="guide-section">
+        <h2>${sec.title}</h2>
+        <ul class="guide-list${sec.featured ? ' guide-list--featured' : ''}">
+${items}
+        </ul>
+      </section>`
+}).join('\n')
+
 write(
   'guide',
   page({
@@ -326,12 +367,10 @@ write(
       '育児休業給付金の受給要件・延長・転職・勤務形態など、もらえるか微妙なケースをやさしく解説するガイド集。',
     canonical: `${SITE}/guide/`,
     body: `      <nav class="breadcrumb"><a href="/">ホーム</a> › ガイド</nav>
-      <div class="page">
+      <div class="page guide-index">
         <h1>育休給付金ガイド</h1>
         <p>「自分の場合はもらえる？」が微妙な人向けに、受給要件・延長・転職・勤務形態などをやさしく解説します。</p>
-        <ul class="guide-list">
-${listItems || '        <li>準備中です。</li>'}
-        </ul>
+${sectionsHtml || '        <p>準備中です。</p>'}
       </div>`,
   }),
 )
