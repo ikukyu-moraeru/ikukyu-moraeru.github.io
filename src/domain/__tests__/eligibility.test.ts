@@ -151,6 +151,46 @@ describe("judgeEligibility", () => {
     expect(m1.reason).toBe("80時間以上");
   });
 
+  it("端数月: 11 日未満でも 80 時間以上なら 0.5 か月 (業務取扱要領 R8.4 版 59523)", () => {
+    // 疾病休職 50 日（無給）で窓が 2024-02-25 まで延び、19 日間の端数月が生じる。
+    // 端数月内は 10 日 × 8 時間 = 80 時間（11 日未満、80 時間以上）。
+    const fragmentWork: DailyAttendance[] = [
+      "2024-02-26",
+      "2024-02-27",
+      "2024-02-28",
+      "2024-02-29",
+      "2024-03-01",
+      "2024-03-04",
+      "2024-03-05",
+      "2024-03-06",
+      "2024-03-07",
+      "2024-03-08",
+    ].map((date) => ({ date, status: "work" as const, hours: 8 }));
+    const input = makeInput({
+      leavePeriods: [
+        {
+          id: "sick1",
+          type: "病気休職",
+          start: "2025-06-01",
+          end: "2025-07-20",
+          hasWageDuringLeave: false,
+        },
+      ],
+      attendances: [
+        ...fragmentWork,
+        ...fillWorkDays("2024-03-15", "2026-04-14"),
+      ],
+    });
+    const result = judgeEligibility(input, "2026-02-17");
+    expect(result.relaxationDays).toBe(50);
+    expect(result.scanWindow.start).toBe("2024-02-25");
+    expect(result.fragmentJudgment?.range.days).toBe(19);
+    expect(result.fragmentJudgment?.attendance?.basicWageDays).toBe(10);
+    expect(result.fragmentJudgment?.attendance?.basicWageHours).toBe(80);
+    expect(result.fragmentJudgment?.counted).toBe(0.5);
+    expect(result.fragmentJudgment?.reason).toBe("80時間以上");
+  });
+
   it("80 時間ルールは 2020-08-01 以降の月にしか適用されない", () => {
     // 育休開始 2020-08-15 → 完全月 1: 2020-07-15..2020-08-14（80h ルール非適用）
     //                    完全月 2: 2020-06-15..2020-07-14（同非適用）

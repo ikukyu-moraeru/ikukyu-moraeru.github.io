@@ -156,7 +156,7 @@ export interface EligibilityResult {
   fragmentJudgment?: {
     range: FragmentMonth;
     counted: 0 | 0.5;
-    reason: "11日以上" | "条件未達" | "15日未満" | "雇用保険未加入";
+    reason: "11日以上" | "80時間以上" | "条件未達" | "15日未満" | "雇用保険未加入";
     attendance?: JudgedAttendance;
   };
 }

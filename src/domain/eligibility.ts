@@ -221,6 +221,9 @@ function judgeFragment(
   if (attendance.basicWageDays >= 11) {
     return { range: fragment, counted: 0.5, reason: "11日以上", attendance };
   }
+  if (canApplyHoursRule(fragment.end) && attendance.basicWageHours >= 80) {
+    return { range: fragment, counted: 0.5, reason: "80時間以上", attendance };
+  }
   return { range: fragment, counted: 0, reason: "条件未達", attendance };
 }
 
