@@ -1074,3 +1074,108 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* まとめて入力（簡単入力の導線） */
+.ac-bulk {
+  background: linear-gradient(135deg, var(--bg-3) 0%, #fff 70%);
+  border: 1.5px solid var(--mint);
+  border-radius: 22px;
+  padding: 1rem 1.1rem 1.1rem;
+  display: grid;
+  gap: 0.7rem;
+}
+.ac-bulk__head h3 {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-h);
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--plum);
+}
+.ac-bulk__head p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.ac-bulk__dows {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+.ac-dowbtn {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ink-mute);
+}
+.ac-dowbtn.is-on {
+  background: var(--plum);
+  border-color: var(--plum);
+  color: #fff;
+}
+.ac-dowbtn--sun:not(.is-on) {
+  color: var(--pink-deep);
+}
+.ac-dowbtn--sat:not(.is-on) {
+  color: #4a7bb7;
+}
+.ac-bulk__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.ac-bulk__actions .at-quick:disabled {
+  opacity: 0.45;
+}
+.ac-bulk__done {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--mint-deep);
+}
+
+/* 見直し推奨の月チップ */
+.ac-review {
+  background: #fff5d4;
+  border: 1.5px solid var(--gold);
+  border-radius: 16px;
+  padding: 0.8rem 1rem;
+  display: grid;
+  gap: 0.55rem;
+}
+.ac-review__label {
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--gold-deep);
+}
+.ac-review__chips {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.ac-review__chip {
+  background: #fff;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-h);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--ink);
+}
+.ac-review__chip:hover {
+  border-color: var(--gold-deep);
+}
+.ac-review__hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}

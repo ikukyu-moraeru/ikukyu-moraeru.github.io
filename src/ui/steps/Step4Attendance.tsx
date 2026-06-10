@@ -118,6 +118,11 @@ export function Step4Attendance() {
   const { state, dispatch } = useAppState()
   const [selectedYm, setSelectedYm] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  // 一括入力で「出勤」にする曜日（getDay 形式: 0=日〜6=土）。既定は平日。
+  const [bulkDows, setBulkDows] = useState<Set<number>>(
+    () => new Set([1, 2, 3, 4, 5]),
+  )
+  const [bulkResult, setBulkResult] = useState<number | null>(null)
   const detailRef = useRef<HTMLElement>(null)
 
   const selectMonth = (ym: string, scroll = true) => {
@@ -407,6 +412,67 @@ export function Step4Attendance() {
     dispatch({ type: 'PATCH_INPUT', patch: { attendances: next } })
   }
 
+  const toggleBulkDow = (n: number) => {
+    setBulkResult(null)
+    setBulkDows((prev) => {
+      const s = new Set(prev)
+      if (s.has(n)) s.delete(n)
+      else s.add(n)
+      return s
+    })
+  }
+
+  /**
+   * 走査期間全体の未入力日のうち、選択した曜日を一括で「出勤」にする。
+   * 手入力済み・休業中・対象外の日は変更しない（fillSelectedMonthWeekdaysWithWork
+   * の全期間版。土日を選んだ場合は公休扱いの日も埋める）。
+   */
+  const bulkFillSelectedDows = () => {
+    const next = [...state.input.attendances]
+    let count = 0
+    let d = parseISO(result.scanWindow.start)
+    const end = parseISO(result.scanWindow.end)
+    while (d.getTime() <= end.getTime()) {
+      const date = format(d, 'yyyy-MM-dd')
+      if (bulkDows.has(getDay(d)) && !overrideMap.has(date)) {
+        const info = deriveDay(date, undefined, state.input, result.scanWindow.end)
+        if (
+          info.state.kind === 'unset' ||
+          info.state.kind === 'public_holiday'
+        ) {
+          next.push({ date, status: 'work' })
+          count += 1
+        }
+      }
+      d = addDays(d, 1)
+    }
+    if (count > 0) {
+      next.sort((a, b) => a.date.localeCompare(b.date))
+      dispatch({ type: 'PATCH_INPUT', patch: { attendances: next } })
+    }
+    setBulkResult(count)
+  }
+
+  const bulkClearAll = () => {
+    if (
+      !window.confirm(
+        '入力済みの出勤情報（手入力分を含む）をすべて削除します。よろしいですか？',
+      )
+    ) {
+      return
+    }
+    dispatch({ type: 'PATCH_INPUT', patch: { attendances: [] } })
+    setBulkResult(null)
+  }
+
+  /** 一括入力後にユーザーが見直すべき月（境界ぎりぎり⚠・未達）。 */
+  const reviewMonths = calendarMonths.filter((m, i) => {
+    if (calAchievedAt >= 0 && i > calAchievedAt) return false // 入力不要月
+    if (m.status === 'out' || m.status === 'leave') return false
+    if (!m.hasInputs) return false
+    return m.volatile || m.status === 'fail'
+  })
+
   const selectedDay = selectedDate
     ? days.find((d) => d.date === selectedDate) ?? null
     : null
@@ -483,6 +549,75 @@ export function Step4Attendance() {
           </p>
         </div>
       </details>
+
+      {/* まとめて入力（簡単入力の導線） */}
+      <section className="ac-bulk">
+        <header className="ac-bulk__head">
+          <h3>
+            <span aria-hidden>🚀</span> まずはまとめて入力
+          </h3>
+          <p>
+            普段出勤している曜日を選んでボタンを押すと、対象期間の未入力日をまとめて「出勤」にします。
+            手で入力した日や休業期間は上書きしないので、あとから気になる月だけ直せば OK です。
+          </p>
+        </header>
+        <div className="ac-bulk__dows" role="group" aria-label="出勤している曜日">
+          {['日', '月', '火', '水', '木', '金', '土'].map((label, n) => (
+            <button
+              key={n}
+              type="button"
+              className={`ac-dowbtn${bulkDows.has(n) ? ' is-on' : ''}${n === 0 ? ' ac-dowbtn--sun' : ''}${n === 6 ? ' ac-dowbtn--sat' : ''}`}
+              aria-pressed={bulkDows.has(n)}
+              onClick={() => toggleBulkDow(n)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="ac-bulk__actions">
+          <button
+            className="at-quick"
+            onClick={bulkFillSelectedDows}
+            disabled={bulkDows.size === 0}
+          >
+            📌 選んだ曜日を全期間まとめて出勤にする
+          </button>
+          <button className="at-quick at-quick--ghost" onClick={bulkClearAll}>
+            すべてクリア
+          </button>
+        </div>
+        {bulkResult !== null && (
+          <p className="ac-bulk__done" aria-live="polite">
+            {bulkResult > 0
+              ? `✓ ${bulkResult} 日を「出勤」として入力しました。上の達成見込みと、下の月一覧を確認してください。`
+              : '追加できる未入力日はありませんでした（入力済みの日は上書きしません）。'}
+          </p>
+        )}
+      </section>
+
+      {/* 見直し推奨の月チップ */}
+      {reviewMonths.length > 0 && (
+        <div className="ac-review">
+          <span className="ac-review__label">
+            <span aria-hidden>👀</span> この月だけ確認してください
+          </span>
+          <div className="ac-review__chips">
+            {reviewMonths.map((m) => (
+              <button
+                key={m.ym}
+                className="ac-review__chip"
+                onClick={() => selectMonth(m.ym)}
+              >
+                {monthLabel(m.ym)}
+                {m.volatile && <span aria-hidden> ⚠</span>}
+              </button>
+            ))}
+          </div>
+          <p className="ac-review__hint">
+            境界ぎりぎり（⚠）や未達の月です。タップして、実際の出勤・休みに合わせて直してください。それ以外の月はこのままで大丈夫です。
+          </p>
+        </div>
+      )}
 
       {/* 暦月の年ビュー */}
       <section className="ac-year">
