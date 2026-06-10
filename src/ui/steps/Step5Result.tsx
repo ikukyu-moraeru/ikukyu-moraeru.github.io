@@ -206,6 +206,16 @@ export function Step5Result() {
         </p>
       )}
 
+      {summary.failDays > 0 && (
+        <p className="r5-hint">
+          📖 つわりなどの欠勤・休職が原因で届いていない場合、休み方しだいで結果が変わることがあります。詳しくは「
+          <a href="/guide/tsuwari-kyuushoku-otoshiana/">
+            妊娠中の「休み方」が受給を左右する
+          </a>
+          」を参照してください。
+        </p>
+      )}
+
       <MissingMonthsHint input={state.input} results={results} />
 
       <section className="r5-heat">
