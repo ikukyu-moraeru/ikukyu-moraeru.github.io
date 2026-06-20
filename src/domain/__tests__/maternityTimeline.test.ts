@@ -6,7 +6,8 @@ describe("computeMaternityTimeline", () => {
     const t = computeMaternityTimeline("2026-09-15", false);
     expect(t).not.toBeNull();
     expect(t!.prenatalDays).toBe(42);
-    expect(t!.prenatalLeaveStart).toBe("2026-08-04");
+    // 出産予定日を含めた 42 日間なので開始は 41 日前（9/15 - 41 = 8/5）
+    expect(t!.prenatalLeaveStart).toBe("2026-08-05");
     expect(t!.postnatalDays).toBe(56);
     expect(t!.postnatalLeaveEnd).toBe("2026-11-10");
     expect(t!.childCareStart).toBe("2026-11-11");
@@ -15,7 +16,8 @@ describe("computeMaternityTimeline", () => {
   it("多胎: 産前 98 日に拡張される", () => {
     const t = computeMaternityTimeline("2026-09-15", true);
     expect(t!.prenatalDays).toBe(98);
-    expect(t!.prenatalLeaveStart).toBe("2026-06-09");
+    // 9/15 - 97 = 6/10
+    expect(t!.prenatalLeaveStart).toBe("2026-06-10");
     // 産後と育休開始は変わらない
     expect(t!.postnatalLeaveEnd).toBe("2026-11-10");
     expect(t!.childCareStart).toBe("2026-11-11");
@@ -23,8 +25,8 @@ describe("computeMaternityTimeline", () => {
 
   it("月またぎ: 月初の出産予定日でも産前開始日が前月になる", () => {
     const t = computeMaternityTimeline("2026-03-01", false);
-    // 2026-03-01 - 42 = 2026-01-18
-    expect(t!.prenatalLeaveStart).toBe("2026-01-18");
+    // 2026-03-01 - 41 = 2026-01-19（滋賀労働局 早見表と一致）
+    expect(t!.prenatalLeaveStart).toBe("2026-01-19");
     // 2026-03-01 + 56 = 2026-04-26
     expect(t!.postnatalLeaveEnd).toBe("2026-04-26");
     expect(t!.childCareStart).toBe("2026-04-27");
@@ -32,7 +34,8 @@ describe("computeMaternityTimeline", () => {
 
   it("うるう年: 2024-02-29 起点の計算が正しい", () => {
     const t = computeMaternityTimeline("2024-02-29", false);
-    expect(t!.prenatalLeaveStart).toBe("2024-01-18");
+    // 2024-02-29 - 41 = 2024-01-19（うるう年）
+    expect(t!.prenatalLeaveStart).toBe("2024-01-19");
     expect(t!.postnatalLeaveEnd).toBe("2024-04-25");
     expect(t!.childCareStart).toBe("2024-04-26");
   });
@@ -59,7 +62,7 @@ describe("computeMaternityTimeline", () => {
     const t = computeMaternityTimeline("2026-09-15", false, {
       maternityEnd: "2026-10-31",
     });
-    expect(t!.prenatalLeaveStart).toBe("2026-08-04");
+    expect(t!.prenatalLeaveStart).toBe("2026-08-05");
     expect(t!.postnatalLeaveEnd).toBe("2026-10-31");
     // 育休開始日はカスタム終了日の翌日に追従
     expect(t!.childCareStart).toBe("2026-11-01");
@@ -80,6 +83,6 @@ describe("computeMaternityTimeline", () => {
     // 同じ計算をしているか確認するための回帰テスト。
     const t = computeMaternityTimeline("2026-02-17", false);
     expect(t!.childCareStart).toBe("2026-04-15");
-    expect(t!.prenatalLeaveStart).toBe("2026-01-06");
+    expect(t!.prenatalLeaveStart).toBe("2026-01-07");
   });
 });

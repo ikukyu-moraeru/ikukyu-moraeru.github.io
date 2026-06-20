@@ -58,9 +58,10 @@ export function judgeEligibility(
   const prenatalDays = input.isMultipleBirth
     ? PRENATAL_DAYS_MULTIPLE
     : PRENATAL_DAYS_SINGLE;
-  // 産前休業の開始（予定・指定）より早く生まれた場合、休業は実出産日から始まる
+  // 産前休業の開始（予定・指定）より早く生まれた場合、休業は実出産日から始まる。
+  // 産前は出産（予定）日を含めた 42 日間（多胎 98 日間）なので開始は (期間 - 1) 日前。
   const plannedLeaveStart =
-    input.customMaternityStart ?? fmt(subDays(birthDateD, prenatalDays));
+    input.customMaternityStart ?? fmt(subDays(birthDateD, prenatalDays - 1));
   const leaveStartDate =
     plannedLeaveStart < birthDate ? plannedLeaveStart : birthDate;
   // 育休開始日の既定値:

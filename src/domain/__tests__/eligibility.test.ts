@@ -55,7 +55,7 @@ describe("judgeEligibility", () => {
     const input = makeInput();
     const result = judgeEligibility(input, "2026-02-17");
 
-    expect(result.leaveStartDate).toBe("2026-01-06");
+    expect(result.leaveStartDate).toBe("2026-01-07");
     expect(result.childCareStartDate).toBe("2026-04-15");
     expect(result.baseWindowStart).toBe("2024-04-15");
     expect(result.scanWindow).toEqual({
@@ -72,13 +72,13 @@ describe("judgeEligibility", () => {
 
   it("多胎妊娠は産前休業 98 日 → leaveStartDate が前倒しされる", () => {
     const single = judgeEligibility(makeInput(), "2026-09-01");
-    expect(single.leaveStartDate).toBe("2026-07-21");
+    expect(single.leaveStartDate).toBe("2026-07-22");
 
     const multi = judgeEligibility(
       makeInput({ isMultipleBirth: true }),
       "2026-09-01",
     );
-    expect(multi.leaveStartDate).toBe("2026-05-26");
+    expect(multi.leaveStartDate).toBe("2026-05-27");
   });
 
   it("出勤入力が無い完全月は条件未達としてカウントされない", () => {

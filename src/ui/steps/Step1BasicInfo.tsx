@@ -311,7 +311,9 @@ function Timeline({
         ) : (
           <>
             根拠: 🌸 {md(t.prenatalLeaveStart)} 産前休業
-            {isCustomPrenatal ? '（手動指定）' : `（予定日 ${t.prenatalDays} 日前）`}
+            {isCustomPrenatal
+              ? '（手動指定）'
+              : `（予定日を含む産前 ${t.prenatalDays} 日間）`}
             → 👶 {md(t.expectedBirthDate)} 出産 → 🌿 {md(t.postnatalLeaveEnd)}{' '}
             産後休業 終了{isCustomPostnatal ? '（手動指定）' : '（出産 + 56 日）'}→
             その翌日

@@ -4,7 +4,9 @@ import type { DateISO } from "./types";
 /**
  * 出産予定日と単胎/多胎の別から、産休・育休関連の主要な日付を算出する。
  *
- * - 産前休業: 出産予定日基準で 42 日（多胎 98 日）。法定の最長期間。
+ * - 産前休業: 出産予定日を含めて 42 日間（多胎 98 日間）。法定の最長期間。
+ *   出産予定日を期間に含むため、開始日は予定日の 41 日前（多胎 97 日前）=
+ *   `予定日 - (期間日数 - 1)`。労基法 65 条・出産手当金「出産日以前 42 日」と整合する。
  * - 産後休業: 出産日翌日から 56 日（労基法 65 条）。本ヘルパーでは
  *   出産予定日 = 実出産日と仮定して算出する（実出産日が前後すれば自動的にずれる）。
  * - 育休開始日 = 出産日 + 産後 56 日 + 翌日 = 出産日 + 57 日。
@@ -52,8 +54,9 @@ export function computeMaternityTimeline(
   const prenatalDays = isMultipleBirth
     ? PRENATAL_DAYS_MULTIPLE
     : PRENATAL_DAYS_SINGLE;
+  // 出産予定日を含めた期間なので開始日は (期間日数 - 1) 日前。
   const prenatalLeaveStart =
-    overrides?.maternityStart ?? fmt(subDays(exp, prenatalDays));
+    overrides?.maternityStart ?? fmt(subDays(exp, prenatalDays - 1));
   const postnatalLeaveEnd =
     overrides?.maternityEnd ?? fmt(addDays(exp, POSTNATAL_DAYS));
   return {
