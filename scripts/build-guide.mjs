@@ -133,6 +133,68 @@ const GFOOT = `<footer class="gfoot"><div class="gfoot__inner">
       <a href="/content-policy">コンテンツポリシー</a>
     </div></footer>`
 
+/**
+ * 記事カテゴリ（第一階層タグ。1記事1カテゴリ）。
+ * バッジ・タグ一覧ページ・ガイド一覧・sitemap・構造化データの単一の出典。
+ * 新記事はここに slug を1行足す（金額・申請などの新カテゴリはこの配列に追加）。
+ */
+const CATEGORIES = [
+  {
+    key: 'kiso',
+    label: '受給要件の基礎',
+    emoji: '📘',
+    desc: '誰がもらえるか、「12か月」の数え方、もらえないときの備え。',
+    slugs: ['jukyu-youken', 'moraenai-baai', 'hasuu-tsuki-15nichi'],
+  },
+  {
+    key: 'kinmu',
+    label: '勤務形態と日数',
+    emoji: '🕒',
+    desc: 'パート・週3・時短・契約社員。賃金支払基礎日数11日と80時間ルール。',
+    slugs: ['part-time-shift-jitan', '80jikan-rule', 'chingin-shiharai-kiso-nissu'],
+  },
+  {
+    key: 'kyuugyou',
+    label: '妊娠中の休みと緩和',
+    emoji: '🌸',
+    desc: 'つわり・産前産後休業と、2年→最長4年の緩和のしくみ。',
+    slugs: [
+      'tsuwari-kyuushoku-otoshiana',
+      'kanwa-saichou-4nen',
+      'sankyuu-ikukyuu-kanwa',
+      'sanzen-kyuugyou-mijikaku',
+    ],
+  },
+  {
+    key: 'tenshoku',
+    label: '転職と期間の通算',
+    emoji: '💼',
+    desc: '前職の雇用保険を通算する条件と、会社ごとの完全月の数え方。',
+    slugs: ['tenshoku-tsuusan', 'tenshoku-kanzengetsu-kugiri'],
+  },
+  {
+    key: 'kaishi',
+    label: '出産日と育休開始日',
+    emoji: '📅',
+    desc: '出産日や育休開始日のずれで、判定の2年窓が動くしくみ。',
+    slugs: ['yoteibi-bure', 'ikukyuu-kaishi-zure', 'tatai'],
+  },
+  {
+    key: 'story',
+    label: '開発ストーリー',
+    emoji: '💡',
+    desc: 'この判定ツールを作った理由。',
+    slugs: ['naze-tsukutta'],
+  },
+]
+const TAG_MIN = 2 // この本数以上のカテゴリだけタグ一覧ページを生成（薄いページを作らない）
+const FEATURED = 'jukyu-youken' // 一覧で大型表示するピラー記事
+
+const slugToCat = {}
+for (const c of CATEGORIES) for (const s of c.slugs) slugToCat[s] = c
+const hasTagPage = (cat) => cat.slugs.length >= TAG_MIN
+const tagUrl = (key) => `/guide/tag/${key}/`
+
 function page({ title, description, canonical, head = '', body }) {
   return `<!doctype html>
 <html lang="ja">
@@ -168,7 +230,7 @@ ${body}
 `
 }
 
-function articleJsonLd({ title, description, canonical, date, updated }) {
+function articleJsonLd({ title, description, canonical, date, updated, keywords }) {
   const data = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -180,6 +242,7 @@ function articleJsonLd({ title, description, canonical, date, updated }) {
     publisher: { '@type': 'Person', name: AUTHOR },
     mainEntityOfPage: canonical,
     inLanguage: 'ja-JP',
+    ...(keywords ? { keywords } : {}),
   }
   return `\n    <script type="application/ld+json">${JSON.stringify(data)}</script>`
 }
@@ -201,6 +264,12 @@ function renderArticle(a) {
   const slug = fm.slug
   const canonical = `${SITE}/guide/${slug}/`
   const bodyHtml = injectAds(md.render(body))
+  const cat = slugToCat[slug]
+  const catBadge = cat
+    ? hasTagPage(cat)
+      ? `<div class="cat-row"><a class="cat-badge" href="${tagUrl(cat.key)}"><span aria-hidden="true">${cat.emoji}</span>${esc(cat.label)}</a></div>`
+      : `<div class="cat-row"><span class="cat-badge"><span aria-hidden="true">${cat.emoji}</span>${esc(cat.label)}</span></div>`
+    : ''
   const related = (fm.related || [])
     .map((s) => `<li><a href="/guide/${s}/">${esc(slugTitle(s))}</a></li>`)
     .join('\n        ')
@@ -209,6 +278,7 @@ function renderArticle(a) {
     : ''
   const inner = `      <nav class="breadcrumb"><a href="/">ホーム</a> › <a href="/guide/">ガイド</a> › ${esc(fm.title)}</nav>
       <article>
+        ${catBadge}
         <h1>${esc(fm.title)}</h1>
         <p class="meta">公開 ${fm.date}${fm.updated ? ` ・ 更新 ${fm.updated}` : ''}</p>
         ${bodyHtml}
@@ -235,6 +305,7 @@ function renderArticle(a) {
       canonical,
       date: fm.date,
       updated: fm.updated,
+      keywords: cat ? cat.label : undefined,
     }),
     body: inner,
   })
@@ -257,6 +328,39 @@ function renderPage(p) {
   })
 }
 
+/** カテゴリのタグ一覧ページ（記事カードを並べる）。CollectionPage 構造化データ付き。 */
+function renderTagPage(cat) {
+  const canonical = `${SITE}/guide/tag/${cat.key}/`
+  const cards = cat.slugs
+    .map((s) => bySlug[s])
+    .filter(Boolean)
+    .map((a) => guideCard(a, a.fm.slug === FEATURED))
+    .join('\n')
+  const jsonld = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `${cat.label}｜育休もらえる？`,
+    description: cat.desc,
+    url: canonical,
+    inLanguage: 'ja-JP',
+  }
+  return page({
+    title: `${cat.label}の記事一覧 | 育休もらえる？`,
+    description: cat.desc,
+    canonical,
+    head: `\n    <script type="application/ld+json">${JSON.stringify(jsonld)}</script>`,
+    body: `      <nav class="breadcrumb"><a href="/">ホーム</a> › <a href="/guide/">ガイド</a> › ${esc(cat.label)}</nav>
+      <div class="page guide-index">
+        <h1>${cat.emoji} ${esc(cat.label)}</h1>
+        <p>${esc(cat.desc)}</p>
+        <ul class="guide-list">
+${cards}
+        </ul>
+        <p class="tag-back"><a href="/guide/">← ガイド一覧へ戻る</a></p>
+      </div>`,
+  })
+}
+
 // slug → タイトルの索引（関連記事リンク表示用）
 let titleIndex = {}
 function slugTitle(slug) {
@@ -269,11 +373,16 @@ function write(outRel, html) {
   writeFileSync(join(dir, 'index.html'), html)
 }
 
-function buildSitemap(articleSlugs, pageSlugs) {
-  const today = '2026-06-08'
+function buildSitemap(articleSlugs, pageSlugs, tagKeys = []) {
+  const today = '2026-06-20'
   const urls = [
     { loc: `${SITE}/`, pri: '1.0', freq: 'monthly' },
     { loc: `${SITE}/guide/`, pri: '0.8', freq: 'weekly' },
+    ...tagKeys.map((k) => ({
+      loc: `${SITE}/guide/tag/${k}/`,
+      pri: '0.5',
+      freq: 'weekly',
+    })),
     ...articleSlugs.map((s) => ({
       loc: `${SITE}/guide/${s}/`,
       pri: '0.7',
@@ -311,53 +420,46 @@ if (!existsSync(DIST)) {
 for (const a of articles) write(`guide/${a.fm.slug}`, renderArticle(a))
 for (const p of pages) write(p.fm.slug, renderPage(p))
 
-// ガイド一覧（広告なし）
-// テーマ別セクション。どこにも属さない新規記事は自動で「もっと知る」に入る。
-const GUIDE_SECTIONS = [
-  { title: '🌱 まずはここから', slugs: ['jukyu-youken'], featured: true },
-  {
-    title: '🕒 働き方がフルタイムじゃない人へ',
-    slugs: ['part-time-shift-jitan', '80jikan-rule', 'chingin-shiharai-kiso-nissu'],
-  },
-  {
-    title: '🌸 妊娠中の休み・休職がある人へ',
-    slugs: ['tsuwari-kyuushoku-otoshiana', 'kanwa-saichou-4nen', 'sankyuu-ikukyuu-kanwa'],
-  },
-  {
-    title: '💼 転職した人へ',
-    slugs: ['tenshoku-tsuusan', 'tenshoku-kanzengetsu-kugiri', 'hasuu-tsuki-15nichi'],
-  },
-  {
-    title: '📅 出産日・育休開始日まわり',
-    slugs: ['yoteibi-bure', 'ikukyuu-kaishi-zure', 'sanzen-kyuugyou-mijikaku', 'tatai'],
-  },
-  { title: '☕ もっと知る', slugs: ['moraenai-baai', 'naze-tsukutta'] },
-]
-
+// ガイド一覧（広告なし）。カテゴリ（CATEGORIES）をそのままセクションに使う。
 function guideCard(a, featured = false) {
   const emoji = a.fm.emoji || '📄'
   return `        <li><a class="guide-card${featured ? ' guide-card--featured' : ''}" href="/guide/${a.fm.slug}/"><span class="guide-card__emoji" aria-hidden="true">${emoji}</span><span class="guide-card__body"><h3>${esc(a.fm.title)}</h3><p>${esc(a.fm.description)}</p></span></a></li>`
 }
 
 const bySlug = Object.fromEntries(articles.map((a) => [a.fm.slug, a]))
-const placed = new Set(GUIDE_SECTIONS.flatMap((s) => s.slugs))
-const rest = articles.filter((a) => !placed.has(a.fm.slug)).map((a) => a.fm.slug)
-if (rest.length) GUIDE_SECTIONS[GUIDE_SECTIONS.length - 1].slugs.push(...rest)
 
-const sectionsHtml = GUIDE_SECTIONS.map((sec) => {
-  const items = sec.slugs
-    .map((s) => bySlug[s])
-    .filter(Boolean)
-    .map((a) => guideCard(a, sec.featured))
-    .join('\n')
-  if (!items) return ''
+// カテゴリ未登録の記事があれば警告（一覧から漏れる）。CATEGORIES に slug を足して解消する。
+const unplaced = articles.filter((a) => !slugToCat[a.fm.slug]).map((a) => a.fm.slug)
+if (unplaced.length) {
+  console.warn(
+    `[build-guide] カテゴリ未登録の記事: ${unplaced.join(', ')}（CATEGORIES に追加してください）`,
+  )
+}
+
+const sectionsHtml = CATEGORIES.map((cat) => {
+  const items = cat.slugs.map((s) => bySlug[s]).filter(Boolean)
+  if (!items.length) return ''
+  const cards = items.map((a) => guideCard(a, a.fm.slug === FEATURED)).join('\n')
+  const heading = hasTagPage(cat)
+    ? `<a href="${tagUrl(cat.key)}">${cat.emoji} ${esc(cat.label)}</a>`
+    : `${cat.emoji} ${esc(cat.label)}`
   return `      <section class="guide-section">
-        <h2>${sec.title}</h2>
-        <ul class="guide-list${sec.featured ? ' guide-list--featured' : ''}">
-${items}
+        <h2>${heading}</h2>
+        <p class="guide-section__desc">${esc(cat.desc)}</p>
+        <ul class="guide-list">
+${cards}
         </ul>
       </section>`
 }).join('\n')
+
+// カテゴリのタグ一覧ページ（記事 TAG_MIN 本以上のカテゴリのみ＝薄いページを作らない）
+const tagKeys = []
+for (const cat of CATEGORIES) {
+  if (!hasTagPage(cat)) continue
+  if (!cat.slugs.some((s) => bySlug[s])) continue
+  write(`guide/tag/${cat.key}`, renderTagPage(cat))
+  tagKeys.push(cat.key)
+}
 
 write(
   'guide',
@@ -378,8 +480,9 @@ ${sectionsHtml || '        <p>準備中です。</p>'}
 buildSitemap(
   articles.map((a) => a.fm.slug),
   pages.map((p) => p.fm.slug),
+  tagKeys,
 )
 
 console.log(
-  `[build-guide] 記事 ${articles.length} 本・固定ページ ${pages.length} 件・一覧・sitemap を生成しました${CLIENT && GUIDE_SLOT ? '（広告枠あり）' : '（広告枠なし: VITE_ADSENSE_CLIENT/VITE_ADSENSE_GUIDE_SLOT 未設定）'}`,
+  `[build-guide] 記事 ${articles.length} 本・固定ページ ${pages.length} 件・タグ一覧 ${tagKeys.length} 件・一覧・sitemap を生成しました${CLIENT && GUIDE_SLOT ? '（広告枠あり）' : '（広告枠なし: VITE_ADSENSE_CLIENT/VITE_ADSENSE_GUIDE_SLOT 未設定）'}`,
 )
