@@ -184,7 +184,7 @@ const CATEGORIES = [
     label: '金額・計算',
     emoji: '💰',
     desc: 'いくらもらえる？計算式・上限額と、社会保険料免除で手取りが増えるしくみ。',
-    slugs: ['ikukyu-okane-kingaku'],
+    slugs: ['ikukyu-okane-kingaku', 'ikukyu-jitan-kyufu'],
   },
   {
     key: 'tsukaikata',
