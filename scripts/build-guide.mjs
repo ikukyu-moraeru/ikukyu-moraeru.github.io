@@ -194,6 +194,13 @@ const CATEGORIES = [
     slugs: ['sango-papa-ikukyu', 'ikukyu-encho'],
   },
   {
+    key: 'okane-naka',
+    label: '育休中のお金',
+    emoji: '🏦',
+    desc: '社会保険料の免除・税金・住民税。育休中の家計に効くお金の話。',
+    slugs: ['ikukyu-shahoken-menjo'],
+  },
+  {
     key: 'story',
     label: '開発ストーリー',
     emoji: '💡',
