@@ -198,7 +198,7 @@ const CATEGORIES = [
     label: '育休中のお金',
     emoji: '🏦',
     desc: '社会保険料の免除・税金・住民税。育休中の家計に効くお金の話。',
-    slugs: ['ikukyu-shahoken-menjo'],
+    slugs: ['ikukyu-shahoken-menjo', 'ikukyu-zeikin'],
   },
   {
     key: 'shinsei',
