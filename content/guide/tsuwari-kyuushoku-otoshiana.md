@@ -4,7 +4,7 @@ description: "つわりで無給欠勤すると賃金支払基礎日数が11日�
 slug: "tsuwari-kyuushoku-otoshiana"
 emoji: "🛌"
 date: "2026-06-08"
-updated: "2026-06-20"
+updated: "2026-06-23"
 tags: ["受給要件", "妊娠中の休み"]
 related: ["jukyu-youken", "kanwa-saichou-4nen", "part-time-shift-jitan"]
 draft: false

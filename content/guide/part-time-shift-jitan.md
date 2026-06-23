@@ -4,7 +4,7 @@ description: "パート・シフト勤務・週3・時短・契約社員でも�
 slug: "part-time-shift-jitan"
 emoji: "🕒"
 date: "2026-06-08"
-updated: "2026-06-20"
+updated: "2026-06-23"
 tags: ["受給要件", "勤務形態"]
 related: ["jukyu-youken", "tsuwari-kyuushoku-otoshiana", "kanwa-saichou-4nen"]
 draft: false

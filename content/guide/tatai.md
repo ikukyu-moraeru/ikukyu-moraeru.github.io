@@ -4,7 +4,7 @@ description: "双子以上の多胎妊娠だと産前休業が42日から98日�
 slug: "tatai"
 emoji: "👶👶"
 date: "2026-06-08"
-updated: "2026-06-20"
+updated: "2026-06-23"
 tags: ["受給要件", "産休育休"]
 related: ["jukyu-youken", "yoteibi-bure", "kanwa-saichou-4nen"]
 draft: false

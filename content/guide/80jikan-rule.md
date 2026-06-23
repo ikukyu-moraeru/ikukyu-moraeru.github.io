@@ -4,7 +4,7 @@ description: "賃金支払基礎日数が月11日に届かなくても、賃金�
 slug: "80jikan-rule"
 emoji: "⏱️"
 date: "2026-06-08"
-updated: "2026-06-20"
+updated: "2026-06-23"
 tags: ["受給要件", "勤務形態"]
 related: ["jukyu-youken", "part-time-shift-jitan", "chingin-shiharai-kiso-nissu"]
 draft: false

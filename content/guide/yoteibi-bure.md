@@ -4,7 +4,7 @@ description: "出産予定日が早まる・遅れると、育児休業給付金
 slug: "yoteibi-bure"
 emoji: "🎯"
 date: "2026-06-08"
-updated: "2026-06-20"
+updated: "2026-06-23"
 tags: ["受給要件", "出産日"]
 related: ["jukyu-youken", "ikukyuu-kaishi-zure", "tatai"]
 draft: false

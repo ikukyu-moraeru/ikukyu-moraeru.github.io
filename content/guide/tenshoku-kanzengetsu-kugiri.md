@@ -4,7 +4,7 @@ description: "育休給付金の完全月は、現職は育休開始日から、
 slug: "tenshoku-kanzengetsu-kugiri"
 emoji: "✂️"
 date: "2026-06-11"
-updated: "2026-06-20"
+updated: "2026-06-23"
 tags: ["受給要件", "転職", "みなし被保険者期間"]
 related: ["tenshoku-tsuusan", "hasuu-tsuki-15nichi", "jukyu-youken"]
 draft: false

@@ -4,7 +4,7 @@ description: "育児休業給付金の「賃金支払基礎日数11日」は出�
 slug: "chingin-shiharai-kiso-nissu"
 emoji: "🧮"
 date: "2026-06-08"
-updated: "2026-06-20"
+updated: "2026-06-23"
 tags: ["受給要件", "賃金支払基礎日数"]
 related: ["jukyu-youken", "part-time-shift-jitan", "tsuwari-kyuushoku-otoshiana", "80jikan-rule"]
 draft: false

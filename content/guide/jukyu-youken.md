@@ -4,7 +4,7 @@ description: "育児休業給付金の受給要件を、雇用保険の加入・
 slug: "jukyu-youken"
 emoji: "📘"
 date: "2026-06-08"
-updated: "2026-06-20"
+updated: "2026-06-23"
 tags: ["受給要件", "基礎知識"]
 related: ["part-time-shift-jitan", "kanwa-saichou-4nen", "tsuwari-kyuushoku-otoshiana", "chingin-shiharai-kiso-nissu", "80jikan-rule", "tenshoku-tsuusan"]
 draft: false

@@ -4,7 +4,7 @@ description: "育児休業給付金の受給要件を満たせなくても、育
 slug: "moraenai-baai"
 emoji: "🤝"
 date: "2026-06-10"
-updated: "2026-06-20"
+updated: "2026-06-23"
 tags: ["もらえない場合", "関連制度"]
 related: ["jukyu-youken", "kanwa-saichou-4nen", "tenshoku-tsuusan"]
 draft: false

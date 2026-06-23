@@ -4,7 +4,7 @@ description: "育児休業給付金の受給要件は2年で足りなければ�
 slug: "kanwa-saichou-4nen"
 emoji: "⏳"
 date: "2026-06-08"
-updated: "2026-06-20"
+updated: "2026-06-23"
 tags: ["受給要件", "緩和"]
 related: ["jukyu-youken", "tsuwari-kyuushoku-otoshiana", "part-time-shift-jitan"]
 draft: false

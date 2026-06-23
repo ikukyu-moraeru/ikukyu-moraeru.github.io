@@ -4,7 +4,7 @@ description: "産前休業は本人が請求して取る権利で、義務では
 slug: "sanzen-kyuugyou-mijikaku"
 emoji: "🏃‍♀️"
 date: "2026-06-10"
-updated: "2026-06-20"
+updated: "2026-06-23"
 tags: ["受給要件", "産前休業"]
 related: ["jukyu-youken", "chingin-shiharai-kiso-nissu", "sankyuu-ikukyuu-kanwa"]
 draft: false
