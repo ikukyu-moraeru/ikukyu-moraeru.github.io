@@ -131,6 +131,7 @@ const GFOOT = `<footer class="gfoot"><div class="gfoot__inner">
       <a href="/contact/">お問い合わせ</a>
       <a href="/privacy">プライバシー</a>
       <a href="/content-policy">コンテンツポリシー</a>
+      <a href="/sitemap/">サイトマップ</a>
     </div></footer>`
 
 /**
@@ -389,6 +390,60 @@ ${cards}
   })
 }
 
+/**
+ * HTMLサイトマップ（人間が読める全ページ一覧）。`/sitemap/` に出力。
+ * GitHub Pages の sitemap.xml が Search Console で取得されない問題の迂回策。
+ * クロール可能な実HTMLページなので、通常クロールでのページ発見を補強する。
+ * 記事のグルーピングは sitemap.xml・一覧と同じ CATEGORIES を単一出典に使う。
+ * （調査記録: docs/sitemap-fetch-issue.md）
+ */
+function renderHtmlSitemap(pageList) {
+  const canonical = `${SITE}/sitemap/`
+  const link = (href, text) => `<li><a href="${href}">${esc(text)}</a></li>`
+  const mainLinks = [
+    link('/', '判定ツール（トップ）'),
+    link('/guide/', '育休給付金ガイド（記事一覧）'),
+  ].join('\n          ')
+  const catSections = CATEGORIES.map((cat) => {
+    const items = cat.slugs.map((s) => bySlug[s]).filter(Boolean)
+    if (!items.length) return ''
+    const heading = hasTagPage(cat)
+      ? `<a href="${tagUrl(cat.key)}">${cat.emoji} ${esc(cat.label)}</a>`
+      : `${cat.emoji} ${esc(cat.label)}`
+    const lis = items
+      .map((a) => link(`/guide/${a.fm.slug}/`, a.fm.title))
+      .join('\n          ')
+    return `        <h3>${heading}</h3>\n        <ul>\n          ${lis}\n        </ul>`
+  })
+    .filter(Boolean)
+    .join('\n')
+  const pageLinks = [
+    ...pageList.map((p) => link(`/${p.fm.slug}/`, p.fm.title)),
+    link('/privacy', 'プライバシーポリシー'),
+    link('/content-policy', 'コンテンツポリシー'),
+  ].join('\n          ')
+  return page({
+    title: 'サイトマップ | 育休もらえる？',
+    description: '「育休もらえる？」の全ページ一覧（HTMLサイトマップ）。',
+    canonical,
+    body: `      <nav class="breadcrumb"><a href="/">ホーム</a> › サイトマップ</nav>
+      <div class="page">
+        <h1>サイトマップ</h1>
+        <p>「育休もらえる？」の全ページ一覧です。</p>
+        <h2>メイン</h2>
+        <ul>
+          ${mainLinks}
+        </ul>
+        <h2>ガイド記事</h2>
+${catSections}
+        <h2>運営情報</h2>
+        <ul>
+          ${pageLinks}
+        </ul>
+      </div>`,
+  })
+}
+
 // slug → タイトルの索引（関連記事リンク表示用）
 let titleIndex = {}
 function slugTitle(slug) {
@@ -434,6 +489,7 @@ function buildSitemap(articleList, pageSlugs, tagKeys = []) {
     })),
     { loc: `${SITE}/privacy`, pri: '0.3', freq: 'yearly', lastmod: siteLastmod },
     { loc: `${SITE}/content-policy`, pri: '0.3', freq: 'yearly', lastmod: siteLastmod },
+    { loc: `${SITE}/sitemap/`, pri: '0.3', freq: 'monthly', lastmod: siteLastmod },
   ]
   const body = urls
     .map(
@@ -519,6 +575,9 @@ ${sectionsHtml || '        <p>準備中です。</p>'}
       </div>`,
   }),
 )
+
+// HTMLサイトマップ（/sitemap/）。フッターから全ページ到達可能にしてある。
+write('sitemap', renderHtmlSitemap(pages))
 
 buildSitemap(
   articles,
