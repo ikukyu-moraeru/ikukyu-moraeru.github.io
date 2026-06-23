@@ -401,29 +401,44 @@ function write(outRel, html) {
   writeFileSync(join(dir, 'index.html'), html)
 }
 
-function buildSitemap(articleSlugs, pageSlugs, tagKeys = []) {
-  const today = '2026-06-20'
+function buildSitemap(articleList, pageSlugs, tagKeys = []) {
+  // lastmod は記事ごとに updated（無ければ date）を使う。トップ・一覧・タグ・固定ページは
+  // 最新の記事更新日（siteLastmod）を当てる。Search Console に更新が正しく伝わるようにするため。
+  const lastmodOf = (fm) => fm.updated || fm.date
+  const siteLastmod =
+    articleList
+      .map((a) => lastmodOf(a.fm))
+      .filter(Boolean)
+      .sort()
+      .at(-1) || '2026-06-20'
   const urls = [
-    { loc: `${SITE}/`, pri: '1.0', freq: 'monthly' },
-    { loc: `${SITE}/guide/`, pri: '0.8', freq: 'weekly' },
+    { loc: `${SITE}/`, pri: '1.0', freq: 'monthly', lastmod: siteLastmod },
+    { loc: `${SITE}/guide/`, pri: '0.8', freq: 'weekly', lastmod: siteLastmod },
     ...tagKeys.map((k) => ({
       loc: `${SITE}/guide/tag/${k}/`,
       pri: '0.5',
       freq: 'weekly',
+      lastmod: siteLastmod,
     })),
-    ...articleSlugs.map((s) => ({
-      loc: `${SITE}/guide/${s}/`,
+    ...articleList.map((a) => ({
+      loc: `${SITE}/guide/${a.fm.slug}/`,
       pri: '0.7',
       freq: 'monthly',
+      lastmod: lastmodOf(a.fm),
     })),
-    ...pageSlugs.map((s) => ({ loc: `${SITE}/${s}/`, pri: '0.3', freq: 'yearly' })),
-    { loc: `${SITE}/privacy`, pri: '0.3', freq: 'yearly' },
-    { loc: `${SITE}/content-policy`, pri: '0.3', freq: 'yearly' },
+    ...pageSlugs.map((s) => ({
+      loc: `${SITE}/${s}/`,
+      pri: '0.3',
+      freq: 'yearly',
+      lastmod: siteLastmod,
+    })),
+    { loc: `${SITE}/privacy`, pri: '0.3', freq: 'yearly', lastmod: siteLastmod },
+    { loc: `${SITE}/content-policy`, pri: '0.3', freq: 'yearly', lastmod: siteLastmod },
   ]
   const body = urls
     .map(
       (u) =>
-        `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.pri}</priority>\n  </url>`,
+        `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${u.lastmod}</lastmod>\n    <changefreq>${u.freq}</changefreq>\n    <priority>${u.pri}</priority>\n  </url>`,
     )
     .join('\n')
   writeFileSync(
@@ -506,7 +521,7 @@ ${sectionsHtml || '        <p>準備中です。</p>'}
 )
 
 buildSitemap(
-  articles.map((a) => a.fm.slug),
+  articles,
   pages.map((p) => p.fm.slug),
   tagKeys,
 )
