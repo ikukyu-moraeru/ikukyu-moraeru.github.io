@@ -187,6 +187,13 @@ const CATEGORIES = [
     slugs: ['ikukyu-okane-kingaku'],
   },
   {
+    key: 'tsukaikata',
+    label: '制度の使い方',
+    emoji: '👨‍🍼',
+    desc: '産後パパ育休・延長・分割取得。制度をどう組み合わせて取るか。',
+    slugs: ['sango-papa-ikukyu'],
+  },
+  {
     key: 'story',
     label: '開発ストーリー',
     emoji: '💡',
