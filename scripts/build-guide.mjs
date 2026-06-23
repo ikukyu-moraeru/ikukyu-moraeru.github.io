@@ -201,6 +201,13 @@ const CATEGORIES = [
     slugs: ['ikukyu-shahoken-menjo'],
   },
   {
+    key: 'shinsei',
+    label: '申請手続き',
+    emoji: '📋',
+    desc: '申請は誰が・いつ・どの書類で。受給資格の確認から2か月ごとの申請まで。',
+    slugs: ['ikukyu-shinsei'],
+  },
+  {
     key: 'story',
     label: '開発ストーリー',
     emoji: '💡',
