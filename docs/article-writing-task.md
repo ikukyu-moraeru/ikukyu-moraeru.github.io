@@ -73,7 +73,7 @@ draft: false
 2. AIが該当 slug の `content/guide/<slug>.md` を作成（フォーマット遵守）。
 3. 人間が数値・要件をファクトチェック（YMYLのため必須）。
 4. `pnpm build` で `/guide/<slug>/` に静的HTML化され、sitemapにも反映される（配信の仕組みは `scripts/build-guide.mjs`）。
-5. commit / push すると GitHub Actions が自動デプロイし、`https://ikukyu-moraeru.github.io/guide/<slug>/` に公開される。
+5. commit / push すると GitHub Actions が自動デプロイし、`https://ikukyu.nkjzm.jp/guide/<slug>/` に公開される。
 
 ## 6. プレビュー・確認方法
 

@@ -8,7 +8,7 @@ import './SocialShare.css'
  * 個人入力データは載せず、サイト URL（GitHub Pages のトップ）を貼る。
  */
 
-const SITE_URL = 'https://ikukyu-moraeru.github.io/'
+const SITE_URL = 'https://ikukyu.nkjzm.jp/'
 
 export interface SocialShareProps {
   /** 投稿テキスト本文（ハッシュタグ含めても良い）。URL は別パラメータで付与される。 */

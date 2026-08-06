@@ -29,7 +29,7 @@ import MarkdownIt from 'markdown-it'
 const here = dirname(fileURLToPath(import.meta.url))
 const root = join(here, '..')
 const DIST = join(root, 'dist')
-const SITE = 'https://ikukyu-moraeru.github.io'
+const SITE = 'https://ikukyu.nkjzm.jp'
 const OGP = `${SITE}/ogp.png`
 const AUTHOR = 'なかじ'
 const AUTHOR_URL = 'https://nkjzm.jp/'

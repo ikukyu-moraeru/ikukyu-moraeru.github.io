@@ -5,14 +5,14 @@
  *   pnpm exec node scripts/screenshot.mjs <url> <out.png> [step2|step3]
  *
  * 例:
- *   pnpm exec node scripts/screenshot.mjs https://nkjzm.github.io/MaternityLeaveCalculator/ /tmp/landing.png
+ *   pnpm exec node scripts/screenshot.mjs https://ikukyu.nkjzm.jp/ /tmp/landing.png
  *   pnpm exec node scripts/screenshot.mjs http://localhost:5173/MaternityLeaveCalculator/ /tmp/step2.png step2
  *
  * 初回は `pnpm exec playwright install chromium` が必要。
  */
 import { chromium } from 'playwright'
 
-const url = process.argv[2] ?? 'https://nkjzm.github.io/MaternityLeaveCalculator/'
+const url = process.argv[2] ?? 'https://ikukyu.nkjzm.jp/'
 const out = process.argv[3] ?? '.claude/tmp/shot.png'
 const goto = process.argv[4] // step2 | step3
 

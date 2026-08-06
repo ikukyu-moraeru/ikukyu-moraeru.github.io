@@ -11,7 +11,7 @@ interface Props {
   onClose: () => void
 }
 
-const APP_URL = 'https://ikukyu-moraeru.github.io/'
+const APP_URL = 'https://ikukyu.nkjzm.jp/'
 
 export function ShareModal({ open, onClose }: Props) {
   const { state } = useAppState()
