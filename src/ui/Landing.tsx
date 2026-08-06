@@ -1,6 +1,7 @@
 import { useAppState } from '../state/AppState'
 import { SAMPLE_HEATMAP } from '../preview/sample'
 import { SocialShare } from './components/SocialShare'
+import { AmazonProductLinks } from './components/AmazonProductLinks'
 import { formatMonths } from './shared/formatUtils'
 import './Landing.css'
 
@@ -328,6 +329,8 @@ export function Landing() {
           text={`育休給付金、転職や時短があっても自分はもらえる？を 1 日ごとに判定できるツール。ブラウザだけで完結します。 #育休もらえる`}
         />
       </section>
+
+      <AmazonProductLinks />
 
       <footer className="ht-foot">
         <p>

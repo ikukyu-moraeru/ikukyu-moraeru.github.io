@@ -15,6 +15,7 @@ import { summarizeScan } from '../../domain/summary'
 import type { EligibilityResult, UserInput } from '../../domain/types'
 import { IssueBanner } from '../components/IssueBanner'
 import { DateInput } from '../components/DateInput'
+import { AmazonProductLinks } from '../components/AmazonProductLinks'
 import { computeMaternityTimeline } from '../../domain/maternityTimeline'
 import { isInputableDay } from '../shared/dayClassification'
 import { jpDate, formatMonths, deriveExpectedBirthDate } from '../shared/formatUtils'
@@ -509,6 +510,8 @@ export function Step5Result() {
         {' '}
         <a className="r5-disclaimer__link" href="#/privacy">プライバシーポリシー</a>
       </p>
+
+      <AmazonProductLinks />
     </div>
   )
 }

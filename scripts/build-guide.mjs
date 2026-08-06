@@ -9,7 +9,8 @@
  * Amazonアソシエイト運用:
  *  - 本文は静的HTML（JS不要で全文表示）
  *  - 記事ごとに固有の title/description/canonical/OGP/JSON-LD(Article)
- *  - 商品リンクは記事末のみ。一覧・固定ページ・ツールの入力画面には載せない
+ *  - 商品リンクは記事末に掲載。React側ではトップと判定結果の末尾にも掲載する
+ *  - ツールの入力途中には載せない
  *
  * `pnpm build` から `tsc -b && vite build && node scripts/build-guide.mjs` の順で実行する
  * （vite build 後の dist/ に書き込む）。
@@ -34,34 +35,12 @@ const OGP = `${SITE}/ogp.png`
 const AUTHOR = 'なかじ'
 const AUTHOR_URL = 'https://nkjzm.jp/'
 
-const AMAZON_ASSOCIATE_TAG = process.env.AMAZON_ASSOCIATE_TAG || 'listingfit-22'
-
-const AMAZON_PRODUCTS = {
-  'working-mother-money': {
-    id: 'working-mother-money',
-    asin: '4528025116',
-    name: '働くママのための妊娠・出産・育児のお金と制度、ぜんぶ教えてください！',
-    reason: '妊娠・出産・育児でもらえるお金と制度を、まとめて確認したい方へ。',
-    imageUrl: 'https://m.media-amazon.com/images/I/51T90zgoCzL._SY445_SX342_ML2_.jpg',
-    imageRetrievedAt: '2026-08-06',
-  },
-  'sekisei-document-file': {
-    id: 'sekisei-document-file',
-    asin: 'B002DC6T8K',
-    name: 'セキセイ ドキュメントファイル ホワイト SSS-1212',
-    reason: '給与明細や申請書、通知書をひとまとめに保管したい方へ。',
-    imageUrl: 'https://m.media-amazon.com/images/I/51QWb-OJJdS._AC_SX569_.jpg',
-    imageRetrievedAt: '2026-08-06',
-  },
-  'kingjim-document-file': {
-    id: 'kingjim-document-file',
-    asin: 'B004NR8FS0',
-    name: 'キングジム ドキュメントファイル Toffy 13ポケット A4',
-    reason: '申請書類を提出時期や種類ごとに分けて整理したい方へ。',
-    imageUrl: 'https://m.media-amazon.com/images/I/51xXOIzz7lL._AC_SX679_.jpg',
-    imageRetrievedAt: '2026-08-06',
-  },
-}
+const amazonCatalog = JSON.parse(
+  readFileSync(join(root, 'src/data/amazon-products.json'), 'utf8'),
+)
+const AMAZON_ASSOCIATE_TAG =
+  process.env.AMAZON_ASSOCIATE_TAG || amazonCatalog.associateTag
+const AMAZON_PRODUCTS = amazonCatalog.products
 
 const md = new MarkdownIt({ html: true, linkify: true, typographer: false })
 
