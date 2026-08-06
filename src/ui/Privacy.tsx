@@ -11,7 +11,7 @@ export function Privacy() {
           ← トップに戻る
         </a>
         <h1 className="pv-title">プライバシーポリシー</h1>
-        <p className="pv-meta">最終更新: 2026年4月27日</p>
+        <p className="pv-meta">最終更新: 2026-08-06</p>
       </header>
 
       <main className="pv-main">
@@ -36,37 +36,29 @@ export function Privacy() {
         </section>
 
         <section>
-          <h2>3. 広告について（Google AdSense）</h2>
+          <h2>3. Amazonアソシエイトについて</h2>
           <p>
-            本サービスでは、Google の広告配信サービス「Google AdSense」を利用しています。Google は Cookie を使用してユーザーに関連性の高い広告を表示します。
+            本サービスは Amazonアソシエイト・プログラムを利用し、Amazon.co.jpの商品へのアフィリエイトリンクを掲載しています。リンクを経由した適格販売により、運営者が紹介料を得ることがあります。
           </p>
           <ul>
             <li>
-              Google の Cookie の利用により、ユーザーが本サービスや他のサイトを訪問した際の情報を基に広告が表示されます。
-            </li>
-            <li>
-              広告のパーソナライズを無効化したい場合は{' '}
-              <a
-                href="https://www.google.com/settings/ads"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Google 広告設定
-              </a>{' '}
-              からオプトアウトできます。
+              商品リンクをクリックした後は、Amazon側がCookieその他の技術を利用してアクセス情報等を取り扱うことがあります。
             </li>
             <li>
               詳細は{' '}
               <a
-                href="https://policies.google.com/privacy"
+                href="https://www.amazon.co.jp/gp/help/customer/display.html?nodeId=201909010"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Google プライバシーポリシー
+                Amazon.co.jp プライバシー規約
               </a>{' '}
               をご覧ください。
             </li>
           </ul>
+          <p>
+            Amazonのアソシエイトとして、育休もらえる？は適格販売により収入を得ています。
+          </p>
         </section>
 
         <section>
@@ -79,7 +71,7 @@ export function Privacy() {
         <section>
           <h2>5. Cookie について</h2>
           <p>
-            本サービス自体は Cookie を直接利用しません。ただし、Google AdSense が広告配信のために Cookie を利用することがあります。
+            本サービス自体は Cookie を直接利用しません。ただし、Amazonの商品リンクをクリックした後は、Amazon側がCookie等を利用することがあります。
           </p>
         </section>
 

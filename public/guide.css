@@ -237,16 +237,86 @@ blockquote {
   }
 }
 
-/* 広告枠 */
-.ad { margin: 2.4rem 0; min-height: 90px; text-align: center; }
-.ad::before {
-  content: "スポンサーリンク";
-  display: block;
+/* 記事末の商品リンク */
+.amazon-products {
+  margin: 2.4rem 0 0;
+  padding: 1.1rem;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+.amazon-products__label {
+  margin: 0 0 0.25rem;
   font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
   color: var(--ink-mute);
-  margin-bottom: 0.3rem;
+}
+.amazon-products > h2 {
+  margin: 0 0 0.9rem;
+  padding: 0;
+  border: 0;
+  font-size: 1.1rem;
+}
+.amazon-products__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+.amazon-product {
+  display: grid;
+  grid-template-rows: 150px 1fr;
+  overflow: hidden;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+.amazon-product__image-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background: #fff;
+}
+.amazon-product__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.amazon-product__body {
+  display: flex;
+  flex-direction: column;
+  padding: 0.8rem;
+}
+.amazon-product__name {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+.amazon-product__reason {
+  margin: 0 0 0.7rem;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+.amazon-product__link {
+  margin-top: auto;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.amazon-products__disclosure {
+  margin: 0.9rem 0 0;
+  color: var(--ink-mute);
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+@media (max-width: 600px) {
+  .amazon-products__grid { grid-template-columns: 1fr; }
+  .amazon-product {
+    grid-template-columns: 110px 1fr;
+    grid-template-rows: auto;
+  }
 }
 
 /* 著者・免責 */

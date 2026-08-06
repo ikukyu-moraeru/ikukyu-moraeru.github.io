@@ -11,7 +11,7 @@ export function ContentPolicy() {
           ← トップに戻る
         </a>
         <h1 className="pv-title">コンテンツポリシー</h1>
-        <p className="pv-meta">最終更新: 2026年4月27日</p>
+        <p className="pv-meta">最終更新: 2026-08-06</p>
       </header>
 
       <main className="pv-main">
@@ -46,20 +46,20 @@ export function ContentPolicy() {
         </section>
 
         <section>
-          <h2>4. 広告について（Google AdSense）</h2>
+          <h2>4. 広告・商品リンクについて</h2>
           <p>
-            本サービスは Google AdSense による広告を掲載しています。広告はコンテンツの可読性を妨げない位置に配置し、コンテンツと混同されないよう視覚的に区別します。
+            本サービスは Amazonアソシエイト・プログラムを利用し、記事内容に関連する商品へのアフィリエイトリンクを掲載しています。商品リンクは「広告・Amazonアソシエイトリンク」と明示し、記事本文と混同されないよう視覚的に区別します。
           </p>
           <p>
-            Google によるパーソナライズ広告を希望されない場合は{' '}
+            Amazonのアソシエイトとして、育休もらえる？は適格販売により収入を得ています。Amazon側のデータの取り扱いについては{' '}
             <a
-              href="https://adssettings.google.com/"
+              href="https://www.amazon.co.jp/gp/help/customer/display.html?nodeId=201909010"
               target="_blank"
               rel="noopener noreferrer"
             >
-              Google 広告設定
+              Amazon.co.jp プライバシー規約
             </a>{' '}
-            からオプトアウトできます。
+            をご覧ください。
           </p>
         </section>
 

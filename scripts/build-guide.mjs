@@ -1,15 +1,15 @@
 /**
  * ガイド記事・固定ページの静的HTML生成。
  *
- * - content/guide/*.md  → dist/guide/<slug>/index.html（記事。本文内に広告枠）
+ * - content/guide/*.md  → dist/guide/<slug>/index.html（記事。記事末にAmazon商品リンク）
  * - content/pages/*.md  → dist/<slug>/index.html（運営者情報・お問い合わせ等。広告なし）
  * - dist/guide/index.html（ガイド一覧。広告なし＝ナビ画面のため）
  * - dist/sitemap.xml を全URLで再生成
  *
- * AdSense 適合:
+ * Amazonアソシエイト運用:
  *  - 本文は静的HTML（JS不要で全文表示）
  *  - 記事ごとに固有の title/description/canonical/OGP/JSON-LD(Article)
- *  - 広告は「記事本文」のみ。一覧・固定ページ・ツールの入力画面には載せない
+ *  - 商品リンクは記事末のみ。一覧・固定ページ・ツールの入力画面には載せない
  *
  * `pnpm build` から `tsc -b && vite build && node scripts/build-guide.mjs` の順で実行する
  * （vite build 後の dist/ に書き込む）。
@@ -34,8 +34,34 @@ const OGP = `${SITE}/ogp.png`
 const AUTHOR = 'なかじ'
 const AUTHOR_URL = 'https://nkjzm.jp/'
 
-const CLIENT = process.env.VITE_ADSENSE_CLIENT || ''
-const GUIDE_SLOT = process.env.VITE_ADSENSE_GUIDE_SLOT || ''
+const AMAZON_ASSOCIATE_TAG = process.env.AMAZON_ASSOCIATE_TAG || 'listingfit-22'
+
+const AMAZON_PRODUCTS = {
+  'working-mother-money': {
+    id: 'working-mother-money',
+    asin: '4528025116',
+    name: '働くママのための妊娠・出産・育児のお金と制度、ぜんぶ教えてください！',
+    reason: '妊娠・出産・育児でもらえるお金と制度を、まとめて確認したい方へ。',
+    imageUrl: 'https://m.media-amazon.com/images/I/51T90zgoCzL._SY445_SX342_ML2_.jpg',
+    imageRetrievedAt: '2026-08-06',
+  },
+  'sekisei-document-file': {
+    id: 'sekisei-document-file',
+    asin: 'B002DC6T8K',
+    name: 'セキセイ ドキュメントファイル ホワイト SSS-1212',
+    reason: '給与明細や申請書、通知書をひとまとめに保管したい方へ。',
+    imageUrl: 'https://m.media-amazon.com/images/I/51QWb-OJJdS._AC_SX569_.jpg',
+    imageRetrievedAt: '2026-08-06',
+  },
+  'kingjim-document-file': {
+    id: 'kingjim-document-file',
+    asin: 'B004NR8FS0',
+    name: 'キングジム ドキュメントファイル Toffy 13ポケット A4',
+    reason: '申請書類を提出時期や種類ごとに分けて整理したい方へ。',
+    imageUrl: 'https://m.media-amazon.com/images/I/51xXOIzz7lL._AC_SX679_.jpg',
+    imageRetrievedAt: '2026-08-06',
+  },
+}
 
 const md = new MarkdownIt({ html: true, linkify: true, typographer: false })
 
@@ -97,18 +123,6 @@ function readMarkdownDir(dir) {
       return { fm: data, body: content, file: f }
     })
     .filter((a) => !a.fm.draft)
-}
-
-/** AdSense ヘッダーローダ（クライアントIDがある時のみ） */
-function adsenseHead() {
-  if (!CLIENT) return ''
-  return `\n    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${CLIENT}" crossorigin="anonymous"></script>`
-}
-
-/** 本文内広告枠（クライアントID・スロットIDが揃っている時のみ描画） */
-function adUnit() {
-  if (!CLIENT || !GUIDE_SLOT) return ''
-  return `<div class="ad"><ins class="adsbygoogle" style="display:block" data-ad-client="${CLIENT}" data-ad-slot="${GUIDE_SLOT}" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({});</script></div>`
 }
 
 const FONTS =
@@ -246,7 +260,7 @@ function page({ title, description, canonical, head = '', body }) {
     <meta property="og:locale" content="ja_JP" />
     <meta name="twitter:card" content="summary_large_image" />
     ${FONTS}
-    <link rel="stylesheet" href="/guide.css" />${head}${adsenseHead()}
+    <link rel="stylesheet" href="/guide.css" />${head}
   </head>
   <body>
     ${GNAV}
@@ -276,23 +290,55 @@ function articleJsonLd({ title, description, canonical, date, updated, keywords 
   return `\n    <script type="application/ld+json">${JSON.stringify(data)}</script>`
 }
 
-/**
- * 本文HTMLに広告枠を挿入（導入直後＝最初のH2前のみ）。
- * 本文末は「ツール紹介文 → CTAボタン」の導線の間に広告が割り込んでしまうため
- * ここでは入れず、renderArticle 側で CTA の後ろに置く。
- */
-function injectAds(html) {
-  const ad = adUnit()
-  if (!ad) return html
-  const i = html.indexOf('<h2')
-  return i > 0 ? html.slice(0, i) + ad + html.slice(i) : html
+function amazonUrl(asin) {
+  return `https://www.amazon.co.jp/dp/${asin}?tag=${encodeURIComponent(AMAZON_ASSOCIATE_TAG)}`
+}
+
+function productsForArticle(slug, categoryKey) {
+  if (slug === 'ikukyu-shinsei') {
+    return [AMAZON_PRODUCTS['sekisei-document-file'], AMAZON_PRODUCTS['working-mother-money']]
+  }
+  if (slug === 'ikukyu-encho') {
+    return [AMAZON_PRODUCTS['sekisei-document-file'], AMAZON_PRODUCTS['kingjim-document-file']]
+  }
+  if (categoryKey === 'shinsei' || categoryKey === 'kinmu') {
+    return [AMAZON_PRODUCTS['sekisei-document-file'], AMAZON_PRODUCTS['kingjim-document-file']]
+  }
+  return [AMAZON_PRODUCTS['working-mother-money']]
+}
+
+function amazonProductsBlock(slug, categoryKey) {
+  const cards = productsForArticle(slug, categoryKey)
+    .slice(0, 2)
+    .map((product) => {
+      const url = amazonUrl(product.asin)
+      return `<article class="amazon-product" data-product-id="${esc(product.id)}" data-image-retrieved-at="${esc(product.imageRetrievedAt)}">
+          <a class="amazon-product__image-link" href="${esc(url)}" target="_blank" rel="nofollow sponsored noopener noreferrer">
+            <img class="amazon-product__image" src="${esc(product.imageUrl)}" alt="${esc(product.name)}" loading="lazy" onerror="this.closest('.amazon-product').hidden=true" />
+          </a>
+          <div class="amazon-product__body">
+            <h3 class="amazon-product__name">${esc(product.name)}</h3>
+            <p class="amazon-product__reason">${esc(product.reason)}</p>
+            <a class="amazon-product__link" href="${esc(url)}" target="_blank" rel="nofollow sponsored noopener noreferrer">Amazonで見る →</a>
+          </div>
+        </article>`
+    })
+    .join('\n        ')
+  return `<section class="amazon-products" aria-labelledby="amazon-products-title">
+        <p class="amazon-products__label">広告・Amazonアソシエイトリンク</p>
+        <h2 id="amazon-products-title">手続きや家計管理に役立つもの</h2>
+        <div class="amazon-products__grid">
+        ${cards}
+        </div>
+        <p class="amazon-products__disclosure">Amazonのアソシエイトとして、育休もらえる？は適格販売により収入を得ています。</p>
+      </section>`
 }
 
 function renderArticle(a) {
   const { fm, body } = a
   const slug = fm.slug
   const canonical = `${SITE}/guide/${slug}/`
-  const bodyHtml = injectAds(md.render(body))
+  const bodyHtml = md.render(body)
   const cat = slugToCat[slug]
   const catBadge = cat
     ? hasTagPage(cat)
@@ -319,7 +365,7 @@ function renderArticle(a) {
           </span>
           <span class="tool-cta__btn">判定する →</span>
         </a>
-        ${adUnit()}
+        ${amazonProductsBlock(slug, cat?.key)}
         ${relatedBlock}
         <div class="author"><strong>運営者</strong>：${AUTHOR}（<a href="${AUTHOR_URL}">nkjzm.jp</a>）。このサイトは、妻の「週3＋副業」という働き方で育休給付金をもらえるか分からず悩んだ経験から作りました（<a href="/guide/naze-tsukutta/">作った理由</a>）。本サイトの解説は雇用保険法および厚生労働省の資料に基づいて作成しています。詳しくは<a href="/about/">運営者情報</a>をご覧ください。</div>
         <p class="disclaimer">※ 本記事は参考情報です。個別の受給可否の最終判定は、管轄のハローワーク（公共職業安定所）で行われます。</p>
@@ -586,5 +632,5 @@ buildSitemap(
 )
 
 console.log(
-  `[build-guide] 記事 ${articles.length} 本・固定ページ ${pages.length} 件・タグ一覧 ${tagKeys.length} 件・一覧・sitemap を生成しました${CLIENT && GUIDE_SLOT ? '（広告枠あり）' : '（広告枠なし: VITE_ADSENSE_CLIENT/VITE_ADSENSE_GUIDE_SLOT 未設定）'}`,
+  `[build-guide] 記事 ${articles.length} 本・固定ページ ${pages.length} 件・タグ一覧 ${tagKeys.length} 件・一覧・sitemap を生成しました（Amazon商品リンクあり）`,
 )
