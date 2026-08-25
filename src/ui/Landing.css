@@ -932,3 +932,134 @@
 .ht-foot__link:hover {
   opacity: 1;
 }
+
+/* 整理後のトップ構成 */
+.ht-main {
+  gap: clamp(1.5rem, 4vw, 3rem);
+}
+.ht-hero {
+  min-width: 0;
+}
+.ht-cta {
+  margin-bottom: 0;
+}
+.ht-card h2 {
+  margin: 0;
+  font-family: var(--font-h);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--plum);
+}
+.ht-card__note {
+  text-align: right;
+  font-size: 0.68rem !important;
+}
+.ht-start {
+  display: grid;
+  gap: 1rem;
+}
+.ht-start .ht-prep,
+.ht-start .ht-flow {
+  margin: 0;
+  padding: 1.1rem 1.2rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
+}
+.ht-start__title {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-h);
+  font-size: 1rem;
+  color: var(--plum);
+}
+.ht-start__note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.65;
+  color: var(--ink-mute);
+}
+.ht-foot {
+  padding: 0 1rem 1rem;
+}
+
+@media (max-width: 519px) {
+  .ht-page {
+    padding-bottom: 2rem;
+  }
+  .ht-nav {
+    padding-bottom: 0.7rem;
+  }
+  .ht-main {
+    padding-top: 0.7rem;
+  }
+  .ht-pill {
+    font-size: 0.7rem;
+    line-height: 1.5;
+  }
+  .ht-h1 {
+    margin: 1rem 0;
+    font-size: clamp(1.8rem, 9vw, 2.4rem);
+  }
+  .ht-h1__line {
+    white-space: normal;
+  }
+  .ht-lede {
+    margin-bottom: 1.4rem;
+    font-size: 0.95rem;
+    line-height: 1.75;
+  }
+  .ht-btn {
+    padding-inline: 1rem;
+    font-size: 1rem;
+  }
+  .ht-card {
+    padding: 1rem;
+    border-radius: var(--r-lg);
+  }
+  .ht-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .ht-bubble__date {
+    font-size: 0.66rem;
+  }
+  .ht-bubble__num {
+    font-size: 0.88rem;
+  }
+  .ht-leg {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.7rem;
+  }
+  .ht-guide {
+    padding-top: 2.4rem;
+  }
+  .ht-story {
+    margin-inline: 1rem;
+  }
+}
+
+@media (min-width: 720px) {
+  .ht-guide__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 920px) {
+  .ht-main {
+    grid-template-columns: 6fr 5fr;
+  }
+  .ht-hero {
+    align-self: center;
+  }
+  .ht-cta {
+    justify-content: flex-start;
+  }
+  .ht-start {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ht-start__note {
+    grid-column: 1 / -1;
+  }
+}

@@ -17,7 +17,6 @@ export function AmazonProductLinks() {
       <h2 className="apl__title" id="apl-title">
         記録を整理したい方へ
       </h2>
-      <p>購入は受給条件や申請に必要ではありません。給与明細や勤務記録を手元で整理したい場合の参考として紹介しています。</p>
       <div className="apl__grid">
         {products.map((product) => {
           const url = `https://www.amazon.co.jp/dp/${product.asin}?tag=${encodeURIComponent(amazonCatalog.associateTag)}`
