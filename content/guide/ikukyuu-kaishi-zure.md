@@ -6,6 +6,7 @@ emoji: "🧭"
 date: "2026-06-08"
 updated: "2026-06-20"
 tags: ["受給要件", "育休開始日"]
+redirectTo: "yoteibi-bure"
 related: ["jukyu-youken", "yoteibi-bure", "part-time-shift-jitan"]
 draft: false
 ---

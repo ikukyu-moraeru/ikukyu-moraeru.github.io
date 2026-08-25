@@ -92,7 +92,7 @@ const esc = (s = '') =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
 
-function readMarkdownDir(dir) {
+function readMarkdownDir(dir, includeDrafts = false) {
   const abs = join(root, dir)
   if (!existsSync(abs)) return []
   return readdirSync(abs)
@@ -101,7 +101,7 @@ function readMarkdownDir(dir) {
       const { data, content } = matter(readFileSync(join(abs, f), 'utf8'))
       return { fm: data, body: content, file: f }
     })
-    .filter((a) => !a.fm.draft)
+    .filter((a) => includeDrafts || !a.fm.draft)
 }
 
 const FONTS =
@@ -127,94 +127,40 @@ const GFOOT = `<footer class="gfoot"><div class="gfoot__inner">
       <a href="/sitemap/">サイトマップ</a>
     </div></footer>`
 
-/**
- * 記事カテゴリ（第一階層タグ。1記事1カテゴリ）。
- * バッジ・タグ一覧ページ・ガイド一覧・sitemap・構造化データの単一の出典。
- * 新記事はここに slug を1行足す（金額・申請などの新カテゴリはこの配列に追加）。
- */
+/** 記事の frontmatter `category` が分類の正本。ここには表示情報だけを置く。 */
 const CATEGORIES = [
   {
-    key: 'kiso',
-    label: '受給要件の基礎',
+    key: 'counting',
+    label: '受給条件と数え方',
     emoji: '📘',
-    desc: '誰がもらえるか、「12か月」の数え方、もらえないときの備え。',
-    slugs: ['jukyu-youken', 'moraenai-baai', 'hasuu-tsuki-15nichi'],
+    desc: 'まず全体像をつかみ、月数が不足したときに見直す記録と相談先を確認します。',
   },
   {
-    key: 'kinmu',
-    label: '勤務形態と日数',
-    emoji: '🕒',
-    desc: 'パート・週3・時短・契約社員。賃金支払基礎日数11日と80時間ルール。',
-    slugs: ['part-time-shift-jitan', '80jikan-rule', 'chingin-shiharai-kiso-nissu'],
-  },
-  {
-    key: 'kyuugyou',
-    label: '妊娠中の休みと緩和',
-    emoji: '🌸',
-    desc: 'つわり・産前産後休業と、2年→最長4年の緩和のしくみ。',
-    slugs: [
-      'tsuwari-kyuushoku-otoshiana',
-      'kanwa-saichou-4nen',
-      'sankyuu-ikukyuu-kanwa',
-      'sanzen-kyuugyou-mijikaku',
-    ],
-  },
-  {
-    key: 'tenshoku',
-    label: '転職と期間の通算',
+    key: 'work',
+    label: '転職・働き方',
     emoji: '💼',
-    desc: '前職の雇用保険を通算する条件と、会社ごとの完全月の数え方。',
-    slugs: ['tenshoku-tsuusan', 'tenshoku-kanzengetsu-kugiri'],
+    desc: '前職通算、パート・シフト勤務、11日・80時間の数え方を確認します。',
   },
   {
-    key: 'kaishi',
-    label: '出産日と育休開始日',
+    key: 'leave',
+    label: '妊娠中の休み・産休',
+    emoji: '🌸',
+    desc: '有給・無給の違いと、連続30日以上の休業による判定期間の緩和を確認します。',
+  },
+  {
+    key: 'dates',
+    label: '出産日・育休開始日のずれ',
     emoji: '📅',
-    desc: '出産日や育休開始日のずれで、判定の2年窓が動くしくみ。',
-    slugs: ['yoteibi-bure', 'ikukyuu-kaishi-zure', 'tatai'],
-  },
-  {
-    key: 'kingaku',
-    label: '金額・計算',
-    emoji: '💰',
-    desc: 'いくらもらえる？計算式・上限額と、社会保険料免除で手取りが増えるしくみ。',
-    slugs: ['ikukyu-okane-kingaku', 'ikukyu-jitan-kyufu'],
-  },
-  {
-    key: 'tsukaikata',
-    label: '制度の使い方',
-    emoji: '👨‍🍼',
-    desc: '産後パパ育休・延長・分割取得。制度をどう組み合わせて取るか。',
-    slugs: ['sango-papa-ikukyu', 'ikukyu-encho'],
-  },
-  {
-    key: 'okane-naka',
-    label: '育休中のお金',
-    emoji: '🏦',
-    desc: '社会保険料の免除・税金・住民税。育休中の家計に効くお金の話。',
-    slugs: ['ikukyu-shahoken-menjo', 'ikukyu-zeikin'],
-  },
-  {
-    key: 'shinsei',
-    label: '申請手続き',
-    emoji: '📋',
-    desc: '申請は誰が・いつ・どの書類で。受給資格の確認から2か月ごとの申請まで。',
-    slugs: ['ikukyu-shinsei', 'ikukyu-furikomi'],
-  },
-  {
-    key: 'story',
-    label: '開発ストーリー',
-    emoji: '💡',
-    desc: 'この判定ツールを作った理由。',
-    slugs: ['naze-tsukutta'],
+    desc: '予定日と実際の出産日の差で、判定対象の期間がどう動くかを確認します。',
   },
 ]
-const TAG_MIN = 2 // この本数以上のカテゴリだけタグ一覧ページを生成（薄いページを作らない）
 const FEATURED = 'jukyu-youken' // 一覧で大型表示するピラー記事
 
-const slugToCat = {}
-for (const c of CATEGORIES) for (const s of c.slugs) slugToCat[s] = c
-const hasTagPage = (cat) => cat.slugs.length >= TAG_MIN
+const categoryByKey = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]))
+function articlesForCategory(cat) {
+  return articles.filter((a) => a.fm.category === cat.key)
+}
+const hasTagPage = (cat) => articlesForCategory(cat).length >= 2
 const tagUrl = (key) => `/guide/tag/${key}/`
 
 function page({ title, description, canonical, head = '', body }) {
@@ -280,7 +226,7 @@ function productsForArticle(slug, categoryKey) {
   if (slug === 'ikukyu-encho') {
     return [AMAZON_PRODUCTS['sekisei-document-file'], AMAZON_PRODUCTS['kingjim-document-file']]
   }
-  if (categoryKey === 'shinsei' || categoryKey === 'kinmu') {
+  if (categoryKey === 'work') {
     return [AMAZON_PRODUCTS['sekisei-document-file'], AMAZON_PRODUCTS['kingjim-document-file']]
   }
   return [AMAZON_PRODUCTS['working-mother-money']]
@@ -305,7 +251,8 @@ function amazonProductsBlock(slug, categoryKey) {
     .join('\n        ')
   return `<section class="amazon-products" aria-labelledby="amazon-products-title">
         <p class="amazon-products__label">広告・Amazonアソシエイトリンク</p>
-        <h2 id="amazon-products-title">手続きや家計管理に役立つもの</h2>
+        <h2 id="amazon-products-title">記録を整理したい方へ</h2>
+        <p>購入は受給条件や申請に必要ではありません。給与明細や勤務記録を手元で整理したい場合の参考として紹介しています。</p>
         <div class="amazon-products__grid">
         ${cards}
         </div>
@@ -313,18 +260,33 @@ function amazonProductsBlock(slug, categoryKey) {
       </section>`
 }
 
+function qualityNote(fm) {
+  if (fm.slug === 'naze-tsukutta') {
+    return `<aside class="quality-note" aria-label="このページについて">
+          <strong>このページについて</strong><span>運営者が判定ツールを作った背景と、判断支援サイトとして目指す役割を説明しています。制度上の受給条件は各ガイド記事と一次情報をご確認ください。</span>
+        </aside>`
+  }
+  return `<aside class="quality-note" aria-label="この記事の対象と確認範囲">
+          <strong>この記事の対象</strong><span>${esc(fm.description)}</span>
+          <strong>確認できる範囲</strong><span>育児休業給付金の「休業開始前の被保険者期間12か月」を中心に説明します。雇用保険の加入状況、休業中の就業・賃金、個別の証明資料まではこのページだけで確定できません。</span>
+          <strong>一次情報の確認日</strong><span>${esc(fm.reviewed)}。公開前に運営者が一次情報と判定ロジックとの整合を確認する方針です。</span>
+          <strong>個別確認の相談先</strong><span>勤務記録は勤務先の人事・給与担当へ、受給資格の最終確認は管轄のハローワークへご相談ください。</span>
+        </aside>`
+}
+
 function renderArticle(a) {
   const { fm, body } = a
   const slug = fm.slug
   const canonical = `${SITE}/guide/${slug}/`
   const bodyHtml = md.render(body)
-  const cat = slugToCat[slug]
+  const cat = categoryByKey[fm.category]
   const catBadge = cat
     ? hasTagPage(cat)
       ? `<div class="cat-row"><a class="cat-badge" href="${tagUrl(cat.key)}"><span aria-hidden="true">${cat.emoji}</span>${esc(cat.label)}</a></div>`
       : `<div class="cat-row"><span class="cat-badge"><span aria-hidden="true">${cat.emoji}</span>${esc(cat.label)}</span></div>`
     : ''
   const related = (fm.related || [])
+    .filter((s) => bySlug[s])
     .map((s) => `<li><a href="/guide/${s}/">${esc(slugTitle(s))}</a></li>`)
     .join('\n        ')
   const relatedBlock = related
@@ -335,6 +297,7 @@ function renderArticle(a) {
         ${catBadge}
         <h1>${esc(fm.title)}</h1>
         <p class="meta">公開 ${fm.date}${fm.updated ? ` ・ 更新 ${fm.updated}` : ''}</p>
+        ${qualityNote(fm)}
         ${bodyHtml}
         <a class="tool-cta" href="/">
           <span class="tool-cta__body">
@@ -344,8 +307,8 @@ function renderArticle(a) {
           </span>
           <span class="tool-cta__btn">判定する →</span>
         </a>
-        ${amazonProductsBlock(slug, cat?.key)}
         ${relatedBlock}
+        ${amazonProductsBlock(slug, cat?.key)}
         <div class="author"><strong>運営者</strong>：${AUTHOR}（<a href="${AUTHOR_URL}">nkjzm.jp</a>）。このサイトは、妻の「週3＋副業」という働き方で育休給付金をもらえるか分からず悩んだ経験から作りました（<a href="/guide/naze-tsukutta/">作った理由</a>）。本サイトの解説は雇用保険法および厚生労働省の資料に基づいて作成しています。詳しくは<a href="/about/">運営者情報</a>をご覧ください。</div>
         <p class="disclaimer">※ 本記事は参考情報です。個別の受給可否の最終判定は、管轄のハローワーク（公共職業安定所）で行われます。</p>
       </article>`
@@ -385,9 +348,7 @@ function renderPage(p) {
 /** カテゴリのタグ一覧ページ（記事カードを並べる）。CollectionPage 構造化データ付き。 */
 function renderTagPage(cat) {
   const canonical = `${SITE}/guide/tag/${cat.key}/`
-  const cards = cat.slugs
-    .map((s) => bySlug[s])
-    .filter(Boolean)
+  const cards = articlesForCategory(cat)
     .map((a) => guideCard(a, a.fm.slug === FEATURED))
     .join('\n')
   const jsonld = {
@@ -430,7 +391,7 @@ function renderHtmlSitemap(pageList) {
     link('/guide/', '育休給付金ガイド（記事一覧）'),
   ].join('\n          ')
   const catSections = CATEGORIES.map((cat) => {
-    const items = cat.slugs.map((s) => bySlug[s]).filter(Boolean)
+    const items = articlesForCategory(cat)
     if (!items.length) return ''
     const heading = hasTagPage(cat)
       ? `<a href="${tagUrl(cat.key)}">${cat.emoji} ${esc(cat.label)}</a>`
@@ -529,12 +490,63 @@ function buildSitemap(articleList, pageSlugs, tagKeys = []) {
 }
 
 // ---- main ----
-const articles = readMarkdownDir('content/guide').sort((a, b) =>
+const allArticles = readMarkdownDir('content/guide', true)
+const articles = allArticles.filter((a) => !a.fm.draft && !a.fm.redirectTo).sort((a, b) =>
   (a.fm.date < b.fm.date ? 1 : -1),
 )
 const pages = readMarkdownDir('content/pages')
 
+function validateArticleMetadata() {
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/
+  const isValidDate = (value) => {
+    if (typeof value !== 'string' || !datePattern.test(value)) return false
+    const parsed = new Date(`${value}T00:00:00Z`)
+    return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value
+  }
+  const invalidReviews = articles.filter(
+    (a) => a.fm.slug !== 'naze-tsukutta' &&
+      !isValidDate(a.fm.reviewed),
+  )
+  if (invalidReviews.length) {
+    throw new Error(
+      `[build-guide] 公開制度記事の reviewed が欠落または不正です: ${invalidReviews.map((a) => a.fm.slug).join(', ')}`,
+    )
+  }
+
+  const publishedSlugs = new Set(articles.map((a) => a.fm.slug))
+  const redirects = allArticles.filter((a) => a.fm.redirectTo)
+  const redirectMap = new Map(redirects.map((a) => [a.fm.slug, a.fm.redirectTo]))
+
+  for (const a of redirects) {
+    if (a.fm.slug === a.fm.redirectTo) {
+      throw new Error(`[build-guide] リダイレクトが自己参照しています: ${a.fm.slug}`)
+    }
+  }
+
+  for (const start of redirectMap.keys()) {
+    const visited = new Set()
+    let current = start
+    while (redirectMap.has(current)) {
+      if (visited.has(current)) {
+        throw new Error(`[build-guide] リダイレクトが循環しています: ${[...visited, current].join(' -> ')}`)
+      }
+      visited.add(current)
+      current = redirectMap.get(current)
+    }
+  }
+
+  const invalidTargets = redirects.filter((a) => !publishedSlugs.has(a.fm.redirectTo))
+  if (invalidTargets.length) {
+    throw new Error(
+      `[build-guide] リダイレクト先が公開記事ではありません: ${invalidTargets.map((a) => `${a.fm.slug} -> ${a.fm.redirectTo}`).join(', ')}`,
+    )
+  }
+}
+
+validateArticleMetadata()
+
 titleIndex = Object.fromEntries(articles.map((a) => [a.fm.slug, a.fm.title]))
+const bySlug = Object.fromEntries(articles.map((a) => [a.fm.slug, a]))
 
 if (!existsSync(DIST)) {
   console.error('[build-guide] dist/ が無い。先に vite build を実行してください。')
@@ -550,18 +562,16 @@ function guideCard(a, featured = false) {
   return `        <li><a class="guide-card${featured ? ' guide-card--featured' : ''}" href="/guide/${a.fm.slug}/"><span class="guide-card__emoji" aria-hidden="true">${emoji}</span><span class="guide-card__body"><h3>${esc(a.fm.title)}</h3><p>${esc(a.fm.description)}</p></span></a></li>`
 }
 
-const bySlug = Object.fromEntries(articles.map((a) => [a.fm.slug, a]))
-
-// カテゴリ未登録の記事があれば警告（一覧から漏れる）。CATEGORIES に slug を足して解消する。
-const unplaced = articles.filter((a) => !slugToCat[a.fm.slug]).map((a) => a.fm.slug)
+// 未知カテゴリは警告しつつ「その他」に出し、公開ページが一覧から消えないようにする。
+const unplaced = articles.filter((a) => !categoryByKey[a.fm.category])
 if (unplaced.length) {
   console.warn(
-    `[build-guide] カテゴリ未登録の記事: ${unplaced.join(', ')}（CATEGORIES に追加してください）`,
+    `[build-guide] 未知カテゴリの記事: ${unplaced.map((a) => a.fm.slug).join(', ')}`,
   )
 }
 
 const sectionsHtml = CATEGORIES.map((cat) => {
-  const items = cat.slugs.map((s) => bySlug[s]).filter(Boolean)
+  const items = articlesForCategory(cat)
   if (!items.length) return ''
   const cards = items.map((a) => guideCard(a, a.fm.slug === FEATURED)).join('\n')
   const heading = hasTagPage(cat)
@@ -576,11 +586,15 @@ ${cards}
       </section>`
 }).join('\n')
 
-// カテゴリのタグ一覧ページ（記事 TAG_MIN 本以上のカテゴリのみ＝薄いページを作らない）
+const uncategorizedHtml = unplaced.length
+  ? `      <section class="guide-section"><h2>その他</h2><ul class="guide-list">${unplaced.map((a) => guideCard(a)).join('\n')}</ul></section>`
+  : ''
+
+// 2本以上あるカテゴリだけタグ一覧ページを生成し、薄い一覧を作らない。
 const tagKeys = []
 for (const cat of CATEGORIES) {
   if (!hasTagPage(cat)) continue
-  if (!cat.slugs.some((s) => bySlug[s])) continue
+  if (!articlesForCategory(cat).length) continue
   write(`guide/tag/${cat.key}`, renderTagPage(cat))
   tagKeys.push(cat.key)
 }
@@ -597,6 +611,7 @@ write(
         <h1>育休給付金ガイド</h1>
         <p>「自分の場合はもらえる？」が微妙な人向けに、受給要件・延長・転職・勤務形態などをやさしく解説します。</p>
 ${sectionsHtml || '        <p>準備中です。</p>'}
+${uncategorizedHtml}
       </div>`,
   }),
 )
@@ -609,6 +624,11 @@ buildSitemap(
   pages.map((p) => p.fm.slug),
   tagKeys,
 )
+
+for (const a of allArticles.filter((item) => item.fm.redirectTo)) {
+  const target = `/guide/${a.fm.redirectTo}/`
+  write(`guide/${a.fm.slug}`, `<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><link rel="canonical" href="${SITE}${target}"><meta http-equiv="refresh" content="0;url=${target}"><title>記事を移動しました</title></head><body><p><a href="${target}">統合先の記事へ移動します</a></p></body></html>`)
+}
 
 console.log(
   `[build-guide] 記事 ${articles.length} 本・固定ページ ${pages.length} 件・タグ一覧 ${tagKeys.length} 件・一覧・sitemap を生成しました（Amazon商品リンクあり）`,

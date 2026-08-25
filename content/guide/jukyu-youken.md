@@ -4,9 +4,11 @@ description: "育児休業給付金の受給要件を、雇用保険の加入・
 slug: "jukyu-youken"
 emoji: "📘"
 date: "2026-06-08"
-updated: "2026-06-23"
+updated: "2026-08-25"
+reviewed: "2026-08-25"
 tags: ["受給要件", "基礎知識"]
-related: ["part-time-shift-jitan", "kanwa-saichou-4nen", "tsuwari-kyuushoku-otoshiana", "chingin-shiharai-kiso-nissu", "80jikan-rule", "tenshoku-tsuusan"]
+category: "counting"
+related: ["part-time-shift-jitan", "kanwa-saichou-4nen", "tsuwari-kyuushoku-otoshiana", "tenshoku-tsuusan", "moraenai-baai"]
 draft: false
 ---
 
@@ -26,6 +28,8 @@ draft: false
 「12か月」とは、育児休業開始日からさかのぼって1か月ずつ区切った各月（完全月）のうち、**賃金支払基礎日数が11日以上ある月**を1か月と数えて、それが12か月以上ある、という意味です{{厚労省パンフ2025改訂版 p.10|https://www.mhlw.go.jp/content/11600000/001461102.pdf}}。
 
 数えるのは「出勤日数」ではなく「賃金支払基礎日数」です。実際に働いた日に加えて、有給休暇を取った日なども含まれます。
+
+育休開始日から1か月ずつ区切れない、勤務先ごとの加入期間の先頭には「端数月」が生じます。端数が15日以上あり、その中で11日以上または80時間以上の条件を満たすと0.5か月として扱われます{{端数月の取扱い・業務取扱要領59523 p.21|https://www.mhlw.go.jp/content/001684266.pdf}}。勤務先が1つなら端数だけを当てにせず、転職で加入期間が複数に分かれる人は勤務先ごとの端数も含めてハローワークへ確認してください。
 
 さらに、月の賃金支払基礎日数が11日に満たなくても、**賃金の支払いの基礎となった時間数が80時間以上ある月**は1か月と数えられます{{賃金支払基礎日数11日未満でも賃金支払基礎時間数80時間以上の月は完全月とみなす・厚労省パンフ2025改訂版 p.10|https://www.mhlw.go.jp/content/11600000/001461102.pdf}}（適用は2020年8月1日以降の月{{被保険者期間の算定に80時間方式を導入した2020年8月の雇用保険改正・LL020615保01|https://www.mhlw.go.jp/content/11600000/000642296.pdf}}）。出勤日数が少ない月がある人を救う規定です。詳しくは「[パート・週3・時短でも育休手当はもらえる](/guide/part-time-shift-jitan/)」で解説しています。
 

@@ -4,8 +4,9 @@ description: "このツールは、妻が正社員の週3勤務と副業のダ�
 slug: "naze-tsukutta"
 emoji: "💡"
 date: "2026-06-08"
-updated: "2026-06-20"
+updated: "2026-08-25"
 tags: ["開発ストーリー"]
+category: "counting"
 related: ["jukyu-youken", "part-time-shift-jitan", "tenshoku-tsuusan"]
 draft: false
 ---

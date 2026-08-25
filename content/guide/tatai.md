@@ -6,6 +6,7 @@ emoji: "👶👶"
 date: "2026-06-08"
 updated: "2026-06-23"
 tags: ["受給要件", "産休育休"]
+redirectTo: "yoteibi-bure"
 related: ["jukyu-youken", "yoteibi-bure", "kanwa-saichou-4nen"]
 draft: false
 ---

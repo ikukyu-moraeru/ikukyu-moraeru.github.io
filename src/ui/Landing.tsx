@@ -7,9 +7,9 @@ import './Landing.css'
 
 const SERVICE_NAME = '育休もらえる？'
 
-// トップに出す注目記事。
-// 選定基準: ヒーローで名指しする読者層（転職・休職/つわり・シフト）の入口記事を1本ずつ＋全体像のピラー。
-// 各テーマの深掘り記事（80時間・緩和・端数月・区切りなど）へは入口記事の本文から辿れるため、ここには置かない。
+// トップに出す判断フロー。
+// 受給条件の全体像から、転職・働き方・妊娠中の休み・緩和・日付のずれへ進み、
+// 最後にツールを作った背景を読めるよう、公開中の中核7記事を並べる。
 const FEATURED_GUIDES = [
   {
     href: '/guide/jukyu-youken/',
@@ -34,6 +34,24 @@ const FEATURED_GUIDES = [
     emoji: '🛌',
     title: 'つわり・妊娠中の休みが条件を崩す“落とし穴”',
     desc: '無給欠勤は基礎日数に入らず条件を崩すことも。有給の活用や連続30日で味方にする方法を解説します。',
+  },
+  {
+    href: '/guide/kanwa-saichou-4nen/',
+    emoji: '⏳',
+    title: '2年で足りないときの受給要件緩和',
+    desc: '無給の休業が連続30日以上あると、休んだ日数ぶん判定期間を延ばせる場合があります。',
+  },
+  {
+    href: '/guide/yoteibi-bure/',
+    emoji: '📅',
+    title: '出産日・育休開始日のずれを確認する',
+    desc: '出産日や実際の育休開始日が動くと、判定対象の2年も同じだけ動きます。',
+  },
+  {
+    href: '/guide/naze-tsukutta/',
+    emoji: '💡',
+    title: 'この判断支援ツールを作った理由',
+    desc: '週3勤務と副業という実体験から、申請前に月ごとの根拠を確認できる形を目指しました。',
   },
 ]
 
@@ -267,9 +285,9 @@ export function Landing() {
       </main>
 
       <section className="ht-guide">
-        <h2 className="ht-guide__title">育休給付金を知る</h2>
+        <h2 className="ht-guide__title">迷っている点から確認する</h2>
         <p className="ht-guide__sub">
-          「自分の場合はもらえる？」が微妙な方へ。受給のしくみをやさしく解説しています。
+          全体像を確認したあと、転職・働き方・妊娠中の休み・日付のずれの順に、自分に関係する項目だけ読めます。
         </p>
         <div className="ht-guide__grid">
           {FEATURED_GUIDES.map((g) => (

@@ -6,6 +6,7 @@ emoji: "🏃‍♀️"
 date: "2026-06-10"
 updated: "2026-06-23"
 tags: ["受給要件", "産前休業"]
+redirectTo: "tsuwari-kyuushoku-otoshiana"
 related: ["jukyu-youken", "chingin-shiharai-kiso-nissu", "sankyuu-ikukyuu-kanwa"]
 draft: false
 ---

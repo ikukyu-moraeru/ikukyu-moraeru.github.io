@@ -6,6 +6,7 @@ emoji: "🧮"
 date: "2026-06-08"
 updated: "2026-06-23"
 tags: ["受給要件", "賃金支払基礎日数"]
+redirectTo: "part-time-shift-jitan"
 related: ["jukyu-youken", "part-time-shift-jitan", "tsuwari-kyuushoku-otoshiana", "80jikan-rule"]
 draft: false
 ---

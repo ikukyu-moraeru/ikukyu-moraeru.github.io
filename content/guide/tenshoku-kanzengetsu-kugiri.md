@@ -6,6 +6,7 @@ emoji: "✂️"
 date: "2026-06-11"
 updated: "2026-06-23"
 tags: ["受給要件", "転職", "みなし被保険者期間"]
+redirectTo: "tenshoku-tsuusan"
 related: ["tenshoku-tsuusan", "hasuu-tsuki-15nichi", "jukyu-youken"]
 draft: false
 ---

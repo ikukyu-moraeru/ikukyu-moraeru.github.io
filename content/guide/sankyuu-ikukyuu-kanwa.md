@@ -6,6 +6,7 @@ emoji: "🍼"
 date: "2026-06-08"
 updated: "2026-06-20"
 tags: ["受給要件", "緩和"]
+redirectTo: "kanwa-saichou-4nen"
 related: ["kanwa-saichou-4nen", "tsuwari-kyuushoku-otoshiana", "jukyu-youken"]
 draft: false
 ---

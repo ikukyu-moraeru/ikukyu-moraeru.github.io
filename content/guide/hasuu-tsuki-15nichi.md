@@ -6,6 +6,7 @@ emoji: "🌗"
 date: "2026-06-08"
 updated: "2026-06-20"
 tags: ["受給要件", "みなし被保険者期間"]
+redirectTo: "jukyu-youken"
 related: ["jukyu-youken", "tenshoku-kanzengetsu-kugiri", "80jikan-rule", "kanwa-saichou-4nen"]
 draft: false
 ---
